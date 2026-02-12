@@ -425,7 +425,7 @@ function AuthScreen({ onAuth }) {
           fontFamily: fonts.display, fontSize: 38, fontWeight: 700,
           color: "white", lineHeight: 1.1, marginBottom: 8,
         }}>
-          Sports Journal
+          The Season
         </h1>
         <p style={{
           fontFamily: fonts.display, fontSize: 17, color: "rgba(255,255,255,0.8)",
