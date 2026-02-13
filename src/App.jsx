@@ -2367,33 +2367,14 @@ function LandingPage({ onDemo, onStart }) {
                 marginBottom: 10,
                 overflow: "hidden",
               }}>
-                {/* Photo area */}
-                <div style={{
-                  height: 72,
-                  background: `linear-gradient(170deg, #52B788 0%, #2D6A4F 60%, #1B4332 100%)`,
-                  position: "relative",
-                  overflow: "hidden",
-                }}>
-                  {/* Field illustration */}
-                  <svg viewBox="0 0 240 72" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}>
-                    {/* Pitch lines */}
-                    <line x1="0" y1="68" x2="240" y2="68" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
-                    <rect x="80" y="50" width="80" height="22" rx="1" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8" />
-                    <rect x="100" y="58" width="40" height="14" rx="1" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
-                    <circle cx="120" cy="42" r="18" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8" />
-                    {/* Player silhouettes */}
-                    <g opacity="0.25" fill="white">
-                      <ellipse cx="105" cy="30" rx="4" ry="4.5" />
-                      <path d="M101,35 L101,48 M101,38 L97,42 M101,38 L105,42 M101,48 L97,54 M101,48 L105,54" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-                    </g>
-                    <g opacity="0.18" fill="white">
-                      <ellipse cx="138" cy="34" rx="3.5" ry="4" />
-                      <path d="M134.5,39 L134.5,50 M134.5,42 L131,45 M134.5,42 L138,45 M134.5,50 L131,55 M134.5,50 L138,55" stroke="white" strokeWidth="1.3" strokeLinecap="round" fill="none" />
-                    </g>
-                    {/* Ball */}
-                    <circle cx="118" cy="46" r="2.5" fill="rgba(255,255,255,0.4)" />
-                  </svg>
-                </div>
+                {/* Photo */}
+                <img src="/images/phone-photo.jpg" alt="" style={{
+                  width: "100%",
+                  height: 80,
+                  objectFit: "cover",
+                  objectPosition: "center 30%",
+                  display: "block",
+                }} />
                 <div style={{ padding: "10px 14px 12px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
                     <span style={{
@@ -2492,7 +2473,7 @@ function LandingPage({ onDemo, onStart }) {
           <div style={{
             width: 280,
             height: 280,
-            background: `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 60%, #40916C 100%)`,
+            background: `linear-gradient(160deg, rgba(27,67,50,0.7) 0%, rgba(45,106,79,0.6) 60%, rgba(64,145,108,0.55) 100%), url('/images/share-bg.jpg') center/cover`,
             borderRadius: 12,
             padding: "24px 22px 20px",
             display: "flex",
@@ -2503,26 +2484,6 @@ function LandingPage({ onDemo, onStart }) {
             position: "relative",
             overflow: "hidden",
           }}>
-            {/* Field lines background */}
-            <svg viewBox="0 0 280 280" style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              opacity: 0.07,
-            }}>
-              <circle cx="140" cy="110" r="52" fill="none" stroke="white" strokeWidth="1.5" />
-              <circle cx="140" cy="110" r="3" fill="white" />
-              <line x1="0" y1="110" x2="280" y2="110" stroke="white" strokeWidth="1" />
-              <path d="M0,0 Q16,0 16,16" fill="none" stroke="white" strokeWidth="1" />
-              <path d="M280,0 Q264,0 264,16" fill="none" stroke="white" strokeWidth="1" />
-              <path d="M0,280 Q16,280 16,264" fill="none" stroke="white" strokeWidth="1" />
-              <path d="M280,280 Q264,280 264,264" fill="none" stroke="white" strokeWidth="1" />
-              <rect x="90" y="0" width="100" height="45" rx="1" fill="none" stroke="white" strokeWidth="0.8" />
-              <path d="M115,45 A25,20 0 0,0 165,45" fill="none" stroke="white" strokeWidth="0.8" />
-            </svg>
-
             {/* Team strip */}
             <div style={{
               fontSize: 9,
@@ -2659,129 +2620,13 @@ function LandingPage({ onDemo, onStart }) {
             </p>
           </div>
 
-          {/* Book cover mockup */}
-          <div style={{
-            width: 210,
-            height: 290,
-            position: "relative",
+          {/* Book photo */}
+          <img src="/images/book-mockup.jpg" alt="Printed season book" style={{
+            width: 260,
+            borderRadius: 6,
+            boxShadow: "0 16px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06)",
             flexShrink: 0,
-          }}>
-            {/* Page edges visible on right */}
-            <div style={{
-              position: "absolute",
-              right: -4,
-              top: 6,
-              bottom: 6,
-              width: 8,
-              background: "linear-gradient(90deg, #e8e4dc 0%, #f5f2ea 40%, #ece8e0 100%)",
-              borderRadius: "0 2px 2px 0",
-            }} />
-            {/* Cover */}
-            <div style={{
-              width: "100%",
-              height: "100%",
-              background: `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 100%)`,
-              borderRadius: "4px 8px 8px 4px",
-              padding: "28px 22px 20px",
-              display: "flex",
-              flexDirection: "column",
-              position: "relative",
-              overflow: "hidden",
-              boxShadow: "6px 6px 24px rgba(0,0,0,0.14), 2px 2px 6px rgba(0,0,0,0.06)",
-            }}>
-              {/* Center circle motif */}
-              <svg viewBox="0 0 200 200" style={{
-                position: "absolute",
-                top: "45%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: 200,
-                height: 200,
-                opacity: 0.07,
-              }}>
-                <circle cx="100" cy="100" r="70" fill="none" stroke="white" strokeWidth="1.5" />
-                <circle cx="100" cy="100" r="4" fill="white" />
-                <line x1="0" y1="100" x2="200" y2="100" stroke="white" strokeWidth="1" />
-              </svg>
-
-              {/* Spine highlight */}
-              <div style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: 10,
-                background: "linear-gradient(90deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.05) 50%, transparent 100%)",
-                borderRadius: "4px 0 0 4px",
-              }} />
-
-              {/* Content */}
-              <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column" }}>
-                <p style={{
-                  fontFamily: fonts.display,
-                  fontSize: 30,
-                  fontWeight: 700,
-                  color: "white",
-                  lineHeight: 0.95,
-                  marginBottom: 4,
-                }}>
-                  Thunder
-                </p>
-                <p style={{
-                  fontFamily: fonts.display,
-                  fontSize: 30,
-                  fontWeight: 700,
-                  color: "white",
-                  lineHeight: 0.95,
-                  marginBottom: 14,
-                }}>
-                  SC
-                </p>
-
-                {/* Gold accent line */}
-                <div style={{
-                  width: 28,
-                  height: 2,
-                  background: theme.accent,
-                  marginBottom: 14,
-                }} />
-
-                <p style={{
-                  fontFamily: fonts.mono,
-                  fontSize: 9,
-                  color: "rgba(255,255,255,0.45)",
-                  letterSpacing: 2,
-                  textTransform: "uppercase",
-                }}>
-                  Spring 2026
-                </p>
-
-                <div style={{ flex: 1 }} />
-
-                <p style={{
-                  fontFamily: fonts.headline,
-                  fontStyle: "italic",
-                  fontSize: 13,
-                  color: "rgba(255,255,255,0.55)",
-                  lineHeight: 1.4,
-                  marginBottom: 16,
-                }}>
-                  Every season tells a story
-                </p>
-
-                <p style={{
-                  fontFamily: fonts.body,
-                  fontSize: 7,
-                  fontWeight: 700,
-                  color: "rgba(255,255,255,0.2)",
-                  letterSpacing: 3,
-                  textTransform: "uppercase",
-                }}>
-                  Team Season
-                </p>
-              </div>
-            </div>
-          </div>
+          }} />
         </div>
       </div>
 
