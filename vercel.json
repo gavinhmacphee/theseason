@@ -1,0 +1,26 @@
+{
+  "functions": {
+    "api/generate-pdf.js": {
+      "memory": 1024,
+      "maxDuration": 60
+    },
+    "api/checkout.js": {
+      "maxDuration": 10
+    },
+    "api/webhook-stripe.js": {
+      "maxDuration": 30
+    },
+    "api/upload-s3.js": {
+      "maxDuration": 30
+    },
+    "api/submit-rpi.js": {
+      "maxDuration": 15
+    },
+    "api/webhook-rpi.js": {
+      "maxDuration": 10
+    },
+    "api/order-status.js": {
+      "maxDuration": 10
+    }
+  }
+}

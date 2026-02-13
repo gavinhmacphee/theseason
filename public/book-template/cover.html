@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Season — Book Cover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  @page {
+    size: 14.375in 7.25in;
+    margin: 0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: #111;
+  }
+
+  .cover-wrap {
+    width: 14.375in;
+    height: 7.25in;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* --- Back Cover --- */
+  .back-cover {
+    flex: 1 1 7in;
+    background: linear-gradient(170deg, #1B4332 0%, #2D6A4F 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0.5in;
+    position: relative;
+  }
+
+  .back-cover .brand-mark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .back-cover .brand-mark .logo-text {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 28px;
+    color: rgba(255,255,255,0.15);
+    letter-spacing: 2px;
+  }
+
+  .back-cover .bottom-bar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .back-cover .url {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 1px;
+  }
+
+  .back-cover .team-color-bar {
+    width: 40px;
+    height: 4px;
+    background: var(--team-color, #1B4332);
+    border-radius: 2px;
+  }
+
+  /* --- Spine --- */
+  .spine {
+    flex: 0 0 var(--spine-width, 0.25in);
+    background: linear-gradient(180deg, #163A2E 0%, #1B4332 50%, #2D6A4F 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .spine-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 8px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* --- Front Cover --- */
+  .front-cover {
+    flex: 1 1 7in;
+    background: linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75in;
+    text-align: center;
+    position: relative;
+  }
+
+  .front-cover .team-emoji {
+    font-size: 56px;
+    margin-bottom: 24px;
+  }
+
+  .front-cover .team-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255,255,255,0.2);
+    margin-bottom: 24px;
+  }
+
+  .front-cover .team-name {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 52px;
+    font-weight: 400;
+    color: white;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+
+  .front-cover .accent-line {
+    width: 60px;
+    height: 3px;
+    background: rgba(255,255,255,0.3);
+    margin: 16px auto;
+  }
+
+  .front-cover .season-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .front-cover .player-headshot {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.25);
+    margin-bottom: 8px;
+  }
+
+  .front-cover .player-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: rgba(255,255,255,0.6);
+    font-weight: 400;
+  }
+
+  /* Subtle corner decoration */
+  .front-cover::before {
+    content: '';
+    position: absolute;
+    top: 0.4in;
+    right: 0.4in;
+    width: 30px;
+    height: 30px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    border-right: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .front-cover::after {
+    content: '';
+    position: absolute;
+    bottom: 0.4in;
+    left: 0.4in;
+    width: 30px;
+    height: 30px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-left: 1px solid rgba(255,255,255,0.1);
+  }
+
+  @media print {
+    body { background: white; }
+  }
+</style>
+</head>
+<body>
+<div id="cover"></div>
+
+<script>
+const DEMO_DATA = {
+  team: { name: "Thunder SC", emoji: "\u26BD", logo: null, color: "#1B4332" },
+  season: { name: "Soccer 2026" },
+  players: [{ name: "Alex", headshot: null }],
+  pageCount: 8
+};
+
+function esc(str) {
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function renderCover(data) {
+  const { team, season, players, pageCount } = data;
+  const playerName = players[0]?.name || '';
+  const playerHeadshot = players[0]?.headshot || null;
+  const teamColor = team.color || '#1B4332';
+  const spineWidth = Math.max(0.15, (pageCount || 8) * 0.0025);
+
+  document.documentElement.style.setProperty('--team-color', teamColor);
+  document.documentElement.style.setProperty('--spine-width', spineWidth + 'in');
+
+  const spineText = `${esc(team.name)}  \u2022  ${esc(season.name)}`;
+
+  document.getElementById('cover').innerHTML = `
+    <div class="cover-wrap">
+      <div class="back-cover">
+        <div class="brand-mark">
+          <div class="logo-text">The Season</div>
+        </div>
+        <div class="bottom-bar">
+          <span class="url">theseason.app</span>
+          <div class="team-color-bar"></div>
+        </div>
+      </div>
+
+      <div class="spine">
+        <span class="spine-text">${spineText}</span>
+      </div>
+
+      <div class="front-cover">
+        ${team.logo
+          ? `<img class="team-logo" src="${team.logo}" alt="">`
+          : `<div class="team-emoji">${team.emoji || '\u26BD'}</div>`
+        }
+        <div class="team-name">${esc(team.name)}</div>
+        <div class="accent-line"></div>
+        <div class="season-name">${esc(season.name)}</div>
+        ${playerHeadshot
+          ? `<img class="player-headshot" src="${playerHeadshot}" alt="">`
+          : ''
+        }
+        ${playerName ? `<div class="player-name">${esc(playerName)}</div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+async function init() {
+  await document.fonts.ready;
+  const data = window.__BOOK_DATA__ || DEMO_DATA;
+  renderCover(data);
+
+  window.addEventListener('bookDataReady', () => {
+    if (window.__BOOK_DATA__) {
+      renderCover(window.__BOOK_DATA__);
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>

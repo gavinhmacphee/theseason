@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Season — Book Interior</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  @page {
+    size: 7.125in 7.125in;
+    margin: 0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --team-color: #1B4332;
+    --team-color-light: rgba(27, 67, 50, 0.12);
+    --team-color-faint: rgba(27, 67, 50, 0.06);
+    --text: #1A1A1A;
+    --text-muted: #6B7280;
+    --text-light: #9CA3AF;
+    --bg: #FFFDF8;
+    --win: #2D6A4F;
+    --loss: #C1121F;
+    --draw: #6B7280;
+    --page-size: 7.125in;
+    --bleed: 0.125in;
+    --safe: 0.1875in;
+    --padding: 0.3125in; /* bleed + safe */
+  }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    width: var(--page-size);
+    height: var(--page-size);
+    padding: var(--padding);
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+    background: var(--bg);
+  }
+
+  .page:last-child {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  .page-number {
+    position: absolute;
+    bottom: 0.35in;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-light);
+    letter-spacing: 1px;
+  }
+
+  /* --- Title Page --- */
+  .title-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1in;
+  }
+
+  .title-page .team-accent {
+    width: 60px;
+    height: 3px;
+    background: var(--team-color);
+    margin-bottom: 40px;
+  }
+
+  .title-page .team-name {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 48px;
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+  }
+
+  .title-page .player-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .title-page .season-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-light);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .title-page .team-accent-bottom {
+    width: 60px;
+    height: 3px;
+    background: var(--team-color);
+    margin-top: 40px;
+  }
+
+  /* --- Summary Page --- */
+  .summary-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0.8in;
+  }
+
+  .summary-page .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-light);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .summary-page .record {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 64px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+  }
+
+  .summary-page .record-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-light);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+
+  .summary-page .stat-row {
+    display: flex;
+    gap: 48px;
+    margin-bottom: 40px;
+  }
+
+  .summary-page .stat {
+    text-align: center;
+  }
+
+  .summary-page .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .summary-page .stat-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  .summary-page .date-range {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .summary-divider {
+    width: 40px;
+    height: 2px;
+    background: var(--team-color-light);
+    margin: 0 auto 40px;
+  }
+
+  /* --- Entry Pages --- */
+  .entry {
+    margin-bottom: 0;
+  }
+
+  .entry + .entry {
+    padding-top: 28px;
+    margin-top: 28px;
+    border-top: 1px solid var(--team-color-faint);
+  }
+
+  .entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+
+  .entry-type {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .entry-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-light);
+  }
+
+  .entry-score {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .entry-score .score-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 2px;
+  }
+
+  .entry-score .result-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 3px;
+    color: white;
+    letter-spacing: 1px;
+  }
+
+  .result-badge.win { background: var(--win); }
+  .result-badge.loss { background: var(--loss); }
+  .result-badge.draw { background: var(--draw); }
+
+  .entry-opponent {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .entry-photo {
+    width: 100%;
+    max-height: 4.5in;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .entry-text {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.65;
+    color: #2A2A2A;
+  }
+
+  .entry-venue {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 10px;
+  }
+
+  /* --- Closing Page --- */
+  .closing-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1.2in;
+  }
+
+  .closing-page .closing-text {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic;
+    font-size: 24px;
+    line-height: 1.5;
+    color: var(--text-muted);
+    margin-bottom: 48px;
+  }
+
+  .closing-page .closing-accent {
+    width: 40px;
+    height: 2px;
+    background: var(--team-color);
+    margin-bottom: 24px;
+  }
+
+  .closing-page .brand {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-light);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+
+  /* Print-specific */
+  @media print {
+    body { background: white; }
+    .page { background: white; }
+  }
+</style>
+</head>
+<body>
+<div id="book"></div>
+
+<script>
+// Fallback demo data (used when opened directly in browser)
+const DEMO_DATA = {
+  team: { name: "Thunder SC", emoji: "\u26BD", logo: null, color: "#1B4332" },
+  season: { name: "Soccer 2026" },
+  players: [{ name: "Alex", headshot: null }],
+  entries: [
+    {
+      id: "e1", entry_type: "game", text: "Hat trick day. Alex couldn't stop smiling after the third one went in off the post.",
+      entry_date: "2026-02-10", opponent: "Lightning FC", score_home: 3, score_away: 1, result: "win",
+      venue: "Memorial Field", photoData: null, photoPreview: null
+    },
+    {
+      id: "e2", entry_type: "practice", text: "First time nailing the outside-of-the-foot pass. Coach made the whole team stop and watch the replay.",
+      entry_date: "2026-02-07", opponent: null, score_home: null, score_away: null, result: null,
+      venue: null, photoData: null, photoPreview: null
+    },
+    {
+      id: "e3", entry_type: "game", text: "Tough one but never stopped running. Tracked back on every single play in the second half.",
+      entry_date: "2026-02-03", opponent: "Rapids", score_home: 1, score_away: 2, result: "loss",
+      venue: "Riverside Park", photoData: null, photoPreview: null
+    },
+    {
+      id: "e4", entry_type: "tournament", text: "Semifinal shutout. The whole bench was on their feet when the final whistle blew.",
+      entry_date: "2026-01-29", opponent: null, score_home: 2, score_away: 0, result: "win",
+      venue: "City Cup", photoData: null, photoPreview: null
+    },
+    {
+      id: "e5", entry_type: "practice", text: "Coach ran a new set piece drill. You could see it click halfway through \u2014 the spacing just made sense.",
+      entry_date: "2026-01-25", opponent: null, score_home: null, score_away: null, result: null,
+      venue: null, photoData: null, photoPreview: null
+    },
+    {
+      id: "e6", entry_type: "game", text: "Dominated possession but couldn't find the finish. Hit the crossbar twice in the last ten minutes.",
+      entry_date: "2026-01-20", opponent: "United", score_home: 1, score_away: 1, result: "draw",
+      venue: "Home Field", photoData: null, photoPreview: null
+    }
+  ]
+};
+
+// --- Pagination (mirrors App.jsx logic) ---
+function paginateEntries(entries) {
+  const PAGE_BUDGET = 1850;
+  const DIVIDER = 50;
+
+  function estimateHeight(entry) {
+    let h = 60;
+    if ((entry.entry_type === "game" || entry.entry_type === "tournament") &&
+        entry.score_home !== null && entry.score_away !== null) {
+      h += 80;
+    }
+    if (entry.opponent) h += 35;
+    if (entry.photoPreview || entry.photoData) h += 800;
+    if (entry.text) h += Math.ceil(entry.text.length / 42) * 48;
+    if (entry.venue) h += 35;
+    return h;
+  }
+
+  const sorted = [...entries].sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+  const pages = [];
+  let currentPage = [];
+  let currentHeight = 0;
+
+  for (const entry of sorted) {
+    const h = estimateHeight(entry);
+    const hasPhoto = !!(entry.photoPreview || entry.photoData);
+
+    if (hasPhoto) {
+      if (currentPage.length > 0) {
+        pages.push(currentPage);
+        currentPage = [];
+        currentHeight = 0;
+      }
+      pages.push([entry]);
+      continue;
+    }
+
+    const needed = currentHeight > 0 ? h + DIVIDER : h;
+    if (currentHeight + needed > PAGE_BUDGET && currentPage.length > 0) {
+      pages.push(currentPage);
+      currentPage = [entry];
+      currentHeight = h;
+    } else {
+      currentPage.push(entry);
+      currentHeight += needed;
+    }
+  }
+
+  if (currentPage.length > 0) {
+    pages.push(currentPage);
+  }
+
+  return pages;
+}
+
+// --- Rendering ---
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function formatDateRange(entries) {
+  const sorted = [...entries].sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+  if (sorted.length === 0) return '';
+  const first = new Date(sorted[0].entry_date + 'T12:00:00');
+  const last = new Date(sorted[sorted.length - 1].entry_date + 'T12:00:00');
+  const opts = { month: 'long', day: 'numeric', year: 'numeric' };
+  return `${first.toLocaleDateString('en-US', opts)} \u2013 ${last.toLocaleDateString('en-US', opts)}`;
+}
+
+function renderBook(data) {
+  const { team, season, players, entries } = data;
+  const playerName = players[0]?.name || '';
+  const teamColor = team.color || '#1B4332';
+
+  // Set CSS custom property for team color
+  document.documentElement.style.setProperty('--team-color', teamColor);
+  document.documentElement.style.setProperty('--team-color-light', teamColor + '1F');
+  document.documentElement.style.setProperty('--team-color-faint', teamColor + '0F');
+
+  const sorted = [...entries].sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+  const games = sorted.filter(e => e.entry_type === 'game' || e.entry_type === 'tournament');
+  const wins = games.filter(e => e.result === 'win').length;
+  const losses = games.filter(e => e.result === 'loss').length;
+  const draws = games.filter(e => e.result === 'draw').length;
+  const practices = sorted.filter(e => e.entry_type === 'practice').length;
+  const tournaments = sorted.filter(e => e.entry_type === 'tournament').length;
+
+  const entryPages = paginateEntries(entries);
+  const totalPages = 2 + entryPages.length + 1; // title + summary + entries + closing
+  let pageNum = 0;
+
+  let html = '';
+
+  // --- Title Page ---
+  pageNum++;
+  html += `
+    <div class="page title-page">
+      <div class="team-accent"></div>
+      <div class="team-name">${esc(team.name)}</div>
+      ${playerName ? `<div class="player-name">${esc(playerName)}</div>` : ''}
+      <div class="season-label">${esc(season.name)}</div>
+      <div class="team-accent-bottom"></div>
+    </div>
+  `;
+
+  // --- Summary Page ---
+  pageNum++;
+  html += `
+    <div class="page summary-page">
+      <div class="section-label">Season Summary</div>
+      <div class="record">${wins}-${losses}-${draws}</div>
+      <div class="record-label">Win \u2013 Loss \u2013 Draw</div>
+      <div class="summary-divider"></div>
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-value">${games.length}</div>
+          <div class="stat-label">Games</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">${practices}</div>
+          <div class="stat-label">Practices</div>
+        </div>
+        ${tournaments > 0 ? `
+        <div class="stat">
+          <div class="stat-value">${tournaments}</div>
+          <div class="stat-label">Tournaments</div>
+        </div>` : ''}
+        <div class="stat">
+          <div class="stat-value">${sorted.length}</div>
+          <div class="stat-label">Entries</div>
+        </div>
+      </div>
+      <div class="date-range">${formatDateRange(sorted)}</div>
+      <div class="page-number">${pageNum}</div>
+    </div>
+  `;
+
+  // --- Entry Pages ---
+  for (const pageEntries of entryPages) {
+    pageNum++;
+    let entriesHtml = '';
+    for (const entry of pageEntries) {
+      const hasScore = entry.score_home !== null && entry.score_away !== null;
+      const photo = entry.photoPreview || entry.photoData;
+      const resultClass = entry.result || '';
+      const resultLabel = { win: 'W', loss: 'L', draw: 'D' }[entry.result] || '';
+
+      entriesHtml += `
+        <div class="entry">
+          <div class="entry-header">
+            <span class="entry-type">${esc(entry.entry_type)}</span>
+            <span class="entry-date">${formatDate(entry.entry_date)}</span>
+          </div>
+          ${hasScore ? `
+          <div class="entry-score">
+            <span class="score-num">${entry.score_home} \u2013 ${entry.score_away}</span>
+            ${resultLabel ? `<span class="result-badge ${resultClass}">${resultLabel}</span>` : ''}
+          </div>` : ''}
+          ${entry.opponent ? `<div class="entry-opponent">vs ${esc(entry.opponent)}</div>` : ''}
+          ${photo ? `<img class="entry-photo" src="${photo}" alt="">` : ''}
+          ${entry.text ? `<div class="entry-text">\u201C${esc(entry.text)}\u201D</div>` : ''}
+          ${entry.venue ? `<div class="entry-venue">${esc(entry.venue)}</div>` : ''}
+        </div>
+      `;
+    }
+
+    html += `
+      <div class="page">
+        ${entriesHtml}
+        <div class="page-number">${pageNum}</div>
+      </div>
+    `;
+  }
+
+  // --- Closing Page ---
+  pageNum++;
+  const closingName = playerName || 'yours';
+  html += `
+    <div class="page closing-page">
+      <div class="closing-text">
+        Every season tells a story.<br>
+        This was ${esc(closingName)}'s.
+      </div>
+      <div class="closing-accent"></div>
+      <div class="brand">The Season</div>
+    </div>
+  `;
+
+  document.getElementById('book').innerHTML = html;
+}
+
+function esc(str) {
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// --- Init ---
+async function init() {
+  await document.fonts.ready;
+
+  // Use injected data or fallback to demo
+  const data = window.__BOOK_DATA__ || DEMO_DATA;
+  renderBook(data);
+
+  // Listen for late data injection (from parent window)
+  window.addEventListener('bookDataReady', () => {
+    if (window.__BOOK_DATA__) {
+      renderBook(window.__BOOK_DATA__);
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>

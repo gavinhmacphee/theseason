@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import html2canvas from "html2canvas";
 
 // ============================================
-// SPORTS JOURNAL MVP
-// Role-based: Coach / Parent / Player
-// Scope: Team or Individual Player
+// THE SEASON — Soccer Journal
+// Role-based: Parent / Player
 // ============================================
 
 // --- CONFIG (Replace with your Supabase credentials) ---
@@ -139,78 +139,156 @@ const supabase = {
 // --- DEMO MODE ---
 const DEMO = SUPABASE_URL === "YOUR_SUPABASE_URL";
 
+// --- SPORT (Soccer only) ---
+const SPORTS = [{ name: "Soccer", emoji: "⚽" }];
+
+// --- IMAGE RESIZE HELPER ---
+function resizeImage(file, maxSize) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let w = img.width, h = img.height;
+        if (w > h) {
+          if (w > maxSize) { h = h * maxSize / w; w = maxSize; }
+        } else {
+          if (h > maxSize) { w = w * maxSize / h; h = maxSize; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// --- DEMO DATA ---
 function demoData() {
+  const today = new Date();
+  const d = (daysAgo) => {
+    const dt = new Date(today);
+    dt.setDate(dt.getDate() - daysAgo);
+    return dt.toISOString().split("T")[0];
+  };
+
   return {
-    profile: { role: null, display_name: "Coach Demo" },
-    teams: [],
-    seasons: [],
-    players: [],
-    entries: [],
+    role: "parent",
+    team: { name: "Thunder SC", sport: "Soccer", emoji: "⚽", logo: null },
+    season: { name: "Soccer 2026", id: "s_demo" },
+    players: [{ name: "Alex", id: "p_demo", is_my_child: true, headshot: null }],
+    entries: [
+      {
+        id: "e_demo_1", entry_type: "game",
+        text: "Hat trick day. Alex couldn't stop smiling after the third one went in off the post.",
+        entry_date: d(2), opponent: "Lightning FC",
+        score_home: 3, score_away: 1, result: "win",
+        venue: "Memorial Field", photoData: null, photoPreview: null,
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "e_demo_2", entry_type: "practice",
+        text: "First time nailing the outside-of-the-foot pass. Coach made the whole team stop and watch the replay.",
+        entry_date: d(5), opponent: null,
+        score_home: null, score_away: null, result: null,
+        venue: null, photoData: null, photoPreview: null,
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "e_demo_3", entry_type: "game",
+        text: "Tough one but never stopped running. Tracked back on every single play in the second half.",
+        entry_date: d(9), opponent: "Rapids",
+        score_home: 1, score_away: 2, result: "loss",
+        venue: "Riverside Park", photoData: null, photoPreview: null,
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "e_demo_4", entry_type: "tournament",
+        text: "Semifinal shutout. The whole bench was on their feet when the final whistle blew.",
+        entry_date: d(14), opponent: null,
+        score_home: 2, score_away: 0, result: "win",
+        venue: "City Cup", photoData: null, photoPreview: null,
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "e_demo_5", entry_type: "practice",
+        text: "Coach ran a new set piece drill. You could see it click halfway through — the spacing just made sense.",
+        entry_date: d(18), opponent: null,
+        score_home: null, score_away: null, result: null,
+        venue: null, photoData: null, photoPreview: null,
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "e_demo_6", entry_type: "game",
+        text: "Dominated possession but couldn't find the finish. Hit the crossbar twice in the last ten minutes.",
+        entry_date: d(23), opponent: "United",
+        score_home: 1, score_away: 1, result: "draw",
+        venue: "Home Field", photoData: null, photoPreview: null,
+        created_at: new Date().toISOString(),
+      },
+    ],
   };
 }
 
-// --- SPORT OPTIONS ---
-const SPORTS = [
-  { name: "Soccer", emoji: "⚽" },
-  { name: "Baseball", emoji: "⚾" },
-  { name: "Basketball", emoji: "🏀" },
-  { name: "Football", emoji: "🏈" },
-  { name: "Hockey", emoji: "🏒" },
-  { name: "Lacrosse", emoji: "🥍" },
-  { name: "Volleyball", emoji: "🏐" },
-  { name: "Swimming", emoji: "🏊" },
-  { name: "Track & Field", emoji: "🏃" },
-  { name: "Tennis", emoji: "🎾" },
-  { name: "Other", emoji: "🏅" },
-];
+// --- PAGINATION ALGORITHM (for print book) ---
+function paginateEntries(entries) {
+  const PAGE_BUDGET = 1850; // px — 7.125" safe area minus bleed/margins/page-number at ~260 PPI
+  const DIVIDER = 50;
 
-const POSITIONS_BY_SPORT = {
-  Soccer: ["GK", "CB", "LB", "RB", "CDM", "CM", "CAM", "LW", "RW", "ST"],
-  Baseball: ["P", "C", "1B", "2B", "3B", "SS", "LF", "CF", "RF"],
-  Basketball: ["PG", "SG", "SF", "PF", "C"],
-  Football: ["QB", "RB", "WR", "TE", "OL", "DL", "LB", "CB", "S", "K"],
-  Hockey: ["G", "LD", "RD", "LW", "C", "RW"],
-  Lacrosse: ["G", "D", "M", "A"],
-  Volleyball: ["S", "OH", "MB", "OPP", "L", "DS"],
-};
+  function estimateHeight(entry) {
+    let h = 60; // type badge + date row
+    if ((entry.entry_type === "game" || entry.entry_type === "tournament") &&
+        entry.score_home !== null && entry.score_away !== null) {
+      h += 80; // score block
+    }
+    if (entry.opponent) h += 35;
+    if (entry.photoPreview || entry.photoData) h += 800;
+    if (entry.text) h += Math.ceil(entry.text.length / 42) * 48;
+    if (entry.venue) h += 35;
+    return h;
+  }
 
-const CONTRIBUTIONS_BY_SPORT = {
-  Soccer: ["goal", "assist", "save", "mvp", "highlight"],
-  Baseball: ["hit", "run", "rbi", "strikeout", "save", "mvp", "highlight"],
-  Basketball: ["points", "rebound", "assist", "steal", "block", "mvp", "highlight"],
-  Football: ["touchdown", "pass", "sack", "interception", "mvp", "highlight"],
-  Hockey: ["goal", "assist", "save", "mvp", "highlight"],
-  default: ["goal", "assist", "save", "mvp", "highlight"],
-};
+  const sorted = [...entries].sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+  const pages = [];
+  let currentPage = [];
+  let currentHeight = 0;
 
-// --- PROMPTS ---
-const GAME_PROMPTS = [
-  "What moment from today's game will you remember in 10 years?",
-  "What did you see today that made you proud?",
-  "Describe the energy of the team in one line.",
-  "What happened today that no stat sheet will ever capture?",
-  "If you could replay one moment from today, what would it be?",
-  "What would the team say was the highlight?",
-  "What was the turning point?",
-  "Who stepped up when it mattered?",
-  "What was the mood on the ride home?",
-  "What surprised you today?",
-];
+  for (const entry of sorted) {
+    const h = estimateHeight(entry);
+    const hasPhoto = !!(entry.photoPreview || entry.photoData);
 
-const PRACTICE_PROMPTS = [
-  "What clicked for the first time today?",
-  "Who put in extra work when nobody was watching?",
-  "What drill will they still be talking about?",
-  "What was the energy like at practice today?",
-  "What small moment made today's practice special?",
-  "Who showed the most improvement today?",
-  "What would you want to remember about today's session?",
-  "What was the best thing you heard on the field today?",
-];
+    // Photo entries get their own page or pair with at most one short text entry
+    if (hasPhoto) {
+      // Flush current page if it has content
+      if (currentPage.length > 0) {
+        pages.push(currentPage);
+        currentPage = [];
+        currentHeight = 0;
+      }
+      pages.push([entry]);
+      continue;
+    }
 
-function getPrompt(type) {
-  const prompts = type === "practice" ? PRACTICE_PROMPTS : GAME_PROMPTS;
-  return prompts[Math.floor(Math.random() * prompts.length)];
+    const needed = currentHeight > 0 ? h + DIVIDER : h;
+    if (currentHeight + needed > PAGE_BUDGET && currentPage.length > 0) {
+      pages.push(currentPage);
+      currentPage = [entry];
+      currentHeight = h;
+    } else {
+      currentPage.push(entry);
+      currentHeight += needed;
+    }
+  }
+
+  if (currentPage.length > 0) {
+    pages.push(currentPage);
+  }
+
+  return pages;
 }
 
 // --- STYLES ---
@@ -231,11 +309,12 @@ const theme = {
   draw: "#6B7280",
   practice: "#457B9D",
   tournament: "#E07A5F",
-  event: "#9B5DE5",
+  moment: "#9B5DE5",
 };
 
 const fonts = {
   display: "'Crimson Pro', Georgia, serif",
+  headline: "'Instrument Serif', Georgia, serif",
   body: "'DM Sans', -apple-system, sans-serif",
   mono: "'JetBrains Mono', monospace",
 };
@@ -243,39 +322,39 @@ const fonts = {
 // --- GLOBAL STYLES ---
 const GlobalStyle = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-    
+    @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:wght@300;400;500;600;700&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500&display=swap');
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
+
     body {
       font-family: ${fonts.body};
       background: ${theme.bg};
       color: ${theme.text};
       -webkit-font-smoothing: antialiased;
     }
-    
+
     input, textarea, select, button {
       font-family: ${fonts.body};
     }
-    
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    
+
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(24px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    
+
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.05); }
     }
-    
+
     .fade-in { animation: fadeIn 0.4s ease-out both; }
     .slide-up { animation: slideUp 0.5s ease-out both; }
-    
+
     .btn {
       padding: 12px 24px;
       border: none;
@@ -289,28 +368,28 @@ const GlobalStyle = () => (
       justify-content: center;
       gap: 8px;
     }
-    
+
     .btn-primary {
       background: ${theme.primary};
       color: white;
     }
     .btn-primary:hover { background: ${theme.primaryLight}; transform: translateY(-1px); }
-    
+
     .btn-accent {
       background: ${theme.accent};
       color: white;
     }
     .btn-accent:hover { opacity: 0.9; transform: translateY(-1px); }
-    
+
     .btn-ghost {
       background: transparent;
       color: ${theme.textMuted};
       border: 1px solid ${theme.border};
     }
     .btn-ghost:hover { background: ${theme.borderLight}; }
-    
+
     .btn-sm { padding: 8px 16px; font-size: 13px; }
-    
+
     .input {
       width: 100%;
       padding: 12px 16px;
@@ -322,7 +401,7 @@ const GlobalStyle = () => (
       outline: none;
     }
     .input:focus { border-color: ${theme.primary}; }
-    
+
     .label {
       display: block;
       font-size: 12px;
@@ -332,14 +411,14 @@ const GlobalStyle = () => (
       letter-spacing: 0.5px;
       margin-bottom: 6px;
     }
-    
+
     .card {
       background: ${theme.card};
       border-radius: 14px;
       border: 1px solid ${theme.border};
       padding: 20px;
     }
-    
+
     .badge {
       display: inline-flex;
       align-items: center;
@@ -354,7 +433,7 @@ const GlobalStyle = () => (
 );
 
 // --- LAYOUT ---
-function AppShell({ children, title, subtitle, onBack, actions }) {
+function AppShell({ children, title, titleIcon, subtitle, subtitleIcon, onBack, actions }) {
   return (
     <div style={{ maxWidth: 480, margin: "0 auto", minHeight: "100vh", padding: "0 16px 100px" }}>
       <header style={{
@@ -373,12 +452,18 @@ function AppShell({ children, title, subtitle, onBack, actions }) {
             }}>←</button>
           )}
           <div>
-            <h1 style={{
-              fontFamily: fonts.display, fontSize: 22, fontWeight: 700,
-              color: theme.primary, lineHeight: 1.2,
-            }}>{title}</h1>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {titleIcon}
+              <h1 style={{
+                fontFamily: fonts.display, fontSize: 22, fontWeight: 700,
+                color: theme.primary, lineHeight: 1.2,
+              }}>{title}</h1>
+            </div>
             {subtitle && (
-              <p style={{ fontSize: 13, color: theme.textMuted, marginTop: 2 }}>{subtitle}</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                {subtitleIcon}
+                <p style={{ fontSize: 13, color: theme.textMuted }}>{subtitle}</p>
+              </div>
             )}
           </div>
         </div>
@@ -390,7 +475,7 @@ function AppShell({ children, title, subtitle, onBack, actions }) {
 }
 
 // --- AUTH SCREEN ---
-function AuthScreen({ onAuth }) {
+function AuthScreen({ onAuth, onDemo, onSkipAuth }) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -479,13 +564,24 @@ function AuthScreen({ onAuth }) {
       </form>
 
       {DEMO && (
-        <button onClick={() => onAuth({ id: "demo", email: "demo@demo.com" })}
-          className="btn" style={{
-            marginTop: 20, background: "rgba(255,255,255,0.15)",
-            color: "white", backdropFilter: "blur(10px)",
-          }}>
-          Try Demo Mode →
-        </button>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 20, alignItems: "center" }}>
+          <button onClick={onSkipAuth}
+            className="btn" style={{
+              background: "rgba(255,255,255,0.25)",
+              color: "white", backdropFilter: "blur(10px)",
+              width: 220,
+            }}>
+            Start Your Season →
+          </button>
+          <button onClick={onDemo}
+            className="btn" style={{
+              background: "rgba(255,255,255,0.1)",
+              color: "rgba(255,255,255,0.7)", backdropFilter: "blur(10px)",
+              fontSize: 13, padding: "8px 20px",
+            }}>
+            Try Demo Mode
+          </button>
+        </div>
       )}
     </div>
   );
@@ -493,134 +589,75 @@ function AuthScreen({ onAuth }) {
 
 // --- ONBOARDING: ROLE SELECTION ---
 function OnboardingScreen({ onComplete }) {
-  const [step, setStep] = useState(1);
-  const [role, setRole] = useState(null);
-  const [scope, setScope] = useState(null);
-
-  const roles = [
-    { id: "coach", emoji: "📋", title: "Coach", desc: "Track your team's season and individual player growth" },
-    { id: "parent", emoji: "📸", title: "Parent", desc: "Capture your kid's sports journey across seasons" },
-    { id: "player", emoji: "🎽", title: "Player", desc: "Document your own season and development" },
+  const options = [
+    { role: "parent", emoji: "📸", title: "My child's season", desc: "Capture your kid's games, practices, and milestones" },
+    { role: "player", emoji: "⚽", title: "My own season", desc: "Document your own games and development" },
   ];
 
-  const scopes = role === "player"
-    ? [{ id: "player", emoji: "🏃", title: "My Journey", desc: "Track your personal season" }]
-    : [
-        { id: "team", emoji: "👥", title: "Team", desc: "Chronicle the whole team's season" },
-        { id: "player", emoji: "🏃", title: "Individual", desc: role === "coach" ? "Track a specific player's development" : "Follow your kid's journey" },
-      ];
+  return (
+    <div style={{
+      minHeight: "100vh", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center", padding: 24,
+    }}>
+      <div className="slide-up" style={{ textAlign: "center", maxWidth: 400, width: "100%" }}>
+        <h1 style={{ fontFamily: fonts.display, fontSize: 28, fontWeight: 700, color: theme.primary, marginBottom: 8 }}>
+          What are you tracking?
+        </h1>
+        <p style={{ fontSize: 15, color: theme.textMuted, marginBottom: 32 }}>
+          One tap and you're in
+        </p>
 
-  if (step === 1) {
-    return (
-      <div style={{
-        minHeight: "100vh", display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center", padding: 24,
-      }}>
-        <div className="slide-up" style={{ textAlign: "center", maxWidth: 400, width: "100%" }}>
-          <h1 style={{ fontFamily: fonts.display, fontSize: 28, fontWeight: 700, color: theme.primary, marginBottom: 8 }}>
-            How will you use this?
-          </h1>
-          <p style={{ fontSize: 15, color: theme.textMuted, marginBottom: 32 }}>
-            Pick your role — you can always change later
-          </p>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {roles.map((r) => (
-              <button key={r.id} onClick={() => { setRole(r.id); setStep(2); }}
-                className="card" style={{
-                  cursor: "pointer", textAlign: "left",
-                  display: "flex", alignItems: "center", gap: 16,
-                  border: `2px solid ${role === r.id ? theme.primary : theme.border}`,
-                  transition: "all 0.2s",
-                }}>
-                <span style={{ fontSize: 32 }}>{r.emoji}</span>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 16 }}>{r.title}</div>
-                  <div style={{ fontSize: 13, color: theme.textMuted, marginTop: 2 }}>{r.desc}</div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === 2) {
-    // Auto-advance for player role
-    if (role === "player") {
-      return (
-        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div className="slide-up" style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🎽</div>
-            <h2 style={{ fontFamily: fonts.display, fontSize: 24, marginBottom: 24 }}>Ready to chronicle your season</h2>
-            <button className="btn btn-primary" style={{ fontSize: 16, padding: "14px 32px" }}
-              onClick={() => onComplete(role, "player")}>
-              Let's Go →
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {options.map((o) => (
+            <button key={o.role} onClick={() => onComplete(o.role)}
+              className="card" style={{
+                cursor: "pointer", textAlign: "left",
+                display: "flex", alignItems: "center", gap: 16,
+                border: `2px solid ${theme.border}`,
+                transition: "all 0.2s",
+              }}>
+              <span style={{ fontSize: 32 }}>{o.emoji}</span>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 16 }}>{o.title}</div>
+                <div style={{ fontSize: 13, color: theme.textMuted, marginTop: 2 }}>{o.desc}</div>
+              </div>
             </button>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div style={{
-        minHeight: "100vh", display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center", padding: 24,
-      }}>
-        <div className="slide-up" style={{ textAlign: "center", maxWidth: 400, width: "100%" }}>
-          <button onClick={() => setStep(1)} style={{
-            background: "none", border: "none", cursor: "pointer",
-            fontSize: 14, color: theme.textMuted, marginBottom: 24,
-          }}>← Back</button>
-
-          <h1 style={{ fontFamily: fonts.display, fontSize: 28, fontWeight: 700, color: theme.primary, marginBottom: 8 }}>
-            What are you tracking?
-          </h1>
-          <p style={{ fontSize: 15, color: theme.textMuted, marginBottom: 32 }}>
-            You can do both — start with one
-          </p>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {scopes.map((s) => (
-              <button key={s.id} onClick={() => onComplete(role, s.id)}
-                className="card" style={{
-                  cursor: "pointer", textAlign: "left",
-                  display: "flex", alignItems: "center", gap: 16,
-                  border: `2px solid ${theme.border}`,
-                  transition: "all 0.2s",
-                }}>
-                <span style={{ fontSize: 32 }}>{s.emoji}</span>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 16 }}>{s.title}</div>
-                  <div style={{ fontSize: 13, color: theme.textMuted, marginTop: 2 }}>{s.desc}</div>
-                </div>
-              </button>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 // --- TEAM SETUP ---
-function TeamSetupScreen({ role, scope, onComplete }) {
+function TeamSetupScreen({ role, onComplete }) {
   const [teamName, setTeamName] = useState("");
-  const [sport, setSport] = useState("Soccer");
-  const [ageGroup, setAgeGroup] = useState("");
-  const [org, setOrg] = useState("");
-  const [seasonName, setSeasonName] = useState("");
-  const [playerName, setPlayerName] = useState("");
+  const [childName, setChildName] = useState("");
+  const [logo, setLogo] = useState(null);
+  const [childHeadshot, setChildHeadshot] = useState(null);
+  const logoRef = useRef(null);
+  const headshotRef = useRef(null);
 
-  const sportObj = SPORTS.find((s) => s.name === sport) || SPORTS[0];
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const data = await resizeImage(file, 200);
+    setLogo(data);
+  };
+
+  const handleHeadshotUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const data = await resizeImage(file, 200);
+    setChildHeadshot(data);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onComplete({
-      team: { name: teamName || `My ${sport} Team`, sport, age_group: ageGroup, organization: org, emoji: sportObj.emoji },
-      season: { name: seasonName || `${sport} ${new Date().getFullYear()}` },
-      myPlayer: scope === "player" ? { name: playerName } : null,
+      team: { name: teamName || "My Soccer Team", sport: "Soccer", emoji: "⚽", logo },
+      season: { name: `Soccer ${new Date().getFullYear()}` },
+      myPlayer: role === "parent" ? { name: childName, headshot: childHeadshot } : null,
     });
   };
 
@@ -628,61 +665,79 @@ function TeamSetupScreen({ role, scope, onComplete }) {
     <div style={{ minHeight: "100vh", padding: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <form onSubmit={handleSubmit} className="slide-up" style={{ maxWidth: 400, width: "100%" }}>
         <h1 style={{ fontFamily: fonts.display, fontSize: 28, fontWeight: 700, color: theme.primary, marginBottom: 6 }}>
-          Set up your {scope === "team" ? "team" : "player"}
+          {role === "parent" ? "Set up your child's season" : "Set up your season"}
         </h1>
         <p style={{ fontSize: 14, color: theme.textMuted, marginBottom: 28 }}>
           Quick setup — you can edit everything later
         </p>
 
-        {scope === "player" && role !== "player" && (
-          <div style={{ marginBottom: 16 }}>
-            <label className="label">{role === "parent" ? "Your Child's Name" : "Player Name"}</label>
-            <input className="input" value={playerName} onChange={(e) => setPlayerName(e.target.value)}
-              placeholder="Alex" required />
-          </div>
+        {/* Child headshot + name (parent mode) */}
+        {role === "parent" && (
+          <>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 20 }}>
+              <input ref={headshotRef} type="file" accept="image/*" onChange={handleHeadshotUpload} style={{ display: "none" }} />
+              <button type="button" onClick={() => headshotRef.current?.click()}
+                style={{
+                  width: 72, height: 72, borderRadius: "50%",
+                  border: `2px dashed ${theme.border}`, background: theme.borderLight,
+                  cursor: "pointer", overflow: "hidden", position: "relative",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                {childHeadshot ? (
+                  <img src={childHeadshot} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <span style={{ fontSize: 24, color: theme.textLight }}>📷</span>
+                )}
+              </button>
+              {childHeadshot ? (
+                <button type="button" onClick={() => setChildHeadshot(null)}
+                  style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: theme.textMuted, marginTop: 6 }}>
+                  Remove photo
+                </button>
+              ) : (
+                <span style={{ fontSize: 12, color: theme.textLight, marginTop: 6 }}>Child's photo (optional)</span>
+              )}
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label className="label">Child's Name</label>
+              <input className="input" value={childName} onChange={(e) => setChildName(e.target.value)}
+                placeholder="Alex" required />
+            </div>
+          </>
         )}
 
-        <div style={{ marginBottom: 16 }}>
-          <label className="label">Sport</label>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {SPORTS.map((s) => (
-              <button type="button" key={s.name} onClick={() => setSport(s.name)}
-                style={{
-                  padding: "8px 14px", borderRadius: 20, border: `1.5px solid ${sport === s.name ? theme.primary : theme.border}`,
-                  background: sport === s.name ? `${theme.primary}10` : "white",
-                  cursor: "pointer", fontSize: 13, fontWeight: sport === s.name ? 600 : 400,
-                  color: sport === s.name ? theme.primary : theme.text,
-                  transition: "all 0.15s",
-                }}>
-                {s.emoji} {s.name}
-              </button>
-            ))}
-          </div>
+        {/* Club logo */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 20 }}>
+          <input ref={logoRef} type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: "none" }} />
+          <button type="button" onClick={() => logoRef.current?.click()}
+            style={{
+              width: 80, height: 80, borderRadius: "50%",
+              border: `2px dashed ${theme.border}`, background: theme.borderLight,
+              cursor: "pointer", overflow: "hidden", position: "relative",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+            {logo ? (
+              <img src={logo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              <span style={{ fontSize: 12, color: theme.textLight, textAlign: "center", lineHeight: 1.3 }}>Club<br/>Logo</span>
+            )}
+          </button>
+          {logo ? (
+            <button type="button" onClick={() => setLogo(null)}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: theme.textMuted, marginTop: 6 }}>
+              Remove logo
+            </button>
+          ) : (
+            <span style={{ fontSize: 12, color: theme.textLight, marginTop: 6 }}>Team logo (optional)</span>
+          )}
         </div>
 
-        <div style={{ marginBottom: 16 }}>
+        {/* Team name */}
+        <div style={{ marginBottom: 24 }}>
           <label className="label">Team Name</label>
           <input className="input" value={teamName} onChange={(e) => setTeamName(e.target.value)}
-            placeholder={`Thunder U12, Varsity ${sport}, etc.`} />
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-          <div>
-            <label className="label">Age Group</label>
-            <input className="input" value={ageGroup} onChange={(e) => setAgeGroup(e.target.value)}
-              placeholder="U12, Varsity, etc." />
-          </div>
-          <div>
-            <label className="label">Club / Org</label>
-            <input className="input" value={org} onChange={(e) => setOrg(e.target.value)}
-              placeholder="IFA, Town Rec, etc." />
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 24 }}>
-          <label className="label">Season Name</label>
-          <input className="input" value={seasonName} onChange={(e) => setSeasonName(e.target.value)}
-            placeholder={`Fall ${new Date().getFullYear()}, Spring League, etc.`} />
+            placeholder="Thunder U12, Varsity, etc." />
         </div>
 
         <button className="btn btn-primary" type="submit" style={{ width: "100%", padding: "14px 24px", fontSize: 16 }}>
@@ -693,100 +748,8 @@ function TeamSetupScreen({ role, scope, onComplete }) {
   );
 }
 
-// --- ROSTER MANAGER ---
-function RosterManager({ players, sport, onAdd, onClose }) {
-  const [name, setName] = useState("");
-  const [number, setNumber] = useState("");
-  const [position, setPosition] = useState("");
-
-  const positions = POSITIONS_BY_SPORT[sport] || [];
-
-  const handleAdd = (e) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    onAdd({ name: name.trim(), number: number ? parseInt(number) : null, position: position || null });
-    setName("");
-    setNumber("");
-    setPosition("");
-  };
-
-  return (
-    <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
-      display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 100,
-      padding: 16,
-    }}>
-      <div className="slide-up" style={{
-        background: "white", borderRadius: 18, padding: 24,
-        width: "100%", maxWidth: 480, maxHeight: "80vh", overflow: "auto",
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h2 style={{ fontFamily: fonts.display, fontSize: 22, fontWeight: 700 }}>Roster</h2>
-          <button onClick={onClose} style={{
-            background: "none", border: "none", fontSize: 24, cursor: "pointer", color: theme.textMuted,
-          }}>×</button>
-        </div>
-
-        {players.length > 0 && (
-          <div style={{ marginBottom: 20 }}>
-            {players.map((p, i) => (
-              <div key={i} style={{
-                display: "flex", alignItems: "center", gap: 12,
-                padding: "10px 0", borderBottom: `1px solid ${theme.borderLight}`,
-              }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: "50%",
-                  background: `${theme.primary}15`, display: "flex",
-                  alignItems: "center", justifyContent: "center",
-                  fontWeight: 700, fontSize: 14, color: theme.primary,
-                }}>
-                  {p.number || p.name[0]}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: 14 }}>{p.name}</div>
-                  {p.position && <div style={{ fontSize: 12, color: theme.textMuted }}>{p.position}</div>}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <form onSubmit={handleAdd}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 60px", gap: 8, marginBottom: 8 }}>
-            <input className="input" value={name} onChange={(e) => setName(e.target.value)}
-              placeholder="Player name" style={{ padding: "10px 14px" }} />
-            <input className="input" value={number} onChange={(e) => setNumber(e.target.value)}
-              placeholder="#" type="number" style={{ padding: "10px 14px", textAlign: "center" }} />
-          </div>
-
-          {positions.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
-              {positions.map((pos) => (
-                <button type="button" key={pos} onClick={() => setPosition(position === pos ? "" : pos)}
-                  style={{
-                    padding: "4px 10px", borderRadius: 12, fontSize: 12, fontWeight: 600,
-                    border: `1px solid ${position === pos ? theme.primary : theme.border}`,
-                    background: position === pos ? `${theme.primary}10` : "white",
-                    color: position === pos ? theme.primary : theme.textMuted,
-                    cursor: "pointer",
-                  }}>
-                  {pos}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <button className="btn btn-primary btn-sm" type="submit" style={{ width: "100%" }}>
-            Add Player
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
-
 // --- ENTRY COMPOSER ---
-function EntryComposer({ season, players, sport, onSave, onClose }) {
+function EntryComposer({ season, onSave, onClose }) {
   const [entryType, setEntryType] = useState("game");
   const [text, setText] = useState("");
   const [opponent, setOpponent] = useState("");
@@ -794,18 +757,15 @@ function EntryComposer({ season, players, sport, onSave, onClose }) {
   const [scoreHome, setScoreHome] = useState("");
   const [scoreAway, setScoreAway] = useState("");
   const [showGameData, setShowGameData] = useState(false);
-  const [selectedPlayers, setSelectedPlayers] = useState([]);
-  const [showPlayerTags, setShowPlayerTags] = useState(false);
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [prompt] = useState(getPrompt("game"));
   const fileRef = useRef(null);
 
   const entryTypes = [
     { id: "game", label: "Game", emoji: "🏟️" },
     { id: "practice", label: "Practice", emoji: "🔄" },
     { id: "tournament", label: "Tournament", emoji: "🏆" },
-    { id: "event", label: "Event", emoji: "⭐" },
+    { id: "moment", label: "Moment", emoji: "⭐" },
   ];
 
   const handlePhoto = (e) => {
@@ -813,14 +773,6 @@ function EntryComposer({ season, players, sport, onSave, onClose }) {
     if (!file) return;
     setPhoto(file);
     setPhotoPreview(URL.createObjectURL(file));
-  };
-
-  const togglePlayer = (playerId, contribution) => {
-    setSelectedPlayers((prev) => {
-      const exists = prev.find((p) => p.playerId === playerId && p.contribution === contribution);
-      if (exists) return prev.filter((p) => !(p.playerId === playerId && p.contribution === contribution));
-      return [...prev, { playerId, contribution }];
-    });
   };
 
   const computeResult = () => {
@@ -843,11 +795,8 @@ function EntryComposer({ season, players, sport, onSave, onClose }) {
       score_away: scoreAway !== "" ? parseInt(scoreAway) : null,
       result: computeResult(),
       photo,
-      playerTags: selectedPlayers,
     });
   };
-
-  const contributions = CONTRIBUTIONS_BY_SPORT[sport] || CONTRIBUTIONS_BY_SPORT.default;
 
   return (
     <div style={{
@@ -884,14 +833,8 @@ function EntryComposer({ season, players, sport, onSave, onClose }) {
           ))}
         </div>
 
-        {/* The Line - The Soul */}
+        {/* The Line */}
         <div style={{ marginBottom: 16 }}>
-          <p style={{
-            fontFamily: fonts.display, fontStyle: "italic",
-            fontSize: 14, color: theme.accent, marginBottom: 8, lineHeight: 1.4,
-          }}>
-            {entryType === "practice" ? getPrompt("practice") : prompt}
-          </p>
           <textarea
             className="input"
             value={text}
@@ -978,56 +921,6 @@ function EntryComposer({ season, players, sport, onSave, onClose }) {
           </>
         )}
 
-        {/* Player Tags */}
-        {players.length > 0 && (
-          <>
-            <button onClick={() => setShowPlayerTags(!showPlayerTags)}
-              style={{
-                background: "none", border: "none", cursor: "pointer",
-                fontSize: 13, fontWeight: 600, color: theme.primary,
-                marginBottom: showPlayerTags ? 12 : 16,
-                display: "flex", alignItems: "center", gap: 6,
-              }}>
-              {showPlayerTags ? "▾" : "▸"} Tag Players (optional)
-            </button>
-
-            {showPlayerTags && (
-              <div className="fade-in" style={{
-                background: theme.borderLight, borderRadius: 12, padding: 16, marginBottom: 16,
-                maxHeight: 200, overflow: "auto",
-              }}>
-                {players.map((p) => (
-                  <div key={p.id || p.name} style={{ marginBottom: 10 }}>
-                    <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>
-                      {p.number ? `#${p.number} ` : ""}{p.name}
-                    </div>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                      {contributions.map((c) => {
-                        const active = selectedPlayers.some(
-                          (sp) => (sp.playerId === (p.id || p.name)) && sp.contribution === c
-                        );
-                        return (
-                          <button type="button" key={c}
-                            onClick={() => togglePlayer(p.id || p.name, c)}
-                            style={{
-                              padding: "3px 8px", borderRadius: 10, fontSize: 11,
-                              border: `1px solid ${active ? theme.accent : theme.border}`,
-                              background: active ? `${theme.accent}15` : "white",
-                              color: active ? theme.accent : theme.textMuted,
-                              cursor: "pointer", fontWeight: active ? 600 : 400,
-                            }}>
-                            {c}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
         {/* Save */}
         <button className="btn btn-primary" onClick={handleSave}
           disabled={!text.trim()}
@@ -1043,15 +936,15 @@ function EntryComposer({ season, players, sport, onSave, onClose }) {
 }
 
 // --- TIMELINE ENTRY CARD ---
-function EntryCard({ entry, players }) {
+function EntryCard({ entry, players, onShare }) {
   const typeColors = {
     game: entry.result === "win" ? theme.win : entry.result === "loss" ? theme.loss : theme.draw,
     practice: theme.practice,
     tournament: theme.tournament,
-    event: theme.event,
+    moment: theme.moment,
   };
 
-  const typeEmojis = { game: "🏟️", practice: "🔄", tournament: "🏆", event: "⭐" };
+  const typeEmojis = { game: "🏟️", practice: "🔄", tournament: "🏆", moment: "⭐" };
   const resultLabels = { win: "W", loss: "L", draw: "D" };
 
   const color = typeColors[entry.entry_type] || theme.textMuted;
@@ -1074,9 +967,31 @@ function EntryCard({ entry, players }) {
             <span style={{ fontSize: 13, color: theme.textMuted }}>vs {entry.opponent}</span>
           )}
         </div>
-        <span style={{ fontSize: 12, color: theme.textLight, fontFamily: fonts.mono }}>
-          {new Date(entry.entry_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 12, color: theme.textLight, fontFamily: fonts.mono }}>
+            {new Date(entry.entry_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          </span>
+          {onShare && (
+            <button
+              onClick={() => onShare(entry)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 14,
+                color: theme.textLight,
+                padding: "2px 4px",
+                lineHeight: 1,
+                transition: "color 0.15s",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = theme.primary}
+              onMouseLeave={(e) => e.currentTarget.style.color = theme.textLight}
+              title="Share"
+            >
+              ↗
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Score */}
@@ -1098,8 +1013,8 @@ function EntryCard({ entry, players }) {
       )}
 
       {/* Photo */}
-      {entry.photoPreview && (
-        <img src={entry.photoPreview} alt="" style={{
+      {(entry.photoPreview || entry.photoData) && (
+        <img src={entry.photoPreview || entry.photoData} alt="" style={{
           width: "100%", height: 180, objectFit: "cover", borderRadius: 10, marginBottom: 10,
         }} />
       )}
@@ -1109,7 +1024,7 @@ function EntryCard({ entry, players }) {
         fontFamily: fonts.display, fontSize: 17, lineHeight: 1.5,
         color: theme.text, fontStyle: "italic",
       }}>
-        "{entry.text}"
+        &ldquo;{entry.text}&rdquo;
       </p>
 
       {/* Venue */}
@@ -1141,7 +1056,7 @@ function SeasonStats({ entries }) {
   const losses = games.filter((e) => e.result === "loss").length;
   const draws = games.filter((e) => e.result === "draw").length;
   const practices = entries.filter((e) => e.entry_type === "practice").length;
-  const photos = entries.filter((e) => e.photoPreview || e.photo_path).length;
+  const photos = entries.filter((e) => e.photoPreview || e.photoData || e.photo_path).length;
 
   return (
     <div style={{
@@ -1171,119 +1086,1111 @@ function SeasonStats({ entries }) {
   );
 }
 
-// --- BOOK PREVIEW ---
-function BookPreview({ entries, team, season, players, onClose }) {
+// --- BOOK PREVIEW (Paginated) ---
+function BookPreview({ entries, team, season, players, onClose, onOrder }) {
+  const [currentPage, setCurrentPage] = useState(0);
+  const [touchStart, setTouchStart] = useState(null);
+
   const sortedEntries = [...entries].sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+  const entryPages = paginateEntries(entries);
+  const totalPages = 2 + entryPages.length + 1; // title + summary + entries + closing
+
+  const games = sortedEntries.filter((e) => e.entry_type === "game" || e.entry_type === "tournament");
+  const wins = games.filter((e) => e.result === "win").length;
+  const losses = games.filter((e) => e.result === "loss").length;
+  const draws = games.filter((e) => e.result === "draw").length;
+  const practices = sortedEntries.filter((e) => e.entry_type === "practice").length;
+  const tournaments = sortedEntries.filter((e) => e.entry_type === "tournament").length;
+
+  const goNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages - 1));
+  const goPrev = () => setCurrentPage((p) => Math.max(p - 1, 0));
+
+  const handleTouchStart = (e) => setTouchStart(e.touches[0].clientX);
+  const handleTouchEnd = (e) => {
+    if (touchStart === null) return;
+    const diff = touchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) goNext();
+      else goPrev();
+    }
+    setTouchStart(null);
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === "ArrowRight" || e.key === " ") goNext();
+      if (e.key === "ArrowLeft") goPrev();
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
+
+  const handleProofPDF = () => {
+    const bookData = {
+      team: { ...team, color: theme.primary },
+      season,
+      players,
+      entries: sortedEntries.map((e) => ({
+        ...e,
+        photoData: e.photoData || e.photoPreview || null,
+      })),
+    };
+    const w = window.open("/book-template/interior.html", "_blank");
+    if (w) {
+      w.addEventListener("load", () => {
+        w.__BOOK_DATA__ = bookData;
+        w.dispatchEvent(new Event("bookDataReady"));
+      });
+    }
+  };
+
+  const formatDate = (dateStr) => {
+    const d = new Date(dateStr + "T12:00:00");
+    return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  };
+
+  const formatDateRange = () => {
+    if (sortedEntries.length === 0) return "";
+    const first = new Date(sortedEntries[0].entry_date + "T12:00:00");
+    const last = new Date(sortedEntries[sortedEntries.length - 1].entry_date + "T12:00:00");
+    const opts = { month: "long", day: "numeric", year: "numeric" };
+    return `${first.toLocaleDateString("en-US", opts)} – ${last.toLocaleDateString("en-US", opts)}`;
+  };
+
+  // --- Page content renderers ---
+  const renderTitlePage = () => (
+    <div style={{
+      width: "100%", height: "100%", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center", textAlign: "center",
+      padding: 48, background: "#FFFDF8",
+    }}>
+      <div style={{ width: 40, height: 2, background: theme.primary, marginBottom: 28 }} />
+      <h1 style={{
+        fontFamily: fonts.headline, fontSize: 36, fontWeight: 400,
+        color: theme.text, lineHeight: 1.15, marginBottom: 12,
+      }}>{team.name}</h1>
+      {players[0]?.name && (
+        <p style={{ fontFamily: fonts.body, fontSize: 14, color: theme.textMuted, marginBottom: 6 }}>
+          {players[0].name}
+        </p>
+      )}
+      <p style={{
+        fontFamily: fonts.mono, fontSize: 10, color: theme.textLight,
+        letterSpacing: 2, textTransform: "uppercase",
+      }}>{season.name}</p>
+      <div style={{ width: 40, height: 2, background: theme.primary, marginTop: 28 }} />
+    </div>
+  );
+
+  const renderSummaryPage = () => (
+    <div style={{
+      width: "100%", height: "100%", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center", textAlign: "center",
+      padding: 40, background: "#FFFDF8",
+    }}>
+      <p style={{
+        fontFamily: fonts.mono, fontSize: 8, color: theme.textLight,
+        letterSpacing: 3, textTransform: "uppercase", marginBottom: 24,
+      }}>Season Summary</p>
+      <p style={{
+        fontFamily: fonts.mono, fontSize: 48, fontWeight: 700,
+        color: theme.text, letterSpacing: 3, marginBottom: 4,
+      }}>{wins}-{losses}-{draws}</p>
+      <p style={{
+        fontFamily: fonts.mono, fontSize: 9, color: theme.textLight,
+        letterSpacing: 2, textTransform: "uppercase", marginBottom: 28,
+      }}>Win – Loss – Draw</p>
+      <div style={{ width: 30, height: 1.5, background: `${theme.primary}20`, marginBottom: 28 }} />
+      <div style={{ display: "flex", gap: 32, marginBottom: 28 }}>
+        {[
+          { v: games.length, l: "Games" },
+          { v: practices, l: "Practices" },
+          ...(tournaments > 0 ? [{ v: tournaments, l: "Tournaments" }] : []),
+          { v: sortedEntries.length, l: "Entries" },
+        ].map((s) => (
+          <div key={s.l} style={{ textAlign: "center" }}>
+            <div style={{ fontFamily: fonts.mono, fontSize: 20, fontWeight: 600, color: theme.text }}>{s.v}</div>
+            <div style={{ fontFamily: fonts.body, fontSize: 8, color: theme.textLight, textTransform: "uppercase", letterSpacing: 1, marginTop: 2 }}>{s.l}</div>
+          </div>
+        ))}
+      </div>
+      <p style={{ fontFamily: fonts.body, fontSize: 10, color: theme.textMuted }}>{formatDateRange()}</p>
+    </div>
+  );
+
+  const renderEntryPage = (pageEntries) => (
+    <div style={{
+      width: "100%", height: "100%", padding: 32, background: "#FFFDF8",
+      display: "flex", flexDirection: "column",
+    }}>
+      {pageEntries.map((entry, i) => {
+        const hasScore = entry.score_home !== null && entry.score_away !== null;
+        const resultColors = { win: theme.win, loss: theme.loss, draw: theme.draw };
+        const resultLabels = { win: "W", loss: "L", draw: "D" };
+        const photo = entry.photoPreview || entry.photoData;
+
+        return (
+          <div key={entry.id} style={{
+            ...(i > 0 ? { paddingTop: 18, marginTop: 18, borderTop: `1px solid ${theme.primary}0F` } : {}),
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+              <span style={{
+                fontFamily: fonts.mono, fontSize: 7, fontWeight: 500,
+                color: theme.textLight, textTransform: "uppercase", letterSpacing: 2,
+              }}>{entry.entry_type}</span>
+              <span style={{ fontFamily: fonts.mono, fontSize: 8, color: theme.textLight }}>
+                {formatDate(entry.entry_date)}
+              </span>
+            </div>
+
+            {hasScore && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <span style={{
+                  fontFamily: fonts.mono, fontSize: 26, fontWeight: 700,
+                  color: theme.text, letterSpacing: 1,
+                }}>{entry.score_home} – {entry.score_away}</span>
+                {entry.result && (
+                  <span style={{
+                    fontFamily: fonts.mono, fontSize: 8, fontWeight: 600,
+                    padding: "2px 6px", borderRadius: 2,
+                    background: resultColors[entry.result], color: "white",
+                    letterSpacing: 1,
+                  }}>{resultLabels[entry.result]}</span>
+                )}
+              </div>
+            )}
+
+            {entry.opponent && (
+              <p style={{ fontFamily: fonts.body, fontSize: 10, color: theme.textMuted, marginBottom: 8 }}>
+                vs {entry.opponent}
+              </p>
+            )}
+
+            {photo && (
+              <img src={photo} alt="" style={{
+                width: "100%", maxHeight: 280, objectFit: "cover",
+                borderRadius: 3, marginBottom: 10, display: "block",
+              }} />
+            )}
+
+            {entry.text && (
+              <p style={{
+                fontFamily: fonts.display, fontSize: 12, lineHeight: 1.6,
+                color: "#2A2A2A", fontStyle: "italic",
+              }}>
+                &ldquo;{entry.text}&rdquo;
+              </p>
+            )}
+
+            {entry.venue && (
+              <p style={{ fontFamily: fonts.body, fontSize: 8, color: theme.textLight, marginTop: 6 }}>
+                {entry.venue}
+              </p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  const renderClosingPage = () => {
+    const playerName = players[0]?.name || "yours";
+    return (
+      <div style={{
+        width: "100%", height: "100%", display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center", textAlign: "center",
+        padding: 60, background: "#FFFDF8",
+      }}>
+        <p style={{
+          fontFamily: fonts.headline, fontStyle: "italic", fontSize: 18,
+          lineHeight: 1.5, color: theme.textMuted, marginBottom: 36,
+        }}>
+          Every season tells a story.<br />This was {playerName}'s.
+        </p>
+        <div style={{ width: 30, height: 1.5, background: theme.primary, marginBottom: 16 }} />
+        <p style={{
+          fontFamily: fonts.mono, fontSize: 8, color: theme.textLight,
+          letterSpacing: 3, textTransform: "uppercase",
+        }}>The Season</p>
+      </div>
+    );
+  };
+
+  const renderCurrentPage = () => {
+    if (currentPage === 0) return renderTitlePage();
+    if (currentPage === 1) return renderSummaryPage();
+    if (currentPage < 2 + entryPages.length) return renderEntryPage(entryPages[currentPage - 2]);
+    return renderClosingPage();
+  };
+
+  const RENDER_SIZE = 700;
+  const CONTAINER_SIZE = 340;
+  const scale = CONTAINER_SIZE / RENDER_SIZE;
 
   return (
     <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
-      display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100,
-      padding: 16,
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      zIndex: 100, padding: 16,
+    }}>
+      {/* Header */}
+      <div style={{
+        width: "100%", maxWidth: 380, display: "flex", justifyContent: "space-between",
+        alignItems: "center", marginBottom: 16,
+      }}>
+        <button onClick={onClose} style={{
+          background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%",
+          width: 36, height: 36, color: "white", fontSize: 18, cursor: "pointer",
+        }}>×</button>
+        <span style={{
+          fontFamily: fonts.mono, fontSize: 12, color: "rgba(255,255,255,0.5)",
+        }}>{currentPage + 1} / {totalPages}</span>
+      </div>
+
+      {/* Page viewer */}
+      <div
+        style={{
+          width: CONTAINER_SIZE, height: CONTAINER_SIZE,
+          overflow: "hidden", borderRadius: 4,
+          boxShadow: "0 16px 64px rgba(0,0,0,0.5)",
+          marginBottom: 16, position: "relative",
+          background: "#FFFDF8",
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div style={{
+          width: RENDER_SIZE, height: RENDER_SIZE,
+          transform: `scale(${scale})`, transformOrigin: "top left",
+        }}>
+          {renderCurrentPage()}
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 16, marginBottom: 20,
+      }}>
+        <button onClick={goPrev} disabled={currentPage === 0} style={{
+          background: "none", border: "none", color: currentPage === 0 ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.7)",
+          fontSize: 24, cursor: currentPage === 0 ? "default" : "pointer", padding: "4px 8px",
+        }}>‹</button>
+
+        <div style={{ display: "flex", gap: 4 }}>
+          {Array.from({ length: Math.min(totalPages, 12) }, (_, i) => {
+            const pageIdx = totalPages <= 12 ? i : Math.round(i * (totalPages - 1) / 11);
+            return (
+              <div key={i} style={{
+                width: 6, height: 6, borderRadius: "50%",
+                background: pageIdx === currentPage ? "white" : "rgba(255,255,255,0.25)",
+                cursor: "pointer", transition: "background 0.15s",
+              }} onClick={() => setCurrentPage(pageIdx)} />
+            );
+          })}
+        </div>
+
+        <button onClick={goNext} disabled={currentPage === totalPages - 1} style={{
+          background: "none", border: "none",
+          color: currentPage === totalPages - 1 ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.7)",
+          fontSize: 24, cursor: currentPage === totalPages - 1 ? "default" : "pointer", padding: "4px 8px",
+        }}>›</button>
+      </div>
+
+      {/* Actions */}
+      <div style={{ display: "flex", gap: 10 }}>
+        <button onClick={handleProofPDF} className="btn" style={{
+          background: "rgba(255,255,255,0.12)", color: "white",
+          fontSize: 13, padding: "10px 20px",
+        }}>
+          Proof PDF
+        </button>
+        <button onClick={onOrder} className="btn" style={{
+          background: theme.accent, color: "white",
+          fontSize: 13, padding: "10px 20px",
+        }}>
+          Order Book $34.99
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// --- ORDER FLOW ---
+function OrderFlow({ entries, team, season, players, onClose }) {
+  const entryPages = paginateEntries(entries);
+  const totalBookPages = 2 + entryPages.length + 1;
+  const sortedEntries = [...entries].sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+
+  const [step, setStep] = useState(() => {
+    const saved = localStorage.getItem("theSeasonOrder");
+    if (saved) {
+      try {
+        const order = JSON.parse(saved);
+        if (order.status && order.status !== "idle") return "status";
+      } catch (e) {}
+    }
+    return "summary";
+  });
+
+  const [shipping, setShipping] = useState(() => {
+    const saved = localStorage.getItem("theSeasonOrder");
+    if (saved) {
+      try { return JSON.parse(saved).shipping || {}; } catch (e) {}
+    }
+    return { name: "", email: "", street: "", city: "", state: "", zip: "" };
+  });
+
+  const [orderStatus, setOrderStatus] = useState(() => {
+    const saved = localStorage.getItem("theSeasonOrder");
+    if (saved) {
+      try { return JSON.parse(saved).status || "idle"; } catch (e) {}
+    }
+    return "idle";
+  });
+
+  const [errors, setErrors] = useState({});
+
+  // Persist order state
+  useEffect(() => {
+    localStorage.setItem("theSeasonOrder", JSON.stringify({ shipping, status: orderStatus }));
+  }, [shipping, orderStatus]);
+
+  const validateShipping = () => {
+    const errs = {};
+    if (!shipping.name.trim()) errs.name = "Name is required";
+    if (!shipping.email.trim() || !/\S+@\S+\.\S+/.test(shipping.email)) errs.email = "Valid email is required";
+    if (!shipping.street.trim()) errs.street = "Street address is required";
+    if (!shipping.city.trim()) errs.city = "City is required";
+    if (!shipping.state.trim() || shipping.state.trim().length !== 2) errs.state = "Two-letter state code";
+    if (!shipping.zip.trim() || !/^\d{5}(-\d{4})?$/.test(shipping.zip.trim())) errs.zip = "Valid ZIP code";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleContinueToShipping = () => setStep("shipping");
+  const handleContinueToReview = () => {
+    if (validateShipping()) setStep("review");
+  };
+
+  const handlePlaceOrder = () => {
+    // Backend not connected yet — show coming soon
+    setOrderStatus("coming_soon");
+    setStep("status");
+  };
+
+  const statusSteps = [
+    { key: "ordered", label: "Ordered" },
+    { key: "printing", label: "Printing" },
+    { key: "shipped", label: "Shipped" },
+    { key: "delivered", label: "Delivered" },
+  ];
+
+  const shippingField = (key, label, placeholder, opts = {}) => (
+    <div style={{ marginBottom: 12 }}>
+      <label className="label">{label}</label>
+      <input
+        className="input"
+        value={shipping[key]}
+        onChange={(e) => setShipping({ ...shipping, [key]: e.target.value })}
+        placeholder={placeholder}
+        {...opts}
+        style={{ ...(errors[key] ? { borderColor: theme.loss } : {}) }}
+      />
+      {errors[key] && <span style={{ fontSize: 11, color: theme.loss, marginTop: 2, display: "block" }}>{errors[key]}</span>}
+    </div>
+  );
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      zIndex: 100, padding: 16,
     }}>
       <div className="slide-up" style={{
-        background: "#FFF9F0", borderRadius: 4, width: 340, maxHeight: "85vh",
-        overflow: "auto", boxShadow: "0 20px 80px rgba(0,0,0,0.4)",
-        border: "1px solid #E8E0D4",
+        background: "white", borderRadius: 16, width: "100%", maxWidth: 400,
+        maxHeight: "90vh", overflow: "auto", padding: 24,
       }}>
-        {/* Cover */}
-        <div style={{
-          padding: "48px 24px", textAlign: "center",
-          background: `linear-gradient(160deg, ${theme.primary}, #2D6A4F)`,
-          borderRadius: "4px 4px 0 0",
-        }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>{team.emoji}</div>
-          <h1 style={{
-            fontFamily: fonts.display, fontSize: 28, fontWeight: 700,
-            color: "white", lineHeight: 1.2, marginBottom: 8,
-          }}>
-            {team.name}
-          </h1>
-          <p style={{
-            fontFamily: fonts.display, fontSize: 16, color: "rgba(255,255,255,0.8)",
-          }}>
-            {season.name}
-          </p>
-          <div style={{
-            width: 40, height: 2, background: "rgba(255,255,255,0.3)",
-            margin: "16px auto",
-          }} />
-          <p style={{
-            fontFamily: fonts.display, fontSize: 13, color: "rgba(255,255,255,0.6)",
-            fontStyle: "italic",
-          }}>
-            {sortedEntries.length} moments captured
-          </p>
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <h2 style={{ fontFamily: fonts.display, fontSize: 20, fontWeight: 700 }}>
+            {step === "summary" && "Order Your Book"}
+            {step === "shipping" && "Shipping"}
+            {step === "review" && "Review Order"}
+            {step === "status" && "Order Status"}
+          </h2>
+          <button onClick={onClose} style={{
+            background: "none", border: "none", fontSize: 22, cursor: "pointer", color: theme.textMuted,
+          }}>×</button>
         </div>
 
-        {/* Entries */}
-        <div style={{ padding: "24px 20px" }}>
-          {sortedEntries.map((entry, i) => (
-            <div key={i} style={{
-              marginBottom: 24, paddingBottom: 24,
-              borderBottom: i < sortedEntries.length - 1 ? `1px solid #E8E0D4` : "none",
-            }}>
-              <div style={{
-                display: "flex", justifyContent: "space-between", alignItems: "center",
-                marginBottom: 8,
-              }}>
-                <span style={{
-                  fontSize: 11, fontWeight: 600, color: theme.textMuted,
-                  textTransform: "uppercase", letterSpacing: 0.5,
-                }}>
-                  {new Date(entry.entry_date).toLocaleDateString("en-US", {
-                    weekday: "short", month: "short", day: "numeric",
-                  })}
-                </span>
-                {entry.score_home !== null && (
-                  <span style={{ fontFamily: fonts.mono, fontSize: 13, fontWeight: 600 }}>
-                    {entry.score_home}–{entry.score_away}
-                  </span>
-                )}
+        {/* Step: Summary */}
+        {step === "summary" && (
+          <>
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 14, color: theme.textMuted }}>Pages</span>
+                <span style={{ fontFamily: fonts.mono, fontSize: 14, fontWeight: 600 }}>{totalBookPages}</span>
               </div>
-
-              {entry.opponent && (
-                <p style={{ fontSize: 12, color: theme.textMuted, marginBottom: 4 }}>
-                  vs {entry.opponent}
-                </p>
-              )}
-
-              {entry.photoPreview && (
-                <img src={entry.photoPreview} alt="" style={{
-                  width: "100%", height: 160, objectFit: "cover",
-                  borderRadius: 4, marginBottom: 8,
-                }} />
-              )}
-
-              <p style={{
-                fontFamily: fonts.display, fontSize: 15, lineHeight: 1.6,
-                color: "#2A2A2A", fontStyle: "italic",
-              }}>
-                "{entry.text}"
-              </p>
-
-              {entry.venue && (
-                <p style={{ fontSize: 11, color: theme.textLight, marginTop: 6 }}>
-                  📍 {entry.venue}
-                </p>
-              )}
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 14, color: theme.textMuted }}>Entries</span>
+                <span style={{ fontFamily: fonts.mono, fontSize: 14, fontWeight: 600 }}>{sortedEntries.length}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 14, color: theme.textMuted }}>Format</span>
+                <span style={{ fontSize: 14, fontWeight: 500 }}>7×7" Softcover</span>
+              </div>
+              <div style={{ height: 1, background: theme.border, margin: "12px 0" }} />
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 16, fontWeight: 600 }}>Total</span>
+                <span style={{ fontFamily: fonts.mono, fontSize: 16, fontWeight: 700, color: theme.primary }}>$34.99 + shipping</span>
+              </div>
             </div>
-          ))}
+            <button className="btn btn-primary" onClick={handleContinueToShipping} style={{ width: "100%", padding: "14px 24px", fontSize: 15 }}>
+              Continue
+            </button>
+          </>
+        )}
 
-          {sortedEntries.length === 0 && (
-            <p style={{ textAlign: "center", color: theme.textMuted, fontStyle: "italic", padding: "40px 0" }}>
-              Start adding entries to see your book come to life
-            </p>
+        {/* Step: Shipping */}
+        {step === "shipping" && (
+          <>
+            {shippingField("name", "Full Name", "Alex Johnson")}
+            {shippingField("email", "Email", "alex@email.com", { type: "email" })}
+            {shippingField("street", "Street Address", "123 Main St")}
+            {shippingField("city", "City", "Springfield")}
+            <div style={{ display: "flex", gap: 12 }}>
+              <div style={{ flex: 1 }}>
+                {shippingField("state", "State", "CA", { maxLength: 2 })}
+              </div>
+              <div style={{ flex: 1 }}>
+                {shippingField("zip", "ZIP Code", "90210")}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+              <button className="btn btn-ghost" onClick={() => setStep("summary")} style={{ flex: 1 }}>Back</button>
+              <button className="btn btn-primary" onClick={handleContinueToReview} style={{ flex: 2 }}>Review Order</button>
+            </div>
+          </>
+        )}
+
+        {/* Step: Review */}
+        {step === "review" && (
+          <>
+            <div className="card" style={{ marginBottom: 12 }}>
+              <p className="label">Ship To</p>
+              <p style={{ fontSize: 14 }}>{shipping.name}</p>
+              <p style={{ fontSize: 13, color: theme.textMuted }}>{shipping.street}</p>
+              <p style={{ fontSize: 13, color: theme.textMuted }}>{shipping.city}, {shipping.state} {shipping.zip}</p>
+              <p style={{ fontSize: 13, color: theme.textMuted }}>{shipping.email}</p>
+            </div>
+            <div className="card" style={{ marginBottom: 16 }}>
+              <p className="label">Book</p>
+              <p style={{ fontSize: 14 }}>{team.name} — {season.name}</p>
+              <p style={{ fontSize: 13, color: theme.textMuted }}>{totalBookPages} pages, {sortedEntries.length} entries</p>
+              <div style={{ height: 1, background: theme.border, margin: "10px 0" }} />
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontWeight: 600 }}>Total</span>
+                <span style={{ fontFamily: fonts.mono, fontWeight: 700, color: theme.primary }}>$34.99 + shipping</span>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className="btn btn-ghost" onClick={() => setStep("shipping")} style={{ flex: 1 }}>Back</button>
+              <button className="btn btn-primary" onClick={handlePlaceOrder} style={{ flex: 2 }}>Place Order</button>
+            </div>
+          </>
+        )}
+
+        {/* Step: Status */}
+        {step === "status" && (
+          <>
+            {orderStatus === "coming_soon" ? (
+              <div style={{ textAlign: "center", padding: "24px 0" }}>
+                <div style={{ fontSize: 40, marginBottom: 16 }}>🚧</div>
+                <p style={{ fontFamily: fonts.display, fontSize: 18, fontWeight: 600, marginBottom: 8 }}>
+                  Coming Soon
+                </p>
+                <p style={{ fontSize: 14, color: theme.textMuted, marginBottom: 20, lineHeight: 1.5 }}>
+                  Online ordering is almost ready. For now, use the <strong>Proof PDF</strong> button in the book preview to download a print-quality version of your book.
+                </p>
+                <button className="btn btn-ghost" onClick={() => { setStep("summary"); setOrderStatus("idle"); }} style={{ width: "100%" }}>
+                  Got it
+                </button>
+              </div>
+            ) : (
+              <>
+                <div style={{ padding: "16px 0" }}>
+                  {statusSteps.map((s, i) => {
+                    const active = statusSteps.findIndex((ss) => ss.key === orderStatus) >= i;
+                    return (
+                      <div key={s.key} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: i < statusSteps.length - 1 ? 20 : 0 }}>
+                        <div style={{
+                          width: 28, height: 28, borderRadius: "50%",
+                          background: active ? theme.primary : theme.borderLight,
+                          color: active ? "white" : theme.textLight,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 12, fontWeight: 600, flexShrink: 0,
+                        }}>
+                          {active ? "✓" : i + 1}
+                        </div>
+                        <span style={{
+                          fontSize: 14, fontWeight: active ? 600 : 400,
+                          color: active ? theme.text : theme.textMuted,
+                        }}>{s.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button className="btn btn-ghost" onClick={onClose} style={{ width: "100%", marginTop: 16 }}>
+                  Close
+                </button>
+              </>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// --- HEADLINE GENERATOR ---
+function generateHeadline(entry) {
+  const seed = (entry.id || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  const pick = (arr) => arr[seed % arr.length];
+
+  const text = (entry.text || "").toLowerCase();
+  const type = entry.entry_type;
+  const result = entry.result;
+  const scoreHome = entry.score_home;
+  const scoreAway = entry.score_away;
+  const hasScore = scoreHome !== null && scoreAway !== null;
+  const diff = hasScore ? scoreHome - scoreAway : 0;
+
+  if (text.includes("first goal") || text.includes("first time") || text.includes("first one")) {
+    return pick(["The first one", "A first to remember"]);
+  }
+
+  if (type === "practice") {
+    return pick(["The work continues", "Building something", "On the training ground"]);
+  }
+
+  if (type === "tournament") {
+    return pick(["Tournament day", "When it counts", "Under the lights"]);
+  }
+
+  if (type === "moment") {
+    return pick(["The moment", "One for the books"]);
+  }
+
+  if (result === "win") {
+    if (hasScore && diff >= 3) return pick(["Dominant", "Statement game", "Total control"]);
+    if (hasScore && scoreAway === 0) return pick(["Clean sheet", "Shutout", "Nothing gets through"]);
+    return pick(["Victory", "Got the job done", "The W"]);
+  }
+
+  if (result === "loss") {
+    return pick(["Tough one", "We go again", "Not our day"]);
+  }
+
+  if (result === "draw") {
+    return pick(["Battled to a draw", "Couldn't be separated", "Even match"]);
+  }
+
+  return pick(["Game day", "The moment", "Another chapter"]);
+}
+
+// --- SHARE CARD RENDER ---
+const ShareCardRender = React.forwardRef(function ShareCardRender({ entry, team, season, aspect, preview, headline: headlineProp }, ref) {
+  const isStory = aspect === "story";
+  const width = 1080;
+  const height = isStory ? 1920 : 1080;
+
+  const headline = headlineProp || generateHeadline(entry);
+  const entryText = entry.text || "";
+  const hasPhoto = !!(entry.photoPreview || entry.photoData);
+  const hasScore = entry.score_home !== null && entry.score_away !== null;
+
+  const teamColor = theme.primary;
+
+  const lineFontSize = entryText.length > 200 ? 36 : entryText.length > 100 ? 42 : 52;
+
+  const dateStr = new Date(entry.entry_date).toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+  });
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        width,
+        height,
+        ...(preview ? {} : { position: "absolute", left: -9999, top: -9999 }),
+        overflow: "hidden",
+        fontFamily: fonts.body,
+        background: hasPhoto ? "#000" : `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 60%, #40916C 100%)`,
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      {/* Photo area */}
+      {hasPhoto ? (
+        <div style={{
+          flex: isStory ? "1 1 55%" : "1 1 50%",
+          position: "relative",
+          overflow: "hidden",
+        }}>
+          <img
+            src={entry.photoPreview || entry.photoData}
+            alt=""
+            crossOrigin="anonymous"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
+          <div style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "60%",
+            background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, transparent 100%)",
+          }} />
+        </div>
+      ) : (
+        <div style={{ flex: isStory ? "1 1 30%" : "1 1 25%" }} />
+      )}
+
+      {/* Content area */}
+      <div style={{
+        flex: hasPhoto ? (isStory ? "1 1 45%" : "1 1 50%") : (isStory ? "1 1 70%" : "1 1 75%"),
+        background: hasPhoto ? "#000" : "transparent",
+        padding: isStory ? "48px 64px 60px" : "40px 64px 48px",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-end",
+      }}>
+        {/* Team strip */}
+        <div style={{
+          fontSize: 28,
+          fontWeight: 600,
+          color: "rgba(255,255,255,0.6)",
+          letterSpacing: 2,
+          textTransform: "uppercase",
+          marginBottom: 16,
+          display: "flex",
+          alignItems: "center",
+          gap: 14,
+        }}>
+          {team.logo ? (
+            <img src={team.logo} alt="" style={{
+              width: 64, height: 64, borderRadius: "50%", objectFit: "cover",
+              border: "2px solid rgba(255,255,255,0.2)",
+            }} />
+          ) : (
+            <span style={{ fontSize: 36 }}>{team.emoji}</span>
           )}
+          <span>{team.name}</span>
         </div>
 
-        {/* Close */}
-        <div style={{ padding: "0 20px 20px", textAlign: "center" }}>
-          <button className="btn btn-ghost" onClick={onClose} style={{ width: "100%" }}>
-            Close Preview
+        {/* Headline */}
+        <h1 style={{
+          fontFamily: fonts.headline,
+          fontStyle: "italic",
+          fontSize: isStory ? 96 : 80,
+          fontWeight: 400,
+          color: "#FFFFFF",
+          lineHeight: 1.0,
+          marginBottom: 20,
+          letterSpacing: -1,
+        }}>
+          {headline}
+        </h1>
+
+        {/* Accent divider */}
+        <div style={{
+          width: 80,
+          height: 4,
+          background: teamColor,
+          marginBottom: 24,
+          borderRadius: 2,
+        }} />
+
+        {/* The line */}
+        <p style={{
+          fontFamily: fonts.display,
+          fontStyle: "italic",
+          fontSize: lineFontSize,
+          lineHeight: 1.4,
+          color: "rgba(255,255,255,0.85)",
+          marginBottom: 32,
+          maxHeight: isStory ? 280 : 200,
+          overflow: "hidden",
+        }}>
+          &ldquo;{entryText}&rdquo;
+        </p>
+
+        {/* Score badge */}
+        {hasScore && (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 24,
+            background: "rgba(255,255,255,0.08)",
+            borderRadius: 16,
+            padding: "20px 28px",
+            marginBottom: 32,
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}>
+            <span style={{
+              fontFamily: fonts.mono,
+              fontSize: 56,
+              fontWeight: 700,
+              color: "#FFFFFF",
+              letterSpacing: 2,
+            }}>
+              {entry.score_home} – {entry.score_away}
+            </span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              {entry.opponent && (
+                <span style={{ fontSize: 24, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>
+                  vs {entry.opponent}
+                </span>
+              )}
+              {entry.venue && (
+                <span style={{ fontSize: 20, color: "rgba(255,255,255,0.4)" }}>
+                  {entry.venue}
+                </span>
+              )}
+              <span style={{ fontSize: 20, color: "rgba(255,255,255,0.4)" }}>
+                {dateStr}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* No-score date */}
+        {!hasScore && (
+          <div style={{
+            fontSize: 22,
+            color: "rgba(255,255,255,0.35)",
+            marginBottom: 32,
+          }}>
+            {entry.opponent && <span>vs {entry.opponent} · </span>}
+            {dateStr}
+          </div>
+        )}
+
+        {/* Watermark */}
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingTop: 20,
+          borderTop: "1px solid rgba(255,255,255,0.1)",
+        }}>
+          <span style={{
+            fontFamily: fonts.body,
+            fontSize: 22,
+            fontWeight: 700,
+            color: "rgba(255,255,255,0.25)",
+            letterSpacing: 4,
+            textTransform: "uppercase",
+          }}>
+            The Season
+          </span>
+          <span style={{
+            fontFamily: fonts.body,
+            fontSize: 20,
+            color: "rgba(255,255,255,0.2)",
+          }}>
+            theseason.app
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// --- SHARE PROMPT (post-save toast) ---
+function SharePrompt({ entry, onShare, onDismiss }) {
+  useEffect(() => {
+    const timer = setTimeout(onDismiss, 6000);
+    return () => clearTimeout(timer);
+  }, [onDismiss]);
+
+  return (
+    <div style={{
+      position: "fixed",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      zIndex: 150,
+      display: "flex",
+      justifyContent: "center",
+      padding: "0 16px 24px",
+      animation: "slideUp 0.35s ease-out both",
+    }}>
+      <div style={{
+        background: theme.primary,
+        color: "white",
+        borderRadius: 14,
+        padding: "14px 20px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 16,
+        width: "100%",
+        maxWidth: 440,
+        boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 18 }}>✓</span>
+          <span style={{ fontSize: 14, fontWeight: 500 }}>Share this moment?</span>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={onShare}
+            style={{
+              background: "rgba(255,255,255,0.2)",
+              color: "white",
+              border: "none",
+              borderRadius: 8,
+              padding: "8px 16px",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Share
+          </button>
+          <button
+            onClick={onDismiss}
+            style={{
+              background: "none",
+              color: "rgba(255,255,255,0.5)",
+              border: "none",
+              fontSize: 18,
+              cursor: "pointer",
+              padding: "4px 8px",
+            }}
+          >
+            ×
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// --- SHARE CARD MODAL ---
+function ShareCardModal({ entry, team, season, onClose }) {
+  const cardRef = useRef(null);
+  const [aspect, setAspect] = useState("story");
+  const [exporting, setExporting] = useState(false);
+  const [headline, setHeadline] = useState(generateHeadline(entry));
+
+  const previewScale = aspect === "story"
+    ? Math.min(340 / 1080, (window.innerHeight * 0.55) / 1920)
+    : Math.min(340 / 1080, (window.innerHeight * 0.55) / 1080);
+
+  const previewWidth = 1080 * previewScale;
+  const previewHeight = (aspect === "story" ? 1920 : 1080) * previewScale;
+
+  const handleExport = async () => {
+    if (!cardRef.current || exporting) return;
+    setExporting(true);
+
+    try {
+      await document.fonts.ready;
+      await new Promise((r) => setTimeout(r, 200));
+
+      const canvas = await html2canvas(cardRef.current, {
+        width: 1080,
+        height: aspect === "story" ? 1920 : 1080,
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+      });
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          setExporting(false);
+          return;
+        }
+
+        const file = new File([blob], `the-season-${entry.id}.png`, { type: "image/png" });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: "The Season",
+            });
+          } catch (err) {
+            if (err.name !== "AbortError") console.warn(err);
+          }
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `the-season-${entry.id}.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+
+        setExporting(false);
+      }, "image/png");
+    } catch (err) {
+      console.error("Export failed:", err);
+      setExporting(false);
+    }
+  };
+
+  return (
+    <div style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.85)",
+      zIndex: 200,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 16,
+    }}>
+      {/* Close button */}
+      <button
+        onClick={onClose}
+        style={{
+          position: "absolute",
+          top: 16,
+          right: 16,
+          background: "rgba(255,255,255,0.1)",
+          border: "none",
+          borderRadius: "50%",
+          width: 40,
+          height: 40,
+          color: "white",
+          fontSize: 20,
+          cursor: "pointer",
+          zIndex: 201,
+        }}
+      >
+        ×
+      </button>
+
+      {/* Aspect toggle */}
+      <div style={{
+        display: "flex",
+        gap: 4,
+        background: "rgba(255,255,255,0.1)",
+        borderRadius: 10,
+        padding: 4,
+        marginBottom: 20,
+      }}>
+        {[
+          { id: "story", label: "Story 9:16" },
+          { id: "square", label: "Square 1:1" },
+        ].map((opt) => (
+          <button
+            key={opt.id}
+            onClick={() => setAspect(opt.id)}
+            style={{
+              padding: "8px 18px",
+              borderRadius: 8,
+              border: "none",
+              background: aspect === opt.id ? "rgba(255,255,255,0.2)" : "transparent",
+              color: aspect === opt.id ? "white" : "rgba(255,255,255,0.5)",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "all 0.15s",
+            }}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Editable headline */}
+      <div style={{ marginBottom: 16, width: "100%", maxWidth: 340 }}>
+        <label style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4, display: "block" }}>
+          Caption
+        </label>
+        <input
+          value={headline}
+          onChange={(e) => setHeadline(e.target.value)}
+          maxLength={40}
+          style={{
+            width: "100%",
+            padding: "8px 12px",
+            background: "rgba(255,255,255,0.1)",
+            border: "1px solid rgba(255,255,255,0.15)",
+            borderRadius: 8,
+            color: "white",
+            fontSize: 15,
+            fontFamily: fonts.headline,
+            fontStyle: "italic",
+            outline: "none",
+          }}
+        />
+      </div>
+
+      {/* Scaled preview */}
+      <div style={{
+        width: previewWidth,
+        height: previewHeight,
+        overflow: "hidden",
+        borderRadius: 12,
+        boxShadow: "0 12px 48px rgba(0,0,0,0.4)",
+        marginBottom: 24,
+      }}>
+        <div style={{
+          width: 1080,
+          height: aspect === "story" ? 1920 : 1080,
+          transform: `scale(${previewScale})`,
+          transformOrigin: "top left",
+        }}>
+          <ShareCardRender
+            entry={entry}
+            team={team}
+            season={season}
+            aspect={aspect}
+            headline={headline}
+            preview
+          />
+        </div>
+      </div>
+
+      {/* Share button */}
+      <button
+        onClick={handleExport}
+        disabled={exporting}
+        className="btn btn-primary"
+        style={{
+          padding: "14px 40px",
+          fontSize: 16,
+          opacity: exporting ? 0.6 : 1,
+          minWidth: 160,
+        }}
+      >
+        {exporting ? "Exporting..." : navigator.canShare ? "Share" : "Download PNG"}
+      </button>
+
+      {/* Hidden full-size card for capture */}
+      <ShareCardRender
+        ref={cardRef}
+        entry={entry}
+        team={team}
+        season={season}
+        aspect={aspect}
+        headline={headline}
+      />
     </div>
   );
 }
@@ -1294,7 +2201,7 @@ export default function SportsJournalApp() {
   const [user, setUser] = useState(null);
   const [screen, setScreen] = useState("loading"); // loading, auth, onboarding, setup, home
   const [role, setRole] = useState(null);
-  const [scope, setScope] = useState(null);
+  const [isDemo, setIsDemo] = useState(false);
 
   // Data
   const [team, setTeam] = useState(null);
@@ -1304,12 +2211,37 @@ export default function SportsJournalApp() {
 
   // UI state
   const [showComposer, setShowComposer] = useState(false);
-  const [showRoster, setShowRoster] = useState(false);
   const [showBook, setShowBook] = useState(false);
+  const [showOrder, setShowOrder] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [filter, setFilter] = useState("all");
+  const menuRef = useRef(null);
 
-  // Init
+  // Share card state
+  const [shareEntry, setShareEntry] = useState(null);
+  const [showSharePrompt, setShowSharePrompt] = useState(false);
+
+  // Init: restore from localStorage or show auth
   useEffect(() => {
+    const saved = localStorage.getItem("theSeason");
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        setRole(data.role);
+        setTeam(data.team);
+        setSeason(data.season);
+        setPlayers(data.players);
+        setEntries(data.entries.map((e) => ({
+          ...e,
+          photoPreview: e.photoData || null,
+        })));
+        setScreen("home");
+        return;
+      } catch (e) {
+        // Invalid data, continue to auth
+      }
+    }
+
     if (DEMO) {
       setScreen("auth");
       return;
@@ -1317,12 +2249,34 @@ export default function SportsJournalApp() {
     if (supabase.auth.restore()) {
       setUser(supabase.auth.user);
       setAuthed(true);
-      // TODO: load profile, check if onboarding complete
       setScreen("onboarding");
     } else {
       setScreen("auth");
     }
   }, []);
+
+  // Persist to localStorage (skip demo, skip mid-setup)
+  useEffect(() => {
+    if (screen !== "home" || isDemo) return;
+    if (!team || !season) return;
+    const data = { role, team, season, players, entries };
+    localStorage.setItem("theSeason", JSON.stringify(data));
+  }, [role, team, season, players, entries, screen, isDemo]);
+
+  // Close overflow menu on outside click
+  useEffect(() => {
+    if (!showMenu) return;
+    const handleClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowMenu(false);
+      }
+    };
+    const timer = setTimeout(() => document.addEventListener("click", handleClick), 0);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("click", handleClick);
+    };
+  }, [showMenu]);
 
   const handleAuth = (user) => {
     setUser(user);
@@ -1330,9 +2284,20 @@ export default function SportsJournalApp() {
     setScreen("onboarding");
   };
 
-  const handleOnboarding = (selectedRole, selectedScope) => {
+  const handleDemo = () => {
+    const data = demoData();
+    setRole(data.role);
+    setTeam(data.team);
+    setSeason(data.season);
+    setPlayers(data.players);
+    setEntries(data.entries);
+    setIsDemo(true);
+    setAuthed(true);
+    setScreen("home");
+  };
+
+  const handleOnboarding = (selectedRole) => {
     setRole(selectedRole);
-    setScope(selectedScope);
     setScreen("setup");
   };
 
@@ -1345,34 +2310,40 @@ export default function SportsJournalApp() {
     setScreen("home");
   };
 
-  const handleAddPlayer = (playerData) => {
-    setPlayers((prev) => [...prev, { ...playerData, id: "p_" + Date.now() + Math.random() }]);
-  };
-
-  const handleSaveEntry = (entryData) => {
+  const handleSaveEntry = async (entryData) => {
+    let photoData = null;
+    if (entryData.photo) {
+      photoData = await resizeImage(entryData.photo, 800);
+    }
+    const { photo, ...rest } = entryData;
     const newEntry = {
-      ...entryData,
+      ...rest,
       id: "e_" + Date.now(),
       entry_date: new Date().toISOString().split("T")[0],
       season_id: season?.id,
-      photoPreview: entryData.photo ? URL.createObjectURL(entryData.photo) : null,
+      photoData,
+      photoPreview: photoData,
       created_at: new Date().toISOString(),
     };
     setEntries((prev) => [newEntry, ...prev]);
     setShowComposer(false);
+    setShareEntry(newEntry);
+    setShowSharePrompt(true);
   };
 
   const handleSignOut = () => {
     supabase.auth.signOut();
+    localStorage.removeItem("theSeason");
     setAuthed(false);
     setUser(null);
+    setIsDemo(false);
     setScreen("auth");
     setTeam(null);
     setSeason(null);
     setPlayers([]);
     setEntries([]);
     setRole(null);
-    setScope(null);
+    setShowMenu(false);
   };
 
   // Filter entries
@@ -1385,18 +2356,44 @@ export default function SportsJournalApp() {
     <>
       <GlobalStyle />
 
-      {screen === "auth" && <AuthScreen onAuth={handleAuth} />}
+      {screen === "auth" && <AuthScreen onAuth={handleAuth} onDemo={handleDemo} onSkipAuth={() => setScreen("onboarding")} />}
       {screen === "onboarding" && <OnboardingScreen onComplete={handleOnboarding} />}
-      {screen === "setup" && <TeamSetupScreen role={role} scope={scope} onComplete={handleSetup} />}
+      {screen === "setup" && <TeamSetupScreen role={role} onComplete={handleSetup} />}
 
       {screen === "home" && team && season && (
         <AppShell
           title={team.name}
-          subtitle={`${season.name} · ${role}`}
+          titleIcon={team.logo ? (
+            <img src={team.logo} alt="" style={{
+              width: 28, height: 28, borderRadius: "50%", objectFit: "cover",
+            }} />
+          ) : null}
+          subtitle={role === "parent" && players[0]?.name ? `${players[0].name}'s season` : season.name}
+          subtitleIcon={role === "parent" && players[0]?.headshot ? (
+            <img src={players[0].headshot} alt="" style={{
+              width: 20, height: 20, borderRadius: "50%", objectFit: "cover",
+            }} />
+          ) : null}
           actions={
-            <div style={{ display: "flex", gap: 6 }}>
+            <div ref={menuRef} style={{ display: "flex", gap: 6, position: "relative" }}>
               <button className="btn btn-ghost btn-sm" onClick={() => setShowBook(true)}>📖</button>
-              <button className="btn btn-ghost btn-sm" onClick={handleSignOut}>↗</button>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowMenu(!showMenu)}>⋯</button>
+              {showMenu && (
+                <div style={{
+                  position: "absolute", top: "100%", right: 0, marginTop: 4,
+                  background: "white", borderRadius: 10, border: `1px solid ${theme.border}`,
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.1)", overflow: "hidden", zIndex: 50,
+                  minWidth: 140,
+                }}>
+                  <button onClick={handleSignOut} style={{
+                    display: "block", width: "100%", padding: "10px 16px",
+                    background: "none", border: "none", cursor: "pointer",
+                    fontSize: 14, color: theme.text, textAlign: "left",
+                  }}>
+                    Sign Out
+                  </button>
+                </div>
+              )}
             </div>
           }
         >
@@ -1409,11 +2406,6 @@ export default function SportsJournalApp() {
               style={{ flex: 1, fontSize: 15 }}>
               ✏️ New Entry
             </button>
-            {(role === "coach" || scope === "team") && (
-              <button className="btn btn-ghost" onClick={() => setShowRoster(true)}>
-                👥 Roster {players.length > 0 && `(${players.length})`}
-              </button>
-            )}
           </div>
 
           {/* Filter Tabs */}
@@ -1426,6 +2418,7 @@ export default function SportsJournalApp() {
               { id: "game", label: "Games" },
               { id: "practice", label: "Practice" },
               { id: "tournament", label: "Tournaments" },
+              { id: "moment", label: "Moments" },
             ].map((tab) => (
               <button key={tab.id} onClick={() => setFilter(tab.id)}
                 style={{
@@ -1448,7 +2441,9 @@ export default function SportsJournalApp() {
             }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>✏️</div>
               <p style={{ fontFamily: fonts.display, fontSize: 18, fontStyle: "italic", marginBottom: 8 }}>
-                Your season story starts here
+                {role === "parent" && players[0]?.name
+                  ? `${players[0].name}'s season story starts here`
+                  : "Your season story starts here"}
               </p>
               <p style={{ fontSize: 14 }}>
                 Tap "New Entry" after your next game or practice
@@ -1456,7 +2451,7 @@ export default function SportsJournalApp() {
             </div>
           ) : (
             filteredEntries.map((entry) => (
-              <EntryCard key={entry.id} entry={entry} players={players} />
+              <EntryCard key={entry.id} entry={entry} players={players} onShare={(e) => setShareEntry(e)} />
             ))
           )}
 
@@ -1464,19 +2459,8 @@ export default function SportsJournalApp() {
           {showComposer && (
             <EntryComposer
               season={season}
-              players={players}
-              sport={team.sport}
               onSave={handleSaveEntry}
               onClose={() => setShowComposer(false)}
-            />
-          )}
-
-          {showRoster && (
-            <RosterManager
-              players={players}
-              sport={team.sport}
-              onAdd={handleAddPlayer}
-              onClose={() => setShowRoster(false)}
             />
           )}
 
@@ -1487,9 +2471,44 @@ export default function SportsJournalApp() {
               season={season}
               players={players}
               onClose={() => setShowBook(false)}
+              onOrder={() => { setShowBook(false); setShowOrder(true); }}
+            />
+          )}
+
+          {showOrder && (
+            <OrderFlow
+              entries={entries}
+              team={team}
+              season={season}
+              players={players}
+              onClose={() => setShowOrder(false)}
             />
           )}
         </AppShell>
+      )}
+
+      {/* Share prompt toast */}
+      {showSharePrompt && shareEntry && (
+        <SharePrompt
+          entry={shareEntry}
+          onShare={() => {
+            setShowSharePrompt(false);
+          }}
+          onDismiss={() => {
+            setShowSharePrompt(false);
+            setShareEntry(null);
+          }}
+        />
+      )}
+
+      {/* Share card modal */}
+      {shareEntry && !showSharePrompt && (
+        <ShareCardModal
+          entry={shareEntry}
+          team={team}
+          season={season}
+          onClose={() => setShareEntry(null)}
+        />
       )}
     </>
   );
