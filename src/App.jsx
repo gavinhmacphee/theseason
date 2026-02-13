@@ -2197,50 +2197,90 @@ function ShareCardModal({ entry, team, season, onClose }) {
 
 // --- LANDING PAGE ---
 function LandingPage({ onDemo, onStart }) {
+  const sectionLabel = {
+    fontFamily: fonts.mono,
+    fontSize: 11,
+    fontWeight: 500,
+    color: theme.textLight,
+    letterSpacing: 4,
+    textTransform: "uppercase",
+    marginBottom: 16,
+  };
+
+  const sectionCopy = {
+    fontFamily: fonts.body,
+    fontSize: 16,
+    color: theme.textMuted,
+    lineHeight: 1.6,
+    maxWidth: 420,
+    marginBottom: 32,
+  };
+
+  const phoneMockup = {
+    width: 260,
+    background: "#111",
+    borderRadius: 28,
+    padding: "8px",
+    boxShadow: "0 24px 48px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.08)",
+    flexShrink: 0,
+  };
+
   return (
     <div style={{ background: theme.bg, minHeight: "100vh" }}>
-      {/* Hero */}
+      {/* ====== HERO ====== */}
       <div style={{
         background: `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 50%, #40916C 100%)`,
-        padding: "80px 24px 60px",
+        padding: "80px 24px 72px",
         textAlign: "center",
+        position: "relative",
+        overflow: "hidden",
       }}>
-        <p style={{
-          fontFamily: fonts.mono,
-          fontSize: 11,
-          color: "rgba(255,255,255,0.4)",
-          letterSpacing: 4,
-          textTransform: "uppercase",
-          marginBottom: 20,
-        }}>
-          teamseason.app
-        </p>
+        {/* Center circle decoration */}
+        <svg
+          viewBox="0 0 400 400"
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 360,
+            height: 360,
+            opacity: 0.06,
+          }}
+        >
+          <circle cx="200" cy="200" r="180" fill="none" stroke="white" strokeWidth="2" />
+          <circle cx="200" cy="200" r="6" fill="white" />
+        </svg>
+
         <h1 style={{
           fontFamily: fonts.display,
-          fontSize: 48,
+          fontSize: 52,
           fontWeight: 700,
           color: "white",
-          lineHeight: 1.05,
+          lineHeight: 1.0,
           marginBottom: 12,
+          position: "relative",
         }}>
           Team Season
         </h1>
         <p style={{
           fontFamily: fonts.headline,
           fontStyle: "italic",
-          fontSize: 20,
-          color: "rgba(255,255,255,0.7)",
-          marginBottom: 40,
+          fontSize: 21,
+          color: "rgba(255,255,255,0.65)",
+          marginBottom: 44,
+          position: "relative",
         }}>
           Every season tells a story
         </p>
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", position: "relative" }}>
           <button onClick={onDemo} className="btn" style={{
-            background: "rgba(255,255,255,0.15)",
+            background: "rgba(255,255,255,0.1)",
             color: "white",
             padding: "14px 28px",
             fontSize: 15,
-            border: "1px solid rgba(255,255,255,0.2)",
+            border: "1px solid rgba(255,255,255,0.18)",
+            backdropFilter: "blur(8px)",
           }}>
             Try the Demo
           </button>
@@ -2255,99 +2295,421 @@ function LandingPage({ onDemo, onStart }) {
         </div>
       </div>
 
-      {/* Value Props */}
+      {/* ====== INTRO LINE ====== */}
       <div style={{
         maxWidth: 640,
         margin: "0 auto",
-        padding: "60px 24px",
+        padding: "56px 24px 48px",
+        textAlign: "center",
+      }}>
+        <p style={{
+          fontFamily: fonts.headline,
+          fontStyle: "italic",
+          fontSize: 22,
+          color: theme.text,
+          lineHeight: 1.5,
+        }}>
+          A journal for the season. Share cards for the highlights. A book for the shelf.
+        </p>
+      </div>
+
+      {/* ====== LOG SECTION ====== */}
+      <div style={{
+        maxWidth: 700,
+        margin: "0 auto",
+        padding: "32px 24px 64px",
       }}>
         <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-          gap: 32,
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 48,
+          flexWrap: "wrap",
+          justifyContent: "center",
         }}>
-          {[
-            { title: "Log", desc: "Games, practices, moments, photos - all in one timeline." },
-            { title: "Share", desc: "Generate share cards for Instagram, stories, and more." },
-            { title: "Print", desc: "Turn your season into a real, printed book." },
-          ].map((item) => (
-            <div key={item.title} style={{ textAlign: "center" }}>
-              <h3 style={{
-                fontFamily: fonts.display,
-                fontSize: 22,
-                fontWeight: 600,
-                color: theme.primary,
-                marginBottom: 8,
-              }}>
-                {item.title}
-              </h3>
-              <p style={{ fontSize: 14, color: theme.textMuted, lineHeight: 1.5 }}>
-                {item.desc}
-              </p>
+          {/* Copy */}
+          <div style={{ flex: "1 1 260px", minWidth: 240, paddingTop: 24 }}>
+            <p style={sectionLabel}>Log</p>
+            <p style={sectionCopy}>
+              After every game, practice, or moment worth remembering - write the line. Add the score, a photo, the details you'll want to look back on.
+            </p>
+          </div>
+
+          {/* Phone mockup */}
+          <div style={phoneMockup}>
+            {/* Notch bar */}
+            <div style={{
+              height: 28,
+              background: "#111",
+              borderRadius: "20px 20px 0 0",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}>
+              <div style={{
+                width: 80,
+                height: 6,
+                background: "#333",
+                borderRadius: 3,
+              }} />
             </div>
-          ))}
+            {/* Screen */}
+            <div style={{
+              background: theme.bg,
+              borderRadius: "0 0 20px 20px",
+              padding: "16px 14px 20px",
+              minHeight: 260,
+            }}>
+              {/* Game entry card */}
+              <div style={{
+                background: "white",
+                borderRadius: 10,
+                borderLeft: `3px solid ${theme.win}`,
+                padding: "12px 14px",
+                marginBottom: 10,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <span style={{
+                    fontFamily: fonts.mono,
+                    fontSize: 8,
+                    fontWeight: 600,
+                    color: theme.win,
+                    background: `${theme.win}12`,
+                    padding: "2px 6px",
+                    borderRadius: 3,
+                    letterSpacing: 1,
+                    textTransform: "uppercase",
+                  }}>Game</span>
+                  <span style={{ fontSize: 8, color: theme.textLight }}>Feb 8</span>
+                </div>
+                <p style={{
+                  fontFamily: fonts.body,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: theme.text,
+                  marginBottom: 4,
+                }}>
+                  vs Lightning FC
+                </p>
+                <p style={{
+                  fontFamily: fonts.mono,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: theme.win,
+                  marginBottom: 6,
+                }}>
+                  3 - 1 W
+                </p>
+                <p style={{
+                  fontFamily: fonts.display,
+                  fontStyle: "italic",
+                  fontSize: 10,
+                  color: theme.textMuted,
+                  lineHeight: 1.4,
+                }}>
+                  "Two goals in the first half. The energy was unreal."
+                </p>
+              </div>
+
+              {/* Practice entry card */}
+              <div style={{
+                background: "white",
+                borderRadius: 10,
+                borderLeft: `3px solid ${theme.practice}`,
+                padding: "12px 14px",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <span style={{
+                    fontFamily: fonts.mono,
+                    fontSize: 8,
+                    fontWeight: 600,
+                    color: theme.practice,
+                    background: `${theme.practice}12`,
+                    padding: "2px 6px",
+                    borderRadius: 3,
+                    letterSpacing: 1,
+                    textTransform: "uppercase",
+                  }}>Practice</span>
+                  <span style={{ fontSize: 8, color: theme.textLight }}>Feb 6</span>
+                </div>
+                <p style={{
+                  fontFamily: fonts.display,
+                  fontStyle: "italic",
+                  fontSize: 10,
+                  color: theme.textMuted,
+                  lineHeight: 1.4,
+                }}>
+                  "Finally nailed the outside-foot pass. Coach noticed."
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Divider */}
-      <div style={{ width: 60, height: 2, background: theme.border, margin: "0 auto" }} />
-
-      {/* How it works */}
+      {/* ====== SHARE SECTION ====== */}
       <div style={{
-        maxWidth: 480,
+        maxWidth: 700,
         margin: "0 auto",
-        padding: "48px 24px",
+        padding: "32px 24px 64px",
       }}>
-        <h2 style={{
-          fontFamily: fonts.display,
-          fontSize: 26,
-          fontWeight: 600,
-          color: theme.text,
-          textAlign: "center",
-          marginBottom: 32,
+        <div style={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 48,
+          flexWrap: "wrap-reverse",
+          justifyContent: "center",
         }}>
-          How it works
-        </h2>
-        {[
-          { step: "1", title: "Set up your season", desc: "Add your team name, player's name, and club logo. Takes 30 seconds." },
-          { step: "2", title: "Journal as you go", desc: "After each game or practice, write the moment. Add scores, photos, and details." },
-          { step: "3", title: "Share and print", desc: "Create social share cards or turn the whole season into a printed keepsake book." },
-        ].map((item, i) => (
-          <div key={item.step} style={{
+          {/* Share card mockup */}
+          <div style={{
+            width: 280,
+            height: 280,
+            background: `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 60%, #40916C 100%)`,
+            borderRadius: 12,
+            padding: "24px 22px 20px",
             display: "flex",
-            gap: 16,
-            marginBottom: i < 2 ? 28 : 0,
-            alignItems: "flex-start",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            boxShadow: "0 24px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06)",
+            flexShrink: 0,
+            position: "relative",
+            overflow: "hidden",
           }}>
-            <span style={{
-              fontFamily: fonts.mono,
-              fontSize: 14,
+            {/* Team strip */}
+            <div style={{
+              fontSize: 9,
               fontWeight: 600,
-              color: theme.accent,
-              flexShrink: 0,
-              width: 24,
+              color: "rgba(255,255,255,0.5)",
+              letterSpacing: 2,
+              textTransform: "uppercase",
+              marginBottom: 8,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
             }}>
-              {item.step}.
-            </span>
-            <div>
-              <h4 style={{
-                fontFamily: fonts.display,
-                fontSize: 17,
-                fontWeight: 600,
-                color: theme.text,
-                marginBottom: 4,
+              <span style={{ fontSize: 11 }}>{"\u26BD"}</span>
+              <span>Thunder SC</span>
+            </div>
+
+            {/* Headline */}
+            <p style={{
+              fontFamily: fonts.headline,
+              fontStyle: "italic",
+              fontSize: 28,
+              color: "white",
+              lineHeight: 1.0,
+              marginBottom: 10,
+            }}>
+              Hat trick day
+            </p>
+
+            {/* Accent bar */}
+            <div style={{
+              width: 32,
+              height: 3,
+              background: theme.accent,
+              borderRadius: 2,
+              marginBottom: 10,
+            }} />
+
+            {/* Quote */}
+            <p style={{
+              fontFamily: fonts.display,
+              fontStyle: "italic",
+              fontSize: 10,
+              color: "rgba(255,255,255,0.7)",
+              lineHeight: 1.4,
+              marginBottom: 12,
+            }}>
+              "Two goals in the first half. The energy was unreal."
+            </p>
+
+            {/* Score badge */}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              background: "rgba(255,255,255,0.08)",
+              borderRadius: 8,
+              padding: "8px 12px",
+              marginBottom: 14,
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}>
+              <span style={{
+                fontFamily: fonts.mono,
+                fontSize: 18,
+                fontWeight: 700,
+                color: "white",
+                letterSpacing: 1,
               }}>
-                {item.title}
-              </h4>
-              <p style={{ fontSize: 14, color: theme.textMuted, lineHeight: 1.5 }}>
-                {item.desc}
-              </p>
+                3 - 1
+              </span>
+              <span style={{
+                fontSize: 9,
+                color: "rgba(255,255,255,0.5)",
+              }}>
+                vs Lightning FC
+              </span>
+            </div>
+
+            {/* Watermark */}
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              paddingTop: 8,
+              borderTop: "1px solid rgba(255,255,255,0.08)",
+            }}>
+              <span style={{
+                fontFamily: fonts.body,
+                fontSize: 7,
+                fontWeight: 700,
+                color: "rgba(255,255,255,0.2)",
+                letterSpacing: 3,
+                textTransform: "uppercase",
+              }}>
+                Team Season
+              </span>
+              <span style={{
+                fontFamily: fonts.body,
+                fontSize: 7,
+                color: "rgba(255,255,255,0.15)",
+              }}>
+                teamseason.app
+              </span>
             </div>
           </div>
-        ))}
+
+          {/* Copy */}
+          <div style={{ flex: "1 1 260px", minWidth: 240, paddingTop: 24 }}>
+            <p style={sectionLabel}>Share</p>
+            <p style={sectionCopy}>
+              Turn any entry into a share card sized for Instagram Stories or your feed. Edit the caption, pick the format, share the moment.
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Fan Season teaser */}
+      {/* ====== PRINT SECTION ====== */}
+      <div style={{
+        maxWidth: 700,
+        margin: "0 auto",
+        padding: "32px 24px 64px",
+      }}>
+        <div style={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 48,
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}>
+          {/* Copy */}
+          <div style={{ flex: "1 1 260px", minWidth: 240, paddingTop: 24 }}>
+            <p style={sectionLabel}>Print</p>
+            <p style={sectionCopy}>
+              At the end of the season, turn it all into a real, printed book. Every entry, every score, every photo - bound and on your shelf.
+            </p>
+          </div>
+
+          {/* Book page mockup */}
+          <div style={{
+            width: 240,
+            height: 280,
+            background: "#FDFCF8",
+            borderRadius: 4,
+            padding: "36px 28px 24px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            boxShadow: "4px 4px 24px rgba(0,0,0,0.08), 1px 1px 4px rgba(0,0,0,0.04)",
+            border: "1px solid #EDE9E0",
+            flexShrink: 0,
+            position: "relative",
+          }}>
+            {/* Spine shadow */}
+            <div style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: 12,
+              background: "linear-gradient(90deg, rgba(0,0,0,0.04) 0%, transparent 100%)",
+              borderRadius: "4px 0 0 4px",
+            }} />
+
+            <div style={{ flex: 1 }} />
+
+            <p style={{
+              fontFamily: fonts.headline,
+              fontStyle: "italic",
+              fontSize: 16,
+              color: theme.text,
+              lineHeight: 1.45,
+              marginBottom: 20,
+              textAlign: "center",
+            }}>
+              Every season tells a story. This was Alex's.
+            </p>
+
+            <div style={{
+              width: 40,
+              height: 1,
+              background: theme.accent,
+              margin: "0 auto 16px",
+            }} />
+
+            <p style={{
+              fontFamily: fonts.body,
+              fontSize: 7,
+              fontWeight: 700,
+              color: theme.textLight,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              textAlign: "center",
+            }}>
+              Team Season
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ====== BOTTOM CTA ====== */}
+      <div style={{
+        background: `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 50%, #40916C 100%)`,
+        padding: "56px 24px",
+        textAlign: "center",
+      }}>
+        <p style={{
+          fontFamily: fonts.headline,
+          fontStyle: "italic",
+          fontSize: 22,
+          color: "rgba(255,255,255,0.8)",
+          marginBottom: 32,
+        }}>
+          Your season is happening right now.
+        </p>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <button onClick={onDemo} className="btn" style={{
+            background: "rgba(255,255,255,0.1)",
+            color: "white",
+            padding: "14px 28px",
+            fontSize: 15,
+            border: "1px solid rgba(255,255,255,0.18)",
+            backdropFilter: "blur(8px)",
+          }}>
+            Try the Demo
+          </button>
+          <button onClick={onStart} className="btn" style={{
+            background: theme.accent,
+            color: "white",
+            padding: "14px 28px",
+            fontSize: 15,
+          }}>
+            Start Your Season
+          </button>
+        </div>
+      </div>
+
+      {/* ====== FAN SEASON TEASER ====== */}
       <div style={{
         background: `${theme.primary}08`,
         borderTop: `1px solid ${theme.border}`,
@@ -2384,7 +2746,7 @@ function LandingPage({ onDemo, onStart }) {
         </p>
       </div>
 
-      {/* Footer */}
+      {/* ====== FOOTER ====== */}
       <div style={{
         padding: "24px",
         textAlign: "center",
