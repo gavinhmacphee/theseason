@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
       // Example email send (needs customer email from DB):
       // await resend.emails.send({
-      //   from: 'The Season <books@theseason.app>',
+      //   from: 'Team Season <books@teamseason.app>',
       //   to: customerEmail,
       //   subject: 'Your Season Book Has Shipped!',
       //   html: `

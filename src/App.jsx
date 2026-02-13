@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import html2canvas from "html2canvas";
 
 // ============================================
-// THE SEASON — Soccer Journal
+// TEAM SEASON — Soccer Journal
 // Role-based: Parent / Player
 // ============================================
 
@@ -510,7 +510,7 @@ function AuthScreen({ onAuth, onDemo, onSkipAuth }) {
           fontFamily: fonts.display, fontSize: 38, fontWeight: 700,
           color: "white", lineHeight: 1.1, marginBottom: 8,
         }}>
-          The Season
+          Team Season
         </h1>
         <p style={{
           fontFamily: fonts.display, fontSize: 17, color: "rgba(255,255,255,0.8)",
@@ -1313,7 +1313,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
         <p style={{
           fontFamily: fonts.mono, fontSize: 8, color: theme.textLight,
           letterSpacing: 3, textTransform: "uppercase",
-        }}>The Season</p>
+        }}>Team Season</p>
       </div>
     );
   };
@@ -1424,7 +1424,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
   const sortedEntries = [...entries].sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
 
   const [step, setStep] = useState(() => {
-    const saved = localStorage.getItem("theSeasonOrder");
+    const saved = localStorage.getItem("teamSeasonOrder");
     if (saved) {
       try {
         const order = JSON.parse(saved);
@@ -1435,7 +1435,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
   });
 
   const [shipping, setShipping] = useState(() => {
-    const saved = localStorage.getItem("theSeasonOrder");
+    const saved = localStorage.getItem("teamSeasonOrder");
     if (saved) {
       try { return JSON.parse(saved).shipping || {}; } catch (e) {}
     }
@@ -1443,7 +1443,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
   });
 
   const [orderStatus, setOrderStatus] = useState(() => {
-    const saved = localStorage.getItem("theSeasonOrder");
+    const saved = localStorage.getItem("teamSeasonOrder");
     if (saved) {
       try { return JSON.parse(saved).status || "idle"; } catch (e) {}
     }
@@ -1454,7 +1454,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
 
   // Persist order state
   useEffect(() => {
-    localStorage.setItem("theSeasonOrder", JSON.stringify({ shipping, status: orderStatus }));
+    localStorage.setItem("teamSeasonOrder", JSON.stringify({ shipping, status: orderStatus }));
   }, [shipping, orderStatus]);
 
   const validateShipping = () => {
@@ -1900,14 +1900,14 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({ entry, team,
             letterSpacing: 4,
             textTransform: "uppercase",
           }}>
-            The Season
+            Team Season
           </span>
           <span style={{
             fontFamily: fonts.body,
             fontSize: 20,
             color: "rgba(255,255,255,0.2)",
           }}>
-            theseason.app
+            teamseason.app
           </span>
         </div>
       </div>
@@ -2023,13 +2023,13 @@ function ShareCardModal({ entry, team, season, onClose }) {
           return;
         }
 
-        const file = new File([blob], `the-season-${entry.id}.png`, { type: "image/png" });
+        const file = new File([blob], `team-season-${entry.id}.png`, { type: "image/png" });
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({
               files: [file],
-              title: "The Season",
+              title: "Team Season",
             });
           } catch (err) {
             if (err.name !== "AbortError") console.warn(err);
@@ -2038,7 +2038,7 @@ function ShareCardModal({ entry, team, season, onClose }) {
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
-          a.download = `the-season-${entry.id}.png`;
+          a.download = `team-season-${entry.id}.png`;
           a.click();
           URL.revokeObjectURL(url);
         }
@@ -2195,11 +2195,219 @@ function ShareCardModal({ entry, team, season, onClose }) {
   );
 }
 
+// --- LANDING PAGE ---
+function LandingPage({ onDemo, onStart }) {
+  return (
+    <div style={{ background: theme.bg, minHeight: "100vh" }}>
+      {/* Hero */}
+      <div style={{
+        background: `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 50%, #40916C 100%)`,
+        padding: "80px 24px 60px",
+        textAlign: "center",
+      }}>
+        <p style={{
+          fontFamily: fonts.mono,
+          fontSize: 11,
+          color: "rgba(255,255,255,0.4)",
+          letterSpacing: 4,
+          textTransform: "uppercase",
+          marginBottom: 20,
+        }}>
+          teamseason.app
+        </p>
+        <h1 style={{
+          fontFamily: fonts.display,
+          fontSize: 48,
+          fontWeight: 700,
+          color: "white",
+          lineHeight: 1.05,
+          marginBottom: 12,
+        }}>
+          Team Season
+        </h1>
+        <p style={{
+          fontFamily: fonts.headline,
+          fontStyle: "italic",
+          fontSize: 20,
+          color: "rgba(255,255,255,0.7)",
+          marginBottom: 40,
+        }}>
+          Every season tells a story
+        </p>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <button onClick={onDemo} className="btn" style={{
+            background: "rgba(255,255,255,0.15)",
+            color: "white",
+            padding: "14px 28px",
+            fontSize: 15,
+            border: "1px solid rgba(255,255,255,0.2)",
+          }}>
+            Try the Demo
+          </button>
+          <button onClick={onStart} className="btn" style={{
+            background: theme.accent,
+            color: "white",
+            padding: "14px 28px",
+            fontSize: 15,
+          }}>
+            Start Your Season
+          </button>
+        </div>
+      </div>
+
+      {/* Value Props */}
+      <div style={{
+        maxWidth: 640,
+        margin: "0 auto",
+        padding: "60px 24px",
+      }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+          gap: 32,
+        }}>
+          {[
+            { title: "Log", desc: "Games, practices, moments, photos - all in one timeline." },
+            { title: "Share", desc: "Generate share cards for Instagram, stories, and more." },
+            { title: "Print", desc: "Turn your season into a real, printed book." },
+          ].map((item) => (
+            <div key={item.title} style={{ textAlign: "center" }}>
+              <h3 style={{
+                fontFamily: fonts.display,
+                fontSize: 22,
+                fontWeight: 600,
+                color: theme.primary,
+                marginBottom: 8,
+              }}>
+                {item.title}
+              </h3>
+              <p style={{ fontSize: 14, color: theme.textMuted, lineHeight: 1.5 }}>
+                {item.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div style={{ width: 60, height: 2, background: theme.border, margin: "0 auto" }} />
+
+      {/* How it works */}
+      <div style={{
+        maxWidth: 480,
+        margin: "0 auto",
+        padding: "48px 24px",
+      }}>
+        <h2 style={{
+          fontFamily: fonts.display,
+          fontSize: 26,
+          fontWeight: 600,
+          color: theme.text,
+          textAlign: "center",
+          marginBottom: 32,
+        }}>
+          How it works
+        </h2>
+        {[
+          { step: "1", title: "Set up your season", desc: "Add your team name, player's name, and club logo. Takes 30 seconds." },
+          { step: "2", title: "Journal as you go", desc: "After each game or practice, write the moment. Add scores, photos, and details." },
+          { step: "3", title: "Share and print", desc: "Create social share cards or turn the whole season into a printed keepsake book." },
+        ].map((item, i) => (
+          <div key={item.step} style={{
+            display: "flex",
+            gap: 16,
+            marginBottom: i < 2 ? 28 : 0,
+            alignItems: "flex-start",
+          }}>
+            <span style={{
+              fontFamily: fonts.mono,
+              fontSize: 14,
+              fontWeight: 600,
+              color: theme.accent,
+              flexShrink: 0,
+              width: 24,
+            }}>
+              {item.step}.
+            </span>
+            <div>
+              <h4 style={{
+                fontFamily: fonts.display,
+                fontSize: 17,
+                fontWeight: 600,
+                color: theme.text,
+                marginBottom: 4,
+              }}>
+                {item.title}
+              </h4>
+              <p style={{ fontSize: 14, color: theme.textMuted, lineHeight: 1.5 }}>
+                {item.desc}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Fan Season teaser */}
+      <div style={{
+        background: `${theme.primary}08`,
+        borderTop: `1px solid ${theme.border}`,
+        padding: "40px 24px",
+        textAlign: "center",
+      }}>
+        <p style={{
+          fontFamily: fonts.mono,
+          fontSize: 10,
+          color: theme.textLight,
+          letterSpacing: 3,
+          textTransform: "uppercase",
+          marginBottom: 12,
+        }}>
+          Coming soon
+        </p>
+        <h3 style={{
+          fontFamily: fonts.display,
+          fontSize: 22,
+          fontWeight: 600,
+          color: theme.primary,
+          marginBottom: 8,
+        }}>
+          Fan Season
+        </h3>
+        <p style={{
+          fontSize: 14,
+          color: theme.textMuted,
+          maxWidth: 360,
+          margin: "0 auto",
+          lineHeight: 1.5,
+        }}>
+          The fan experience - coming to teamseason.app later this year.
+        </p>
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        padding: "24px",
+        textAlign: "center",
+        borderTop: `1px solid ${theme.border}`,
+      }}>
+        <p style={{
+          fontFamily: fonts.mono,
+          fontSize: 11,
+          color: theme.textLight,
+          letterSpacing: 1,
+        }}>
+          teamseason.app
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // --- MAIN APP ---
 export default function SportsJournalApp() {
   const [authed, setAuthed] = useState(false);
   const [user, setUser] = useState(null);
-  const [screen, setScreen] = useState("loading"); // loading, auth, onboarding, setup, home
+  const [screen, setScreen] = useState("loading"); // loading, landing, auth, onboarding, setup, home
   const [role, setRole] = useState(null);
   const [isDemo, setIsDemo] = useState(false);
 
@@ -2221,9 +2429,19 @@ export default function SportsJournalApp() {
   const [shareEntry, setShareEntry] = useState(null);
   const [showSharePrompt, setShowSharePrompt] = useState(false);
 
-  // Init: restore from localStorage or show auth
+  // Init: restore from localStorage or show landing
   useEffect(() => {
-    const saved = localStorage.getItem("theSeason");
+    // Migrate legacy localStorage keys
+    if (!localStorage.getItem("teamSeason") && localStorage.getItem("theSeason")) {
+      localStorage.setItem("teamSeason", localStorage.getItem("theSeason"));
+      localStorage.removeItem("theSeason");
+    }
+    if (!localStorage.getItem("teamSeasonOrder") && localStorage.getItem("theSeasonOrder")) {
+      localStorage.setItem("teamSeasonOrder", localStorage.getItem("theSeasonOrder"));
+      localStorage.removeItem("theSeasonOrder");
+    }
+
+    const saved = localStorage.getItem("teamSeason");
     if (saved) {
       try {
         const data = JSON.parse(saved);
@@ -2243,7 +2461,7 @@ export default function SportsJournalApp() {
     }
 
     if (DEMO) {
-      setScreen("auth");
+      setScreen("landing");
       return;
     }
     if (supabase.auth.restore()) {
@@ -2251,7 +2469,7 @@ export default function SportsJournalApp() {
       setAuthed(true);
       setScreen("onboarding");
     } else {
-      setScreen("auth");
+      setScreen("landing");
     }
   }, []);
 
@@ -2260,7 +2478,7 @@ export default function SportsJournalApp() {
     if (screen !== "home" || isDemo) return;
     if (!team || !season) return;
     const data = { role, team, season, players, entries };
-    localStorage.setItem("theSeason", JSON.stringify(data));
+    localStorage.setItem("teamSeason", JSON.stringify(data));
   }, [role, team, season, players, entries, screen, isDemo]);
 
   // Close overflow menu on outside click
@@ -2333,11 +2551,11 @@ export default function SportsJournalApp() {
 
   const handleSignOut = () => {
     supabase.auth.signOut();
-    localStorage.removeItem("theSeason");
+    localStorage.removeItem("teamSeason");
     setAuthed(false);
     setUser(null);
     setIsDemo(false);
-    setScreen("auth");
+    setScreen("landing");
     setTeam(null);
     setSeason(null);
     setPlayers([]);
@@ -2356,6 +2574,7 @@ export default function SportsJournalApp() {
     <>
       <GlobalStyle />
 
+      {screen === "landing" && <LandingPage onDemo={handleDemo} onStart={() => setScreen("auth")} />}
       {screen === "auth" && <AuthScreen onAuth={handleAuth} onDemo={handleDemo} onSkipAuth={() => setScreen("onboarding")} />}
       {screen === "onboarding" && <OnboardingScreen onComplete={handleOnboarding} />}
       {screen === "setup" && <TeamSetupScreen role={role} onComplete={handleSetup} />}
