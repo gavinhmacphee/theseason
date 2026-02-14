@@ -149,6 +149,11 @@ function generateId() {
       });
 }
 
+// --- SLUG GENERATOR ---
+function slugify(text) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
 // --- SPORT (Soccer only) ---
 const SPORTS = [{ name: "Soccer", emoji: "⚽" }];
 
@@ -637,6 +642,7 @@ function OnboardingScreen({ onComplete }) {
   const options = [
     { role: "parent", emoji: "📸", title: "My child's season", desc: "Capture your kid's games, practices, and milestones" },
     { role: "player", emoji: "⚽", title: "My own season", desc: "Document your own games and development" },
+    { role: "admin", emoji: "🏟️", title: "I run a club", desc: "Manage teams, rosters, and content across your organization" },
   ];
 
   return (
@@ -2934,6 +2940,365 @@ function LandingPage({ onDemo, onStart }) {
   );
 }
 
+// --- ORG SETUP SCREEN ---
+function OrgSetupScreen({ onComplete }) {
+  const [orgName, setOrgName] = useState("");
+  const [orgType, setOrgType] = useState("club");
+  const [brandColor, setBrandColor] = useState("#1B4332");
+  const [customHex, setCustomHex] = useState("");
+  const [showCustom, setShowCustom] = useState(false);
+  const [logo, setLogo] = useState(null);
+  const logoRef = useRef(null);
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const data = await resizeImage(file, 200);
+    setLogo(data);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const name = orgName.trim() || "My Organization";
+    onComplete({
+      org: {
+        id: generateId(),
+        name,
+        slug: slugify(name),
+        orgType,
+        color: brandColor,
+        logo,
+      },
+    });
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", padding: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <form onSubmit={handleSubmit} className="slide-up" style={{ maxWidth: 400, width: "100%" }}>
+        <h1 style={{ fontFamily: fonts.display, fontSize: 28, fontWeight: 700, color: theme.primary, marginBottom: 6 }}>
+          Set up your organization
+        </h1>
+        <p style={{ fontSize: 14, color: theme.textMuted, marginBottom: 28 }}>
+          Your club or school's hub for managing teams and content
+        </p>
+
+        {/* Logo */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 20 }}>
+          <input ref={logoRef} type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: "none" }} />
+          <button type="button" onClick={() => logoRef.current?.click()}
+            style={{
+              width: 80, height: 80, borderRadius: "50%",
+              border: `2px dashed ${theme.border}`, background: theme.borderLight,
+              cursor: "pointer", overflow: "hidden",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+            {logo ? (
+              <img src={logo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              <span style={{ fontSize: 12, color: theme.textLight, textAlign: "center", lineHeight: 1.3 }}>Org<br/>Logo</span>
+            )}
+          </button>
+          {logo && (
+            <button type="button" onClick={() => setLogo(null)}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: theme.textMuted, marginTop: 6 }}>
+              Remove
+            </button>
+          )}
+        </div>
+
+        {/* Org name */}
+        <div style={{ marginBottom: 20 }}>
+          <label className="label">Organization Name</label>
+          <input className="input" value={orgName} onChange={(e) => setOrgName(e.target.value)}
+            placeholder="Montaña FC, Lincoln High School, etc." />
+        </div>
+
+        {/* Type */}
+        <div style={{ marginBottom: 20 }}>
+          <label className="label">Type</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            {[
+              { value: "club", label: "Club" },
+              { value: "school", label: "High School" },
+              { value: "other", label: "Other" },
+            ].map((t) => (
+              <button key={t.value} type="button" onClick={() => setOrgType(t.value)}
+                style={{
+                  flex: 1, padding: "10px 8px", borderRadius: 8, cursor: "pointer",
+                  border: `2px solid ${orgType === t.value ? theme.primary : theme.border}`,
+                  background: orgType === t.value ? `${theme.primary}08` : "white",
+                  fontWeight: orgType === t.value ? 600 : 400,
+                  fontSize: 14, color: theme.text,
+                }}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Brand color */}
+        <div style={{ marginBottom: 28 }}>
+          <label className="label">Brand Color</label>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {COLOR_PRESETS.map((c) => (
+              <button key={c.hex} type="button" onClick={() => { setBrandColor(c.hex); setShowCustom(false); }}
+                title={c.label}
+                style={{
+                  width: 36, height: 36, borderRadius: "50%", border: brandColor === c.hex && !showCustom ? "3px solid #333" : "2px solid #ddd",
+                  background: c.hex, cursor: "pointer", padding: 0,
+                }} />
+            ))}
+            <button type="button" onClick={() => setShowCustom(!showCustom)}
+              style={{
+                width: 36, height: 36, borderRadius: "50%",
+                border: showCustom ? "3px solid #333" : "2px solid #ddd",
+                background: "conic-gradient(red,yellow,lime,cyan,blue,magenta,red)",
+                cursor: "pointer", padding: 0,
+              }} />
+          </div>
+          {showCustom && (
+            <input className="input" value={customHex} onChange={(e) => { setCustomHex(e.target.value); if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) setBrandColor(e.target.value); }}
+              placeholder="#1B4332" maxLength={7}
+              style={{ marginTop: 8, width: 120, fontFamily: fonts.mono, fontSize: 14 }} />
+          )}
+        </div>
+
+        <button className="btn btn-primary" type="submit"
+          style={{ width: "100%", padding: "14px 24px", fontSize: 16, background: brandColor }}>
+          Create Organization
+        </button>
+      </form>
+    </div>
+  );
+}
+
+
+// --- ADMIN DASHBOARD ---
+function AdminDashboard({ org, teams, onAddTeam, onAddPlayer, onSignOut, accentColor }) {
+  const [showAddTeam, setShowAddTeam] = useState(false);
+  const [newTeamName, setNewTeamName] = useState("");
+  const [newTeamAge, setNewTeamAge] = useState("");
+  const [addPlayerTeamId, setAddPlayerTeamId] = useState(null);
+  const [newPlayerName, setNewPlayerName] = useState("");
+  const [newPlayerNumber, setNewPlayerNumber] = useState("");
+  const [expandedTeam, setExpandedTeam] = useState(null);
+  const [copiedToken, setCopiedToken] = useState(null);
+  const accent = accentColor || theme.primary;
+
+  const handleAddTeam = () => {
+    if (!newTeamName.trim()) return;
+    onAddTeam({ name: newTeamName.trim(), ageGroup: newTeamAge.trim() || null });
+    setNewTeamName("");
+    setNewTeamAge("");
+    setShowAddTeam(false);
+  };
+
+  const handleAddPlayer = () => {
+    if (!newPlayerName.trim() || !addPlayerTeamId) return;
+    onAddPlayer(addPlayerTeamId, {
+      name: newPlayerName.trim(),
+      number: newPlayerNumber ? parseInt(newPlayerNumber) : null,
+    });
+    setNewPlayerName("");
+    setNewPlayerNumber("");
+    setAddPlayerTeamId(null);
+  };
+
+  const copyJoinLink = (token) => {
+    const link = `${window.location.origin}?join=${token}`;
+    navigator.clipboard.writeText(link).then(() => {
+      setCopiedToken(token);
+      setTimeout(() => setCopiedToken(null), 2000);
+    });
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: theme.surface }}>
+      {/* Header */}
+      <div style={{
+        background: accent, padding: "16px 20px",
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {org.logo && (
+            <img src={org.logo} alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }} />
+          )}
+          <div>
+            <div style={{ fontFamily: fonts.display, fontSize: 20, fontWeight: 700, color: "white" }}>{org.name}</div>
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: 1 }}>
+              {org.orgType === "school" ? "High School" : org.orgType === "club" ? "Club" : "Organization"}
+            </div>
+          </div>
+        </div>
+        <button onClick={onSignOut} style={{
+          background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 8,
+          padding: "6px 12px", color: "white", fontSize: 13, cursor: "pointer",
+        }}>Sign Out</button>
+      </div>
+
+      <div style={{ maxWidth: 480, margin: "0 auto", padding: 20 }}>
+        {/* Stats bar */}
+        <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
+          <div className="card" style={{ flex: 1, textAlign: "center", padding: 14 }}>
+            <div style={{ fontSize: 24, fontWeight: 700, color: accent }}>{teams.length}</div>
+            <div style={{ fontSize: 12, color: theme.textMuted }}>Teams</div>
+          </div>
+          <div className="card" style={{ flex: 1, textAlign: "center", padding: 14 }}>
+            <div style={{ fontSize: 24, fontWeight: 700, color: accent }}>
+              {teams.reduce((sum, t) => sum + (t.players?.length || 0), 0)}
+            </div>
+            <div style={{ fontSize: 12, color: theme.textMuted }}>Players</div>
+          </div>
+          <div className="card" style={{ flex: 1, textAlign: "center", padding: 14 }}>
+            <div style={{ fontSize: 24, fontWeight: 700, color: accent }}>
+              {teams.reduce((sum, t) => sum + (t.players?.filter(p => p.connected)?.length || 0), 0)}
+            </div>
+            <div style={{ fontSize: 12, color: theme.textMuted }}>Connected</div>
+          </div>
+        </div>
+
+        {/* Add team button */}
+        <button onClick={() => setShowAddTeam(true)}
+          style={{
+            width: "100%", padding: "12px 16px", marginBottom: 16,
+            background: accent, color: "white", border: "none", borderRadius: 10,
+            fontFamily: fonts.display, fontSize: 15, fontWeight: 600, cursor: "pointer",
+            letterSpacing: 0.5,
+          }}>
+          + Add Team
+        </button>
+
+        {/* Add team modal */}
+        {showAddTeam && (
+          <div style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+            display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20,
+          }}>
+            <div className="card" style={{ maxWidth: 360, width: "100%", padding: 24 }}>
+              <h3 style={{ fontFamily: fonts.display, fontSize: 20, marginBottom: 16 }}>Add Team</h3>
+              <div style={{ marginBottom: 12 }}>
+                <label className="label">Team Name</label>
+                <input className="input" value={newTeamName} onChange={(e) => setNewTeamName(e.target.value)}
+                  placeholder="U12 Boys, Varsity, etc." autoFocus />
+              </div>
+              <div style={{ marginBottom: 20 }}>
+                <label className="label">Age Group (optional)</label>
+                <input className="input" value={newTeamAge} onChange={(e) => setNewTeamAge(e.target.value)}
+                  placeholder="U12, U14, JV, etc." />
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={() => setShowAddTeam(false)} className="btn" style={{ flex: 1 }}>Cancel</button>
+                <button onClick={handleAddTeam} className="btn btn-primary" style={{ flex: 1, background: accent }}>Add</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add player modal */}
+        {addPlayerTeamId && (
+          <div style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+            display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20,
+          }}>
+            <div className="card" style={{ maxWidth: 360, width: "100%", padding: 24 }}>
+              <h3 style={{ fontFamily: fonts.display, fontSize: 20, marginBottom: 16 }}>Add Player</h3>
+              <div style={{ marginBottom: 12 }}>
+                <label className="label">Player Name</label>
+                <input className="input" value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)}
+                  placeholder="Full name" autoFocus />
+              </div>
+              <div style={{ marginBottom: 20 }}>
+                <label className="label">Jersey Number (optional)</label>
+                <input className="input" type="number" value={newPlayerNumber} onChange={(e) => setNewPlayerNumber(e.target.value)}
+                  placeholder="#" />
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={() => setAddPlayerTeamId(null)} className="btn" style={{ flex: 1 }}>Cancel</button>
+                <button onClick={handleAddPlayer} className="btn btn-primary" style={{ flex: 1, background: accent }}>Add</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Teams list */}
+        {teams.length === 0 ? (
+          <div className="card" style={{ textAlign: "center", padding: 32, color: theme.textMuted }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>🏟️</div>
+            <div style={{ fontSize: 15, marginBottom: 4 }}>No teams yet</div>
+            <div style={{ fontSize: 13 }}>Add your first team to start building rosters</div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {teams.map((team) => (
+              <div key={team.id} className="card" style={{ padding: 0, overflow: "hidden" }}>
+                {/* Team header */}
+                <button onClick={() => setExpandedTeam(expandedTeam === team.id ? null : team.id)}
+                  style={{
+                    width: "100%", padding: "14px 16px", background: "none", border: "none",
+                    cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center",
+                    borderLeft: `4px solid ${accent}`,
+                  }}>
+                  <div style={{ textAlign: "left" }}>
+                    <div style={{ fontWeight: 600, fontSize: 15 }}>{team.name}</div>
+                    <div style={{ fontSize: 12, color: theme.textMuted }}>
+                      {team.ageGroup ? `${team.ageGroup} - ` : ""}{team.players?.length || 0} players
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 18, color: theme.textMuted, transform: expandedTeam === team.id ? "rotate(90deg)" : "none", transition: "transform 0.2s" }}>
+                    ›
+                  </span>
+                </button>
+
+                {/* Expanded roster */}
+                {expandedTeam === team.id && (
+                  <div style={{ borderTop: `1px solid ${theme.borderLight}`, padding: "8px 0" }}>
+                    {(team.players || []).map((player) => (
+                      <div key={player.id} style={{
+                        display: "flex", justifyContent: "space-between", alignItems: "center",
+                        padding: "10px 16px", borderBottom: `1px solid ${theme.borderLight}`,
+                      }}>
+                        <div>
+                          <span style={{ fontWeight: 500, fontSize: 14 }}>{player.name}</span>
+                          {player.number && <span style={{ fontSize: 12, color: theme.textMuted, marginLeft: 6 }}>#{player.number}</span>}
+                          {player.connected && <span style={{ fontSize: 11, color: accent, marginLeft: 8, fontWeight: 600 }}>Connected</span>}
+                        </div>
+                        <button onClick={() => copyJoinLink(player.joinToken)}
+                          style={{
+                            background: copiedToken === player.joinToken ? "#059669" : `${accent}15`,
+                            border: "none", borderRadius: 6, padding: "5px 10px",
+                            fontSize: 12, cursor: "pointer",
+                            color: copiedToken === player.joinToken ? "white" : accent,
+                            fontWeight: 600, transition: "all 0.2s",
+                          }}>
+                          {copiedToken === player.joinToken ? "Copied" : "Copy Link"}
+                        </button>
+                      </div>
+                    ))}
+                    <button onClick={() => setAddPlayerTeamId(team.id)}
+                      style={{
+                        width: "100%", padding: "10px 16px", background: "none",
+                        border: "none", cursor: "pointer", fontSize: 13,
+                        color: accent, fontWeight: 600, textAlign: "left",
+                      }}>
+                      + Add Player
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Feed placeholder */}
+        <div style={{ marginTop: 24, padding: 20, textAlign: "center", color: theme.textMuted, fontSize: 13 }}>
+          Content feed coming soon - share join links with parents to start receiving entries
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 // --- MAIN APP ---
 export default function SportsJournalApp() {
   const [authed, setAuthed] = useState(false);
@@ -2942,11 +3307,15 @@ export default function SportsJournalApp() {
   const [role, setRole] = useState(null);
   const [isDemo, setIsDemo] = useState(false);
 
-  // Data
+  // Data (parent)
   const [team, setTeam] = useState(null);
   const [season, setSeason] = useState(null);
   const [players, setPlayers] = useState([]);
   const [entries, setEntries] = useState([]);
+
+  // Data (admin)
+  const [org, setOrg] = useState(null);
+  const [orgTeams, setOrgTeams] = useState([]);
 
   // UI state
   const [showComposer, setShowComposer] = useState(false);
@@ -2960,8 +3329,8 @@ export default function SportsJournalApp() {
   const [shareEntry, setShareEntry] = useState(null);
   const [showSharePrompt, setShowSharePrompt] = useState(false);
 
-  // Dynamic brand color derived from team
-  const brandPrimary = team?.color || theme.primary;
+  // Dynamic brand color derived from team or org
+  const brandPrimary = team?.color || org?.color || theme.primary;
   const brandPrimaryLight = lightenColor(brandPrimary, 0.08);
   const brandGradient = gradientFromColor(brandPrimary);
 
@@ -2977,6 +3346,26 @@ export default function SportsJournalApp() {
       localStorage.removeItem("theSeasonOrder");
     }
 
+    // Check admin localStorage first
+    const adminSaved = localStorage.getItem("teamSeasonAdmin");
+    if (adminSaved) {
+      try {
+        const data = JSON.parse(adminSaved);
+        if (data.role === "admin" && data.org) {
+          setRole("admin");
+          setOrg(data.org);
+          setOrgTeams(data.orgTeams || []);
+          setScreen("admin");
+          if (!DEMO && supabase.auth.restore()) {
+            setUser(supabase.auth.user);
+            setAuthed(true);
+          }
+          return;
+        }
+      } catch (e) { /* continue */ }
+    }
+
+    // Check parent localStorage
     const saved = localStorage.getItem("teamSeason");
     if (saved) {
       try {
@@ -2990,7 +3379,6 @@ export default function SportsJournalApp() {
           photoPreview: e.photoData || null,
         })));
         setScreen("home");
-        // Also restore auth session if available
         if (!DEMO && supabase.auth.restore()) {
           setUser(supabase.auth.user);
           setAuthed(true);
@@ -3044,11 +3432,16 @@ export default function SportsJournalApp() {
 
   // Persist to localStorage (skip demo, skip mid-setup)
   useEffect(() => {
-    if (screen !== "home" || isDemo) return;
-    if (!team || !season) return;
-    const data = { role, team, season, players, entries };
-    localStorage.setItem("teamSeason", JSON.stringify(data));
-  }, [role, team, season, players, entries, screen, isDemo]);
+    if (isDemo) return;
+    if (screen === "home" && team && season) {
+      const data = { role, team, season, players, entries };
+      localStorage.setItem("teamSeason", JSON.stringify(data));
+    }
+    if (screen === "admin" && org) {
+      const data = { role: "admin", org, orgTeams };
+      localStorage.setItem("teamSeasonAdmin", JSON.stringify(data));
+    }
+  }, [role, team, season, players, entries, org, orgTeams, screen, isDemo]);
 
   // Handle Stripe checkout return
   useEffect(() => {
@@ -3112,7 +3505,7 @@ export default function SportsJournalApp() {
 
   const handleOnboarding = (selectedRole) => {
     setRole(selectedRole);
-    setScreen("setup");
+    setScreen(selectedRole === "admin" ? "org-setup" : "setup");
   };
 
   const handleSetup = (data) => {
@@ -3148,6 +3541,79 @@ export default function SportsJournalApp() {
           }
         } catch (e) {
           console.warn("Cloud sync (setup) failed:", e);
+        }
+      })();
+    }
+  };
+
+  // --- Admin handlers ---
+  const handleOrgSetup = (data) => {
+    const orgData = data.org;
+    setOrg(orgData);
+    setScreen("admin");
+
+    // Sync org to cloud
+    if (!DEMO && user) {
+      (async () => {
+        try {
+          await supabase.from("organizations").insert({
+            id: orgData.id, name: orgData.name, slug: orgData.slug,
+            org_type: orgData.orgType || "club", color: orgData.color || "#1B4332",
+            created_by: user.id,
+          });
+        } catch (e) {
+          console.warn("Cloud sync (org) failed:", e);
+        }
+      })();
+    }
+  };
+
+  const handleAddTeam = (teamData) => {
+    const newTeam = { id: generateId(), ...teamData, players: [] };
+    setOrgTeams((prev) => [...prev, newTeam]);
+
+    // Sync to cloud
+    if (!DEMO && user && org) {
+      (async () => {
+        try {
+          await supabase.from("teams").insert({
+            id: newTeam.id, user_id: user.id, org_id: org.id,
+            name: newTeam.name, sport: "Soccer",
+            age_group: newTeam.ageGroup || null,
+            color: org.color || "#1B4332",
+          });
+        } catch (e) {
+          console.warn("Cloud sync (team) failed:", e);
+        }
+      })();
+    }
+  };
+
+  const handleAddPlayer = (teamId, playerData) => {
+    const playerId = generateId();
+    const joinToken = generateId().replace(/-/g, "").slice(0, 32);
+    const newPlayer = { id: playerId, ...playerData, joinToken, connected: false };
+
+    setOrgTeams((prev) =>
+      prev.map((t) =>
+        t.id === teamId ? { ...t, players: [...(t.players || []), newPlayer] } : t
+      )
+    );
+
+    // Sync to cloud
+    if (!DEMO && user) {
+      (async () => {
+        try {
+          await supabase.from("players").insert({
+            id: playerId, user_id: user.id, team_id: teamId,
+            name: newPlayer.name, number: newPlayer.number || null,
+          });
+          await supabase.from("player_connections").insert({
+            player_id: playerId, join_token: joinToken,
+            role: "primary",
+          });
+        } catch (e) {
+          console.warn("Cloud sync (player) failed:", e);
         }
       })();
     }
@@ -3198,6 +3664,7 @@ export default function SportsJournalApp() {
   const handleSignOut = () => {
     supabase.auth.signOut();
     localStorage.removeItem("teamSeason");
+    localStorage.removeItem("teamSeasonAdmin");
     setAuthed(false);
     setUser(null);
     setIsDemo(false);
@@ -3206,6 +3673,8 @@ export default function SportsJournalApp() {
     setSeason(null);
     setPlayers([]);
     setEntries([]);
+    setOrg(null);
+    setOrgTeams([]);
     setRole(null);
     setShowMenu(false);
   };
@@ -3224,6 +3693,17 @@ export default function SportsJournalApp() {
       {screen === "auth" && <AuthScreen onAuth={handleAuth} onDemo={handleDemo} onSkipAuth={() => setScreen("onboarding")} />}
       {screen === "onboarding" && <OnboardingScreen onComplete={handleOnboarding} />}
       {screen === "setup" && <TeamSetupScreen role={role} onComplete={handleSetup} />}
+      {screen === "org-setup" && <OrgSetupScreen onComplete={handleOrgSetup} />}
+      {screen === "admin" && org && (
+        <AdminDashboard
+          org={org}
+          teams={orgTeams}
+          onAddTeam={handleAddTeam}
+          onAddPlayer={handleAddPlayer}
+          onSignOut={handleSignOut}
+          accentColor={brandPrimary}
+        />
+      )}
 
       {screen === "home" && team && season && (
         <AppShell
