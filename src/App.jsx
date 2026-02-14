@@ -178,7 +178,7 @@ function demoData() {
 
   return {
     role: "parent",
-    team: { name: "Montaña FC", sport: "Soccer", emoji: "⚽", logo: null },
+    team: { name: "Montaña FC", sport: "Soccer", emoji: "⚽", logo: null, orgType: "club", color: "#1B4332" },
     season: { name: "Spring 2026", id: "s_demo" },
     players: [{ name: "Marco", id: "p_demo", is_my_child: true, headshot: null }],
     entries: [
@@ -318,6 +318,30 @@ const theme = {
   moment: "#9B5DE5",
 };
 
+// --- COLOR HELPERS ---
+function lightenColor(hex, amount = 0.2) {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const r = Math.min(255, ((num >> 16) & 0xFF) + Math.round(255 * amount));
+  const g = Math.min(255, ((num >> 8) & 0xFF) + Math.round(255 * amount));
+  const b = Math.min(255, (num & 0xFF) + Math.round(255 * amount));
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+function gradientFromColor(hex) {
+  return `linear-gradient(160deg, ${hex} 0%, ${lightenColor(hex, 0.08)} 50%, ${lightenColor(hex, 0.18)} 100%)`;
+}
+
+const COLOR_PRESETS = [
+  { hex: "#1B4332", label: "Forest" },
+  { hex: "#1B3A5C", label: "Navy" },
+  { hex: "#1D4ED8", label: "Royal" },
+  { hex: "#B91C1C", label: "Red" },
+  { hex: "#6B1D2A", label: "Maroon" },
+  { hex: "#5B21B6", label: "Purple" },
+  { hex: "#C2410C", label: "Orange" },
+  { hex: "#171717", label: "Black" },
+];
+
 const fonts = {
   display: "'Crimson Pro', Georgia, serif",
   headline: "'Instrument Serif', Georgia, serif",
@@ -443,7 +467,8 @@ const GlobalStyle = () => (
 );
 
 // --- LAYOUT ---
-function AppShell({ children, title, titleIcon, subtitle, subtitleIcon, onBack, actions }) {
+function AppShell({ children, title, titleIcon, subtitle, subtitleIcon, onBack, actions, accentColor }) {
+  const shellPrimary = accentColor || theme.primary;
   return (
     <div style={{ maxWidth: 480, margin: "0 auto", minHeight: "100vh", padding: "0 16px 100px" }}>
       <header style={{
@@ -466,7 +491,7 @@ function AppShell({ children, title, titleIcon, subtitle, subtitleIcon, onBack, 
               {titleIcon}
               <h1 style={{
                 fontFamily: fonts.display, fontSize: 22, fontWeight: 700,
-                color: theme.primary, lineHeight: 1.2,
+                color: shellPrimary, lineHeight: 1.2,
               }}>{title}</h1>
             </div>
             {subtitle && (
@@ -645,6 +670,10 @@ function TeamSetupScreen({ role, onComplete }) {
   const [childName, setChildName] = useState("");
   const [logo, setLogo] = useState(null);
   const [childHeadshot, setChildHeadshot] = useState(null);
+  const [orgType, setOrgType] = useState("club");
+  const [brandColor, setBrandColor] = useState("#1B4332");
+  const [customHex, setCustomHex] = useState("");
+  const [showCustom, setShowCustom] = useState(false);
   const logoRef = useRef(null);
   const headshotRef = useRef(null);
 
@@ -665,7 +694,7 @@ function TeamSetupScreen({ role, onComplete }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     onComplete({
-      team: { name: teamName || "My Soccer Team", sport: "Soccer", emoji: "⚽", logo },
+      team: { name: teamName || "My Soccer Team", sport: "Soccer", emoji: "⚽", logo, orgType, color: brandColor },
       season: { name: `Soccer ${new Date().getFullYear()}` },
       myPlayer: role === "parent" ? { name: childName, headshot: childHeadshot } : null,
     });
@@ -744,13 +773,91 @@ function TeamSetupScreen({ role, onComplete }) {
         </div>
 
         {/* Team name */}
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 20 }}>
           <label className="label">Team Name</label>
           <input className="input" value={teamName} onChange={(e) => setTeamName(e.target.value)}
             placeholder="Thunder U12, Varsity, etc." />
         </div>
 
-        <button className="btn btn-primary" type="submit" style={{ width: "100%", padding: "14px 24px", fontSize: 16 }}>
+        {/* Organization type */}
+        <div style={{ marginBottom: 20 }}>
+          <label className="label">Organization</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            {[
+              { id: "club", label: "Club" },
+              { id: "school", label: "High School" },
+              { id: "other", label: "Other" },
+            ].map((o) => (
+              <button key={o.id} type="button" onClick={() => setOrgType(o.id)}
+                style={{
+                  flex: 1, padding: "9px 8px", borderRadius: 8, cursor: "pointer",
+                  border: `1.5px solid ${orgType === o.id ? brandColor : theme.border}`,
+                  background: orgType === o.id ? `${brandColor}10` : "white",
+                  color: orgType === o.id ? brandColor : theme.textMuted,
+                  fontSize: 13, fontWeight: orgType === o.id ? 600 : 400,
+                  transition: "all 0.15s",
+                }}>
+                {o.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Brand color */}
+        <div style={{ marginBottom: 24 }}>
+          <label className="label">Team Color</label>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            {COLOR_PRESETS.map((c) => (
+              <button key={c.hex} type="button" title={c.label}
+                onClick={() => { setBrandColor(c.hex); setShowCustom(false); }}
+                style={{
+                  width: 36, height: 36, borderRadius: "50%", border: "none", cursor: "pointer",
+                  background: c.hex, position: "relative", flexShrink: 0,
+                  outline: brandColor === c.hex && !showCustom ? `2px solid ${c.hex}` : "2px solid transparent",
+                  outlineOffset: 3,
+                  transition: "outline 0.15s",
+                }} />
+            ))}
+            <button type="button"
+              onClick={() => setShowCustom(!showCustom)}
+              style={{
+                width: 36, height: 36, borderRadius: "50%", cursor: "pointer", flexShrink: 0,
+                border: `2px dashed ${theme.border}`,
+                background: showCustom ? brandColor : theme.borderLight,
+                color: showCustom ? "white" : theme.textLight,
+                fontSize: 16, fontWeight: 400, lineHeight: 1,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                outline: showCustom ? `2px solid ${brandColor}` : "2px solid transparent",
+                outlineOffset: 3,
+                transition: "all 0.15s",
+              }}>
+              +
+            </button>
+          </div>
+          {showCustom && (
+            <div style={{ display: "flex", gap: 8, marginTop: 10, alignItems: "center" }}>
+              <input
+                className="input"
+                value={customHex}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setCustomHex(v);
+                  if (/^#[0-9A-Fa-f]{6}$/.test(v)) setBrandColor(v);
+                }}
+                placeholder="#1B4332"
+                maxLength={7}
+                style={{ width: 110, fontFamily: fonts.mono, fontSize: 13, padding: "8px 10px" }}
+              />
+              <div style={{
+                width: 32, height: 32, borderRadius: 6, flexShrink: 0,
+                background: brandColor, border: `1px solid ${theme.border}`,
+              }} />
+            </div>
+          )}
+        </div>
+
+        <button className="btn btn-primary" type="submit"
+          style={{ width: "100%", padding: "14px 24px", fontSize: 16, background: brandColor }}>
           Start Journaling →
         </button>
       </form>
@@ -759,7 +866,8 @@ function TeamSetupScreen({ role, onComplete }) {
 }
 
 // --- ENTRY COMPOSER ---
-function EntryComposer({ season, onSave, onClose }) {
+function EntryComposer({ season, onSave, onClose, brandColor }) {
+  const composerPrimary = brandColor || theme.primary;
   const [entryType, setEntryType] = useState("game");
   const [text, setText] = useState("");
   const [opponent, setOpponent] = useState("");
@@ -830,14 +938,14 @@ function EntryComposer({ season, onSave, onClose }) {
           {entryTypes.map((t) => (
             <button key={t.id} onClick={() => setEntryType(t.id)}
               style={{
-                flex: 1, padding: "10px 8px", borderRadius: 10, border: `1.5px solid ${entryType === t.id ? theme.primary : theme.border}`,
-                background: entryType === t.id ? `${theme.primary}10` : "white",
+                flex: 1, padding: "10px 8px", borderRadius: 10, border: `1.5px solid ${entryType === t.id ? composerPrimary : theme.border}`,
+                background: entryType === t.id ? `${composerPrimary}10` : "white",
                 cursor: "pointer", textAlign: "center", transition: "all 0.15s",
               }}>
               <div style={{ fontSize: 18 }}>{t.emoji}</div>
               <div style={{
                 fontSize: 11, fontWeight: 600, marginTop: 2,
-                color: entryType === t.id ? theme.primary : theme.textMuted,
+                color: entryType === t.id ? composerPrimary : theme.textMuted,
               }}>{t.label}</div>
             </button>
           ))}
@@ -893,7 +1001,7 @@ function EntryComposer({ season, onSave, onClose }) {
             <button onClick={() => setShowGameData(!showGameData)}
               style={{
                 background: "none", border: "none", cursor: "pointer",
-                fontSize: 13, fontWeight: 600, color: theme.primary,
+                fontSize: 13, fontWeight: 600, color: composerPrimary,
                 marginBottom: showGameData ? 12 : 0,
                 display: "flex", alignItems: "center", gap: 6,
               }}>
@@ -937,6 +1045,7 @@ function EntryComposer({ season, onSave, onClose }) {
           style={{
             width: "100%", padding: "14px 24px", fontSize: 16,
             opacity: text.trim() ? 1 : 0.5,
+            background: composerPrimary,
           }}>
           Save Entry ✓
         </button>
@@ -946,7 +1055,7 @@ function EntryComposer({ season, onSave, onClose }) {
 }
 
 // --- TIMELINE ENTRY CARD ---
-function EntryCard({ entry, players, onShare }) {
+function EntryCard({ entry, players, onShare, brandColor }) {
   const typeColors = {
     game: entry.result === "win" ? theme.win : entry.result === "loss" ? theme.loss : theme.draw,
     practice: theme.practice,
@@ -994,7 +1103,7 @@ function EntryCard({ entry, players, onShare }) {
                 lineHeight: 1,
                 transition: "color 0.15s",
               }}
-              onMouseEnter={(e) => e.currentTarget.style.color = theme.primary}
+              onMouseEnter={(e) => e.currentTarget.style.color = brandColor || theme.primary}
               onMouseLeave={(e) => e.currentTarget.style.color = theme.textLight}
               title="Share"
             >
@@ -1060,7 +1169,7 @@ function EntryCard({ entry, players, onShare }) {
 }
 
 // --- SEASON STATS BAR ---
-function SeasonStats({ entries }) {
+function SeasonStats({ entries, brandColor }) {
   const games = entries.filter((e) => e.entry_type === "game" || e.entry_type === "tournament");
   const wins = games.filter((e) => e.result === "win").length;
   const losses = games.filter((e) => e.result === "loss").length;
@@ -1074,7 +1183,7 @@ function SeasonStats({ entries }) {
       padding: "2px 0",
     }}>
       {[
-        { label: "Entries", value: entries.length, color: theme.primary },
+        { label: "Entries", value: entries.length, color: brandColor || theme.primary },
         { label: "W-L-D", value: `${wins}-${losses}-${draws}`, color: theme.win },
         { label: "Practices", value: practices, color: theme.practice },
         { label: "Photos", value: photos, color: theme.accent },
@@ -1098,6 +1207,7 @@ function SeasonStats({ entries }) {
 
 // --- BOOK PREVIEW (Paginated) ---
 function BookPreview({ entries, team, season, players, onClose, onOrder }) {
+  const bookPrimary = team?.color || theme.primary;
   const [currentPage, setCurrentPage] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
 
@@ -1139,7 +1249,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
 
   const handleProofPDF = () => {
     const bookData = {
-      team: { ...team, color: theme.primary },
+      team: { ...team, color: team.color || theme.primary },
       season,
       players,
       entries: sortedEntries.map((e) => ({
@@ -1176,7 +1286,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
       alignItems: "center", justifyContent: "center", textAlign: "center",
       padding: 48, background: "#FFFDF8",
     }}>
-      <div style={{ width: 40, height: 2, background: theme.primary, marginBottom: 28 }} />
+      <div style={{ width: 40, height: 2, background: bookPrimary, marginBottom: 28 }} />
       <h1 style={{
         fontFamily: fonts.headline, fontSize: 36, fontWeight: 400,
         color: theme.text, lineHeight: 1.15, marginBottom: 12,
@@ -1190,7 +1300,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
         fontFamily: fonts.mono, fontSize: 10, color: theme.textLight,
         letterSpacing: 2, textTransform: "uppercase",
       }}>{season.name}</p>
-      <div style={{ width: 40, height: 2, background: theme.primary, marginTop: 28 }} />
+      <div style={{ width: 40, height: 2, background: bookPrimary, marginTop: 28 }} />
     </div>
   );
 
@@ -1212,7 +1322,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
         fontFamily: fonts.mono, fontSize: 9, color: theme.textLight,
         letterSpacing: 2, textTransform: "uppercase", marginBottom: 28,
       }}>Win – Loss – Draw</p>
-      <div style={{ width: 30, height: 1.5, background: `${theme.primary}20`, marginBottom: 28 }} />
+      <div style={{ width: 30, height: 1.5, background: `${bookPrimary}20`, marginBottom: 28 }} />
       <div style={{ display: "flex", gap: 32, marginBottom: 28 }}>
         {[
           { v: games.length, l: "Games" },
@@ -1248,7 +1358,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
 
           return (
             <div key={entry.id} style={{
-              ...(i > 0 ? { paddingTop: 18, marginTop: 18, borderTop: `1px solid ${theme.primary}0F` } : {}),
+              ...(i > 0 ? { paddingTop: 18, marginTop: 18, borderTop: `1px solid ${bookPrimary}0F` } : {}),
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
                 <span style={{
@@ -1325,7 +1435,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
         }}>
           Every season tells a story.<br />This was {playerName}'s.
         </p>
-        <div style={{ width: 30, height: 1.5, background: theme.primary, marginBottom: 16 }} />
+        <div style={{ width: 30, height: 1.5, background: bookPrimary, marginBottom: 16 }} />
         <p style={{
           fontFamily: fonts.mono, fontSize: 8, color: theme.textLight,
           letterSpacing: 3, textTransform: "uppercase",
@@ -1435,6 +1545,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
 
 // --- ORDER FLOW ---
 function OrderFlow({ entries, team, season, players, onClose }) {
+  const orderPrimary = team?.color || theme.primary;
   const entryPages = paginateEntries(entries);
   const totalBookPages = 2 + entryPages.length + 1;
   const sortedEntries = [...entries].sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
@@ -1616,10 +1727,10 @@ function OrderFlow({ entries, team, season, players, onClose }) {
               <div style={{ height: 1, background: theme.border, margin: "12px 0" }} />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontSize: 16, fontWeight: 600 }}>Total</span>
-                <span style={{ fontFamily: fonts.mono, fontSize: 16, fontWeight: 700, color: theme.primary }}>$34.99 + shipping</span>
+                <span style={{ fontFamily: fonts.mono, fontSize: 16, fontWeight: 700, color: orderPrimary }}>$34.99 + shipping</span>
               </div>
             </div>
-            <button className="btn btn-primary" onClick={handleContinueToShipping} style={{ width: "100%", padding: "14px 24px", fontSize: 15 }}>
+            <button className="btn btn-primary" onClick={handleContinueToShipping} style={{ width: "100%", padding: "14px 24px", fontSize: 15, background: orderPrimary }}>
               Continue
             </button>
           </>
@@ -1642,7 +1753,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
             </div>
             <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
               <button className="btn btn-ghost" onClick={() => setStep("summary")} style={{ flex: 1 }}>Back</button>
-              <button className="btn btn-primary" onClick={handleContinueToReview} style={{ flex: 2 }}>Review Order</button>
+              <button className="btn btn-primary" onClick={handleContinueToReview} style={{ flex: 2, background: orderPrimary }}>Review Order</button>
             </div>
           </>
         )}
@@ -1664,12 +1775,12 @@ function OrderFlow({ entries, team, season, players, onClose }) {
               <div style={{ height: 1, background: theme.border, margin: "10px 0" }} />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: 600 }}>Total</span>
-                <span style={{ fontFamily: fonts.mono, fontWeight: 700, color: theme.primary }}>$34.99 + shipping</span>
+                <span style={{ fontFamily: fonts.mono, fontWeight: 700, color: orderPrimary }}>$34.99 + shipping</span>
               </div>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <button className="btn btn-ghost" onClick={() => setStep("shipping")} style={{ flex: 1 }}>Back</button>
-              <button className="btn btn-primary" onClick={handlePlaceOrder} style={{ flex: 2 }}>Place Order</button>
+              <button className="btn btn-primary" onClick={handlePlaceOrder} style={{ flex: 2, background: orderPrimary }}>Place Order</button>
             </div>
           </>
         )}
@@ -1680,7 +1791,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
             {orderStatus === "processing" ? (
               <div style={{ textAlign: "center", padding: "24px 0" }}>
                 <div style={{ fontSize: 14, color: theme.textMuted, marginBottom: 8 }}>Setting up your order...</div>
-                <div style={{ width: 32, height: 32, border: `3px solid ${theme.borderLight}`, borderTopColor: theme.primary, borderRadius: "50%", margin: "0 auto", animation: "spin 0.8s linear infinite" }} />
+                <div style={{ width: 32, height: 32, border: `3px solid ${theme.borderLight}`, borderTopColor: orderPrimary, borderRadius: "50%", margin: "0 auto", animation: "spin 0.8s linear infinite" }} />
               </div>
             ) : orderStatus === "error" ? (
               <div style={{ textAlign: "center", padding: "24px 0" }}>
@@ -1715,7 +1826,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
                       <div key={s.key} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: i < statusSteps.length - 1 ? 20 : 0 }}>
                         <div style={{
                           width: 28, height: 28, borderRadius: "50%",
-                          background: active ? theme.primary : theme.borderLight,
+                          background: active ? orderPrimary : theme.borderLight,
                           color: active ? "white" : theme.textLight,
                           display: "flex", alignItems: "center", justifyContent: "center",
                           fontSize: 12, fontWeight: 600, flexShrink: 0,
@@ -1799,7 +1910,7 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({ entry, team,
   const hasPhoto = !!(entry.photoPreview || entry.photoData);
   const hasScore = entry.score_home !== null && entry.score_away !== null;
 
-  const teamColor = theme.primary;
+  const teamColor = team?.color || theme.primary;
 
   const lineFontSize = entryText.length > 200 ? 36 : entryText.length > 100 ? 42 : 52;
 
@@ -1816,7 +1927,7 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({ entry, team,
         ...(preview ? {} : { position: "absolute", left: -9999, top: -9999 }),
         overflow: "hidden",
         fontFamily: fonts.body,
-        background: hasPhoto ? "#000" : `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 60%, #40916C 100%)`,
+        background: hasPhoto ? "#000" : gradientFromColor(teamColor),
         display: "flex",
         flexDirection: "column",
       }}
@@ -2004,7 +2115,7 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({ entry, team,
 });
 
 // --- SHARE PROMPT (post-save toast) ---
-function SharePrompt({ entry, onShare, onDismiss }) {
+function SharePrompt({ entry, onShare, onDismiss, brandColor }) {
   useEffect(() => {
     const timer = setTimeout(onDismiss, 6000);
     return () => clearTimeout(timer);
@@ -2023,7 +2134,7 @@ function SharePrompt({ entry, onShare, onDismiss }) {
       animation: "slideUp 0.35s ease-out both",
     }}>
       <div style={{
-        background: theme.primary,
+        background: brandColor || theme.primary,
         color: "white",
         borderRadius: 14,
         padding: "14px 20px",
@@ -2076,6 +2187,7 @@ function SharePrompt({ entry, onShare, onDismiss }) {
 
 // --- SHARE CARD MODAL ---
 function ShareCardModal({ entry, team, season, onClose }) {
+  const sharePrimary = team?.color || theme.primary;
   const cardRef = useRef(null);
   const [aspect, setAspect] = useState("story");
   const [exporting, setExporting] = useState(false);
@@ -2265,6 +2377,7 @@ function ShareCardModal({ entry, team, season, onClose }) {
           fontSize: 16,
           opacity: exporting ? 0.6 : 1,
           minWidth: 160,
+          background: sharePrimary,
         }}
       >
         {exporting ? "Exporting..." : navigator.canShare ? "Share" : "Download PNG"}
@@ -2837,6 +2950,11 @@ export default function SportsJournalApp() {
   const [shareEntry, setShareEntry] = useState(null);
   const [showSharePrompt, setShowSharePrompt] = useState(false);
 
+  // Dynamic brand color derived from team
+  const brandPrimary = team?.color || theme.primary;
+  const brandPrimaryLight = lightenColor(brandPrimary, 0.08);
+  const brandGradient = gradientFromColor(brandPrimary);
+
   // Init: restore from localStorage or show landing
   useEffect(() => {
     // Migrate legacy localStorage keys
@@ -3016,6 +3134,7 @@ export default function SportsJournalApp() {
 
       {screen === "home" && team && season && (
         <AppShell
+          accentColor={brandPrimary}
           title={team.name}
           titleIcon={team.logo ? (
             <img src={team.logo} alt="" style={{
@@ -3052,12 +3171,12 @@ export default function SportsJournalApp() {
           }
         >
           {/* Stats */}
-          <SeasonStats entries={entries} />
+          <SeasonStats entries={entries} brandColor={brandPrimary} />
 
           {/* Quick Actions */}
           <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
             <button className="btn btn-primary" onClick={() => setShowComposer(true)}
-              style={{ flex: 1, fontSize: 15 }}>
+              style={{ flex: 1, fontSize: 15, background: brandPrimary }}>
               ✏️ New Entry
             </button>
           </div>
@@ -3077,8 +3196,8 @@ export default function SportsJournalApp() {
               <button key={tab.id} onClick={() => setFilter(tab.id)}
                 style={{
                   padding: "6px 14px", borderRadius: 8, border: "none",
-                  background: filter === tab.id ? `${theme.primary}10` : "transparent",
-                  color: filter === tab.id ? theme.primary : theme.textMuted,
+                  background: filter === tab.id ? `${brandPrimary}10` : "transparent",
+                  color: filter === tab.id ? brandPrimary : theme.textMuted,
                   fontWeight: filter === tab.id ? 600 : 400, fontSize: 13,
                   cursor: "pointer", transition: "all 0.15s",
                 }}>
@@ -3105,7 +3224,7 @@ export default function SportsJournalApp() {
             </div>
           ) : (
             filteredEntries.map((entry) => (
-              <EntryCard key={entry.id} entry={entry} players={players} onShare={(e) => setShareEntry(e)} />
+              <EntryCard key={entry.id} entry={entry} players={players} onShare={(e) => setShareEntry(e)} brandColor={brandPrimary} />
             ))
           )}
 
@@ -3115,6 +3234,7 @@ export default function SportsJournalApp() {
               season={season}
               onSave={handleSaveEntry}
               onClose={() => setShowComposer(false)}
+              brandColor={brandPrimary}
             />
           )}
 
@@ -3145,6 +3265,7 @@ export default function SportsJournalApp() {
       {showSharePrompt && shareEntry && (
         <SharePrompt
           entry={shareEntry}
+          brandColor={brandPrimary}
           onShare={() => {
             setShowSharePrompt(false);
           }}
