@@ -287,6 +287,23 @@
     margin-top: 10px;
   }
 
+  /* --- Text-only page (single entry, no photo) --- */
+  .page.text-only-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.8in;
+  }
+
+  .text-only-page .entry-text {
+    font-size: 20px;
+    line-height: 1.7;
+  }
+
+  .text-only-page .entry-score .score-num {
+    font-size: 48px;
+  }
+
   /* --- Closing Page --- */
   .closing-page {
     display: flex;
@@ -356,7 +373,7 @@ const DEMO_DATA = {
     {
       id: "e4", entry_type: "tournament", text: "Semifinal shutout. The whole bench was on their feet when the final whistle blew.",
       entry_date: "2026-01-30", opponent: null, score_home: 2, score_away: 0, result: "win",
-      venue: "City Cup", photoData: null, photoPreview: null
+      venue: "City Cup", photoData: "/images/demo/game-action.jpg", photoPreview: "/images/demo/game-action.jpg"
     },
     {
       id: "e5", entry_type: "moment", text: "Walking back from the field with a bag of balls and that look. This kid lives for it.",
@@ -366,7 +383,7 @@ const DEMO_DATA = {
     {
       id: "e6", entry_type: "game", text: "Dominated possession but couldn't find the finish. Hit the crossbar twice in the last ten minutes.",
       entry_date: "2026-01-21", opponent: "United", score_home: 1, score_away: 1, result: "draw",
-      venue: "Home Field", photoData: null, photoPreview: null
+      venue: "Home Field", photoData: "/images/demo/water-break.jpg", photoPreview: "/images/demo/water-break.jpg"
     }
   ]
 };
@@ -538,8 +555,11 @@ function renderBook(data) {
       `;
     }
 
+    const hasAnyPhoto = pageEntries.some(e => e.photoPreview || e.photoData);
+    const isTextOnly = pageEntries.length === 1 && !hasAnyPhoto;
+
     html += `
-      <div class="page">
+      <div class="page${isTextOnly ? ' text-only-page' : ''}">
         ${entriesHtml}
         <div class="page-number">${pageNum}</div>
       </div>

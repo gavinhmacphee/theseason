@@ -214,7 +214,8 @@ function demoData() {
         text: "Semifinal shutout. The whole bench was on their feet when the final whistle blew.",
         entry_date: d(14), opponent: null,
         score_home: 2, score_away: 0, result: "win",
-        venue: "City Cup", photoData: null, photoPreview: null,
+        venue: "City Cup",
+        photoData: "/images/demo/game-action.jpg", photoPreview: "/images/demo/game-action.jpg",
         created_at: new Date().toISOString(),
       },
       {
@@ -231,7 +232,8 @@ function demoData() {
         text: "Dominated possession but couldn't find the finish. Hit the crossbar twice in the last ten minutes.",
         entry_date: d(23), opponent: "United",
         score_home: 1, score_away: 1, result: "draw",
-        venue: "Home Field", photoData: null, photoPreview: null,
+        venue: "Home Field",
+        photoData: "/images/demo/water-break.jpg", photoPreview: "/images/demo/water-break.jpg",
         created_at: new Date().toISOString(),
       },
     ],
@@ -1228,80 +1230,86 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
     </div>
   );
 
-  const renderEntryPage = (pageEntries) => (
-    <div style={{
-      width: "100%", height: "100%", padding: 32, background: "#FFFDF8",
-      display: "flex", flexDirection: "column",
-    }}>
-      {pageEntries.map((entry, i) => {
-        const hasScore = entry.score_home !== null && entry.score_away !== null;
-        const resultColors = { win: theme.win, loss: theme.loss, draw: theme.draw };
-        const resultLabels = { win: "W", loss: "L", draw: "D" };
-        const photo = entry.photoPreview || entry.photoData;
+  const renderEntryPage = (pageEntries) => {
+    const hasAnyPhoto = pageEntries.some((e) => e.photoPreview || e.photoData);
+    const isTextOnly = pageEntries.length === 1 && !hasAnyPhoto;
 
-        return (
-          <div key={entry.id} style={{
-            ...(i > 0 ? { paddingTop: 18, marginTop: 18, borderTop: `1px solid ${theme.primary}0F` } : {}),
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-              <span style={{
-                fontFamily: fonts.mono, fontSize: 7, fontWeight: 500,
-                color: theme.textLight, textTransform: "uppercase", letterSpacing: 2,
-              }}>{entry.entry_type}</span>
-              <span style={{ fontFamily: fonts.mono, fontSize: 8, color: theme.textLight }}>
-                {formatDate(entry.entry_date)}
-              </span>
-            </div>
+    return (
+      <div style={{
+        width: "100%", height: "100%", padding: isTextOnly ? 56 : 32, background: "#FFFDF8",
+        display: "flex", flexDirection: "column",
+        justifyContent: isTextOnly ? "center" : "flex-start",
+      }}>
+        {pageEntries.map((entry, i) => {
+          const hasScore = entry.score_home !== null && entry.score_away !== null;
+          const resultColors = { win: theme.win, loss: theme.loss, draw: theme.draw };
+          const resultLabels = { win: "W", loss: "L", draw: "D" };
+          const photo = entry.photoPreview || entry.photoData;
 
-            {hasScore && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+          return (
+            <div key={entry.id} style={{
+              ...(i > 0 ? { paddingTop: 18, marginTop: 18, borderTop: `1px solid ${theme.primary}0F` } : {}),
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
                 <span style={{
-                  fontFamily: fonts.mono, fontSize: 26, fontWeight: 700,
-                  color: theme.text, letterSpacing: 1,
-                }}>{entry.score_home} – {entry.score_away}</span>
-                {entry.result && (
-                  <span style={{
-                    fontFamily: fonts.mono, fontSize: 8, fontWeight: 600,
-                    padding: "2px 6px", borderRadius: 2,
-                    background: resultColors[entry.result], color: "white",
-                    letterSpacing: 1,
-                  }}>{resultLabels[entry.result]}</span>
-                )}
+                  fontFamily: fonts.mono, fontSize: 7, fontWeight: 500,
+                  color: theme.textLight, textTransform: "uppercase", letterSpacing: 2,
+                }}>{entry.entry_type}</span>
+                <span style={{ fontFamily: fonts.mono, fontSize: 8, color: theme.textLight }}>
+                  {formatDate(entry.entry_date)}
+                </span>
               </div>
-            )}
 
-            {entry.opponent && (
-              <p style={{ fontFamily: fonts.body, fontSize: 10, color: theme.textMuted, marginBottom: 8 }}>
-                vs {entry.opponent}
-              </p>
-            )}
+              {hasScore && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                  <span style={{
+                    fontFamily: fonts.mono, fontSize: isTextOnly ? 32 : 26, fontWeight: 700,
+                    color: theme.text, letterSpacing: 1,
+                  }}>{entry.score_home} – {entry.score_away}</span>
+                  {entry.result && (
+                    <span style={{
+                      fontFamily: fonts.mono, fontSize: 8, fontWeight: 600,
+                      padding: "2px 6px", borderRadius: 2,
+                      background: resultColors[entry.result], color: "white",
+                      letterSpacing: 1,
+                    }}>{resultLabels[entry.result]}</span>
+                  )}
+                </div>
+              )}
 
-            {photo && (
-              <img src={photo} alt="" style={{
-                width: "100%", maxHeight: 280, objectFit: "cover",
-                borderRadius: 3, marginBottom: 10, display: "block",
-              }} />
-            )}
+              {entry.opponent && (
+                <p style={{ fontFamily: fonts.body, fontSize: 10, color: theme.textMuted, marginBottom: 8 }}>
+                  vs {entry.opponent}
+                </p>
+              )}
 
-            {entry.text && (
-              <p style={{
-                fontFamily: fonts.display, fontSize: 12, lineHeight: 1.6,
-                color: "#2A2A2A", fontStyle: "italic",
-              }}>
-                &ldquo;{entry.text}&rdquo;
-              </p>
-            )}
+              {photo && (
+                <img src={photo} alt="" style={{
+                  width: "100%", maxHeight: 280, objectFit: "cover",
+                  borderRadius: 3, marginBottom: 10, display: "block",
+                }} />
+              )}
 
-            {entry.venue && (
-              <p style={{ fontFamily: fonts.body, fontSize: 8, color: theme.textLight, marginTop: 6 }}>
-                {entry.venue}
-              </p>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
+              {entry.text && (
+                <p style={{
+                  fontFamily: fonts.display, fontSize: isTextOnly ? 15 : 12, lineHeight: 1.6,
+                  color: "#2A2A2A", fontStyle: "italic",
+                }}>
+                  &ldquo;{entry.text}&rdquo;
+                </p>
+              )}
+
+              {entry.venue && (
+                <p style={{ fontFamily: fonts.body, fontSize: 8, color: theme.textLight, marginTop: 6 }}>
+                  {entry.venue}
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   const renderClosingPage = () => {
     const playerName = players[0]?.name || "yours";
