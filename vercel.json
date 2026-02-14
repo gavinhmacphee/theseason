@@ -8,9 +8,13 @@
       "maxDuration": 10
     },
     "api/webhook-stripe.js": {
-      "maxDuration": 30
+      "memory": 1024,
+      "maxDuration": 60
     },
-    "api/upload-s3.js": {
+    "api/store-book-data.js": {
+      "maxDuration": 10
+    },
+    "api/upload.js": {
       "maxDuration": 30
     },
     "api/submit-rpi.js": {

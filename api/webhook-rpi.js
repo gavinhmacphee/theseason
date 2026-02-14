@@ -1,5 +1,7 @@
 // api/webhook-rpi.js — Receive RPI Print status webhooks
-// Status flow: accepted → printing → shipped → delivered
+// Status flow: accepted -> printing -> shipped -> delivered
+
+import { Resend } from 'resend';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -15,7 +17,6 @@ export default async function handler(req, res) {
 
     // On shipped: send email with tracking info
     if (status === 'shipped' && tracking_number && RESEND_API_KEY && !RESEND_API_KEY.startsWith('re_...')) {
-      const { Resend } = require('resend');
       const resend = new Resend(RESEND_API_KEY);
 
       // TODO: Look up customer email from order record
@@ -26,21 +27,14 @@ export default async function handler(req, res) {
         carrier,
       });
 
-      // Example email send (needs customer email from DB):
+      // Email send (needs customer email from DB):
       // await resend.emails.send({
       //   from: 'Team Season <books@teamseason.app>',
       //   to: customerEmail,
       //   subject: 'Your Season Book Has Shipped!',
-      //   html: `
-      //     <h1>Your book is on its way!</h1>
-      //     <p>Tracking: ${tracking_number}</p>
-      //     <p>Carrier: ${carrier}</p>
-      //   `,
+      //   html: `<h1>Your book is on its way!</h1><p>Tracking: ${tracking_number}</p><p>Carrier: ${carrier}</p>`,
       // });
     }
-
-    // TODO: Update order status in database/storage
-    // For MVP, status is polled from RPI directly
 
     return res.status(200).json({ received: true });
   } catch (err) {

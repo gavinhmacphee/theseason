@@ -352,6 +352,10 @@ const GlobalStyle = () => (
       50% { transform: scale(1.05); }
     }
 
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     .fade-in { animation: fadeIn 0.4s ease-out both; }
     .slide-up { animation: slideUp 0.5s ease-out both; }
 
@@ -1474,10 +1478,66 @@ function OrderFlow({ entries, team, season, players, onClose }) {
     if (validateShipping()) setStep("review");
   };
 
-  const handlePlaceOrder = () => {
-    // Backend not connected yet — show coming soon
-    setOrderStatus("coming_soon");
+  const handlePlaceOrder = async () => {
+    setOrderStatus("processing");
     setStep("status");
+
+    try {
+      // Serialize book data (strip File objects, keep base64 photoData)
+      const bookData = {
+        team,
+        season,
+        players,
+        entries: entries.map(({ photo, ...rest }) => rest),
+      };
+
+      // Store book data in Blob
+      const storeRes = await fetch('/api/store-book-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookData }),
+      });
+
+      if (!storeRes.ok) {
+        const err = await storeRes.json();
+        if (err.error === 'Backend not configured') {
+          setOrderStatus("coming_soon");
+          return;
+        }
+        throw new Error('Failed to store book data');
+      }
+
+      const { url: bookDataUrl } = await storeRes.json();
+
+      // Save order state before Stripe redirect
+      localStorage.setItem("teamSeasonOrder", JSON.stringify({
+        shipping,
+        status: "processing",
+        bookDataUrl,
+      }));
+
+      // Create Stripe checkout session
+      const checkoutRes = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookDataUrl, shipping }),
+      });
+
+      if (!checkoutRes.ok) {
+        const err = await checkoutRes.json();
+        if (err.error === 'Backend not configured') {
+          setOrderStatus("coming_soon");
+          return;
+        }
+        throw new Error(err.error || 'Checkout failed');
+      }
+
+      const { url } = await checkoutRes.json();
+      window.location.href = url;
+    } catch (err) {
+      console.error('Order error:', err);
+      setOrderStatus("error");
+    }
   };
 
   const statusSteps = [
@@ -1605,9 +1665,25 @@ function OrderFlow({ entries, team, season, players, onClose }) {
         {/* Step: Status */}
         {step === "status" && (
           <>
-            {orderStatus === "coming_soon" ? (
+            {orderStatus === "processing" ? (
               <div style={{ textAlign: "center", padding: "24px 0" }}>
-                <div style={{ fontSize: 40, marginBottom: 16 }}>🚧</div>
+                <div style={{ fontSize: 14, color: theme.textMuted, marginBottom: 8 }}>Setting up your order...</div>
+                <div style={{ width: 32, height: 32, border: `3px solid ${theme.borderLight}`, borderTopColor: theme.primary, borderRadius: "50%", margin: "0 auto", animation: "spin 0.8s linear infinite" }} />
+              </div>
+            ) : orderStatus === "error" ? (
+              <div style={{ textAlign: "center", padding: "24px 0" }}>
+                <p style={{ fontFamily: fonts.display, fontSize: 18, fontWeight: 600, marginBottom: 8 }}>
+                  Something went wrong
+                </p>
+                <p style={{ fontSize: 14, color: theme.textMuted, marginBottom: 20, lineHeight: 1.5 }}>
+                  Your payment was not charged. Please try again.
+                </p>
+                <button className="btn btn-ghost" onClick={() => { setStep("review"); setOrderStatus("idle"); }} style={{ width: "100%" }}>
+                  Try Again
+                </button>
+              </div>
+            ) : orderStatus === "coming_soon" ? (
+              <div style={{ textAlign: "center", padding: "24px 0" }}>
                 <p style={{ fontFamily: fonts.display, fontSize: 18, fontWeight: 600, marginBottom: 8 }}>
                   Coming Soon
                 </p>
@@ -2800,6 +2876,33 @@ export default function SportsJournalApp() {
     const data = { role, team, season, players, entries };
     localStorage.setItem("teamSeason", JSON.stringify(data));
   }, [role, team, season, players, entries, screen, isDemo]);
+
+  // Handle Stripe checkout return
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('order') === 'success') {
+      const saved = localStorage.getItem("teamSeasonOrder");
+      if (saved) {
+        try {
+          const order = JSON.parse(saved);
+          order.status = "ordered";
+          localStorage.setItem("teamSeasonOrder", JSON.stringify(order));
+        } catch (e) {}
+      }
+      setShowOrder(true);
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (params.get('order') === 'cancelled') {
+      const saved = localStorage.getItem("teamSeasonOrder");
+      if (saved) {
+        try {
+          const order = JSON.parse(saved);
+          order.status = "idle";
+          localStorage.setItem("teamSeasonOrder", JSON.stringify(order));
+        } catch (e) {}
+      }
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   // Close overflow menu on outside click
   useEffect(() => {

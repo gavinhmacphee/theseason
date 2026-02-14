@@ -1,5 +1,7 @@
 // api/checkout.js — Stripe Checkout session creation
-// Requires: STRIPE_SECRET_KEY, STRIPE_PRICE_ID
+// Requires env: STRIPE_SECRET_KEY, STRIPE_PRICE_ID
+
+import Stripe from 'stripe';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -16,8 +18,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const stripe = require('stripe')(STRIPE_SECRET_KEY);
-    const { bookDataKey, shipping } = req.body;
+    const stripe = new Stripe(STRIPE_SECRET_KEY);
+    const { bookDataUrl, shipping } = req.body;
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -30,12 +32,12 @@ export default async function handler(req, res) {
         allowed_countries: ['US'],
       },
       metadata: {
-        bookDataKey,
+        bookDataUrl,
         shippingName: shipping?.name || '',
         shippingEmail: shipping?.email || '',
       },
-      success_url: `${req.headers.origin || 'http://localhost:3001'}?order=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin || 'http://localhost:3001'}?order=cancelled`,
+      success_url: `${req.headers.origin || 'https://teamseason.app'}?order=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.origin || 'https://teamseason.app'}?order=cancelled`,
     });
 
     return res.status(200).json({ url: session.url, sessionId: session.id });

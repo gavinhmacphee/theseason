@@ -1,5 +1,9 @@
 // api/generate-pdf.js — Puppeteer renders HTML templates to PDF
 // Uses @sparticuz/chromium for serverless Chromium
+// Templates are served from public/book-template/ via the app URL
+
+import chromium from '@sparticuz/chromium';
+import puppeteer from 'puppeteer-core';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -7,9 +11,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    const chromium = require('@sparticuz/chromium');
-    const puppeteer = require('puppeteer-core');
-
     const { bookData, type = 'interior' } = req.body;
 
     if (!bookData) {
@@ -25,12 +26,14 @@ export default async function handler(req, res) {
 
     const page = await browser.newPage();
 
-    // Load the appropriate template
-    const templateUrl = type === 'cover'
-      ? `file://${process.cwd()}/public/book-template/cover.html`
-      : `file://${process.cwd()}/public/book-template/interior.html`;
+    // Load template from deployed static files
+    const origin = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : `http://localhost:${process.env.PORT || 3000}`;
 
-    await page.goto(templateUrl, { waitUntil: 'networkidle0' });
+    await page.goto(`${origin}/book-template/${type}.html`, {
+      waitUntil: 'networkidle0',
+    });
 
     // Inject book data and trigger re-render
     await page.evaluate((data) => {
@@ -38,11 +41,11 @@ export default async function handler(req, res) {
       window.dispatchEvent(new Event('bookDataReady'));
     }, bookData);
 
-    // Wait for fonts to load
+    // Wait for fonts and rendering to settle
     await page.evaluate(() => document.fonts.ready);
-    await page.waitForTimeout(500); // Extra settle time for rendering
+    await new Promise((r) => setTimeout(r, 500));
 
-    // Generate PDF
+    // Generate PDF with print specs
     const pdfOptions = type === 'cover'
       ? { width: '14.375in', height: '7.25in', printBackground: true, margin: { top: 0, right: 0, bottom: 0, left: 0 } }
       : { width: '7.125in', height: '7.125in', printBackground: true, margin: { top: 0, right: 0, bottom: 0, left: 0 } };
