@@ -895,7 +895,7 @@ function TeamSetupScreen({ role, onComplete }) {
 }
 
 // --- ENTRY COMPOSER ---
-function EntryComposer({ season, onSave, onClose, brandColor }) {
+function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
   const composerPrimary = brandColor || theme.primary;
   const [entryType, setEntryType] = useState("game");
   const [text, setText] = useState("");
@@ -906,6 +906,7 @@ function EntryComposer({ season, onSave, onClose, brandColor }) {
   const [showGameData, setShowGameData] = useState(false);
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [consentShared, setConsentShared] = useState(!!orgName);
   const fileRef = useRef(null);
 
   const entryTypes = [
@@ -942,6 +943,7 @@ function EntryComposer({ season, onSave, onClose, brandColor }) {
       score_away: scoreAway !== "" ? parseInt(scoreAway) : null,
       result: computeResult(),
       photo,
+      consent_shared: orgName ? consentShared : false,
     });
   };
 
@@ -1066,6 +1068,37 @@ function EntryComposer({ season, onSave, onClose, brandColor }) {
               </div>
             )}
           </>
+        )}
+
+        {/* Consent toggle - only shown when parent is org-connected */}
+        {orgName && (
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "12px 0", marginBottom: 12, borderTop: `1px solid ${theme.borderLight}`,
+          }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: theme.text }}>
+                Share with {orgName}
+              </div>
+              <div style={{ fontSize: 11, color: theme.textMuted }}>
+                Your club can feature this entry
+              </div>
+            </div>
+            <button onClick={() => setConsentShared(!consentShared)}
+              style={{
+                width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer",
+                background: consentShared ? composerPrimary : theme.border,
+                position: "relative", transition: "background 0.2s",
+              }}>
+              <div style={{
+                width: 20, height: 20, borderRadius: "50%", background: "white",
+                position: "absolute", top: 2,
+                left: consentShared ? 22 : 2,
+                transition: "left 0.2s",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+              }} />
+            </button>
+          </div>
         )}
 
         {/* Save */}
@@ -3088,6 +3121,7 @@ function OrgSetupScreen({ onComplete }) {
 
 // --- ADMIN DASHBOARD ---
 function AdminDashboard({ org, teams, onAddTeam, onAddPlayer, onSignOut, accentColor }) {
+  const [activeTab, setActiveTab] = useState("roster");
   const [showAddTeam, setShowAddTeam] = useState(false);
   const [newTeamName, setNewTeamName] = useState("");
   const [newTeamAge, setNewTeamAge] = useState("");
@@ -3096,7 +3130,46 @@ function AdminDashboard({ org, teams, onAddTeam, onAddPlayer, onSignOut, accentC
   const [newPlayerNumber, setNewPlayerNumber] = useState("");
   const [expandedTeam, setExpandedTeam] = useState(null);
   const [copiedToken, setCopiedToken] = useState(null);
+
+  // Feed state
+  const [feedEntries, setFeedEntries] = useState([]);
+  const [feedLoading, setFeedLoading] = useState(false);
+  const [feedFilter, setFeedFilter] = useState("pending");
+  const [actioningId, setActioningId] = useState(null);
+
   const accent = accentColor || theme.primary;
+
+  const fetchFeed = useCallback(async (filter) => {
+    if (DEMO || !org?.id) return;
+    setFeedLoading(true);
+    try {
+      const { data } = await supabase.rpc("get_org_feed", {
+        p_org_id: org.id,
+        p_status: filter || feedFilter,
+      });
+      if (Array.isArray(data)) {
+        setFeedEntries(data);
+      }
+    } catch (e) {
+      console.warn("Feed load failed:", e);
+    }
+    setFeedLoading(false);
+  }, [org?.id, feedFilter]);
+
+  useEffect(() => {
+    if (activeTab === "feed") fetchFeed(feedFilter);
+  }, [activeTab, feedFilter, fetchFeed]);
+
+  const handleApprove = async (entryId, approved) => {
+    setActioningId(entryId);
+    try {
+      await supabase.rpc("approve_entry", { p_entry_id: entryId, p_approved: approved });
+      setFeedEntries((prev) => prev.filter((e) => e.id !== entryId));
+    } catch (e) {
+      console.warn("Approve failed:", e);
+    }
+    setActioningId(null);
+  };
 
   const handleAddTeam = () => {
     if (!newTeamName.trim()) return;
@@ -3125,8 +3198,17 @@ function AdminDashboard({ org, teams, onAddTeam, onAddPlayer, onSignOut, accentC
     });
   };
 
+  const typeColors = {
+    game: theme.win,
+    practice: theme.practice,
+    tournament: theme.tournament,
+    moment: theme.moment,
+  };
+
+  const resultLabels = { win: "W", loss: "L", draw: "D" };
+
   return (
-    <div style={{ minHeight: "100vh", background: theme.surface }}>
+    <div style={{ minHeight: "100vh", background: theme.bg }}>
       {/* Header */}
       <div style={{
         background: accent, padding: "16px 20px",
@@ -3151,7 +3233,7 @@ function AdminDashboard({ org, teams, onAddTeam, onAddPlayer, onSignOut, accentC
 
       <div style={{ maxWidth: 480, margin: "0 auto", padding: 20 }}>
         {/* Stats bar */}
-        <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
+        <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
           <div className="card" style={{ flex: 1, textAlign: "center", padding: 14 }}>
             <div style={{ fontSize: 24, fontWeight: 700, color: accent }}>{teams.length}</div>
             <div style={{ fontSize: 12, color: theme.textMuted }}>Teams</div>
@@ -3170,143 +3252,304 @@ function AdminDashboard({ org, teams, onAddTeam, onAddPlayer, onSignOut, accentC
           </div>
         </div>
 
-        {/* Add team button */}
-        <button onClick={() => setShowAddTeam(true)}
-          style={{
-            width: "100%", padding: "12px 16px", marginBottom: 16,
-            background: accent, color: "white", border: "none", borderRadius: 10,
-            fontFamily: fonts.display, fontSize: 15, fontWeight: 600, cursor: "pointer",
-            letterSpacing: 0.5,
-          }}>
-          + Add Team
-        </button>
+        {/* Tab bar */}
+        <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: `2px solid ${theme.borderLight}` }}>
+          {[{ id: "roster", label: "Roster" }, { id: "feed", label: "Feed" }].map((tab) => (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+              style={{
+                flex: 1, padding: "12px 0", background: "none", border: "none",
+                borderBottom: activeTab === tab.id ? `2px solid ${accent}` : "2px solid transparent",
+                marginBottom: -2, cursor: "pointer",
+                fontFamily: fonts.display, fontSize: 15, fontWeight: 600,
+                color: activeTab === tab.id ? accent : theme.textMuted,
+                transition: "all 0.2s",
+              }}>
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-        {/* Add team modal */}
-        {showAddTeam && (
-          <div style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
-            display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20,
-          }}>
-            <div className="card" style={{ maxWidth: 360, width: "100%", padding: 24 }}>
-              <h3 style={{ fontFamily: fonts.display, fontSize: 20, marginBottom: 16 }}>Add Team</h3>
-              <div style={{ marginBottom: 12 }}>
-                <label className="label">Team Name</label>
-                <input className="input" value={newTeamName} onChange={(e) => setNewTeamName(e.target.value)}
-                  placeholder="U12 Boys, Varsity, etc." autoFocus />
-              </div>
-              <div style={{ marginBottom: 20 }}>
-                <label className="label">Age Group (optional)</label>
-                <input className="input" value={newTeamAge} onChange={(e) => setNewTeamAge(e.target.value)}
-                  placeholder="U12, U14, JV, etc." />
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => setShowAddTeam(false)} className="btn" style={{ flex: 1 }}>Cancel</button>
-                <button onClick={handleAddTeam} className="btn btn-primary" style={{ flex: 1, background: accent }}>Add</button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* ROSTER TAB */}
+        {activeTab === "roster" && (
+          <>
+            <button onClick={() => setShowAddTeam(true)}
+              style={{
+                width: "100%", padding: "12px 16px", marginBottom: 16,
+                background: accent, color: "white", border: "none", borderRadius: 10,
+                fontFamily: fonts.display, fontSize: 15, fontWeight: 600, cursor: "pointer",
+                letterSpacing: 0.5,
+              }}>
+              + Add Team
+            </button>
 
-        {/* Add player modal */}
-        {addPlayerTeamId && (
-          <div style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
-            display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20,
-          }}>
-            <div className="card" style={{ maxWidth: 360, width: "100%", padding: 24 }}>
-              <h3 style={{ fontFamily: fonts.display, fontSize: 20, marginBottom: 16 }}>Add Player</h3>
-              <div style={{ marginBottom: 12 }}>
-                <label className="label">Player Name</label>
-                <input className="input" value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)}
-                  placeholder="Full name" autoFocus />
+            {teams.length === 0 ? (
+              <div className="card" style={{ textAlign: "center", padding: 32, color: theme.textMuted }}>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>🏟️</div>
+                <div style={{ fontSize: 15, marginBottom: 4 }}>No teams yet</div>
+                <div style={{ fontSize: 13 }}>Add your first team to start building rosters</div>
               </div>
-              <div style={{ marginBottom: 20 }}>
-                <label className="label">Jersey Number (optional)</label>
-                <input className="input" type="number" value={newPlayerNumber} onChange={(e) => setNewPlayerNumber(e.target.value)}
-                  placeholder="#" />
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => setAddPlayerTeamId(null)} className="btn" style={{ flex: 1 }}>Cancel</button>
-                <button onClick={handleAddPlayer} className="btn btn-primary" style={{ flex: 1, background: accent }}>Add</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Teams list */}
-        {teams.length === 0 ? (
-          <div className="card" style={{ textAlign: "center", padding: 32, color: theme.textMuted }}>
-            <div style={{ fontSize: 32, marginBottom: 8 }}>🏟️</div>
-            <div style={{ fontSize: 15, marginBottom: 4 }}>No teams yet</div>
-            <div style={{ fontSize: 13 }}>Add your first team to start building rosters</div>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {teams.map((team) => (
-              <div key={team.id} className="card" style={{ padding: 0, overflow: "hidden" }}>
-                {/* Team header */}
-                <button onClick={() => setExpandedTeam(expandedTeam === team.id ? null : team.id)}
-                  style={{
-                    width: "100%", padding: "14px 16px", background: "none", border: "none",
-                    cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center",
-                    borderLeft: `4px solid ${accent}`,
-                  }}>
-                  <div style={{ textAlign: "left" }}>
-                    <div style={{ fontWeight: 600, fontSize: 15 }}>{team.name}</div>
-                    <div style={{ fontSize: 12, color: theme.textMuted }}>
-                      {team.ageGroup ? `${team.ageGroup} - ` : ""}{team.players?.length || 0} players
-                    </div>
-                  </div>
-                  <span style={{ fontSize: 18, color: theme.textMuted, transform: expandedTeam === team.id ? "rotate(90deg)" : "none", transition: "transform 0.2s" }}>
-                    ›
-                  </span>
-                </button>
-
-                {/* Expanded roster */}
-                {expandedTeam === team.id && (
-                  <div style={{ borderTop: `1px solid ${theme.borderLight}`, padding: "8px 0" }}>
-                    {(team.players || []).map((player) => (
-                      <div key={player.id} style={{
-                        display: "flex", justifyContent: "space-between", alignItems: "center",
-                        padding: "10px 16px", borderBottom: `1px solid ${theme.borderLight}`,
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {teams.map((team) => (
+                  <div key={team.id} className="card" style={{ padding: 0, overflow: "hidden" }}>
+                    <button onClick={() => setExpandedTeam(expandedTeam === team.id ? null : team.id)}
+                      style={{
+                        width: "100%", padding: "14px 16px", background: "none", border: "none",
+                        cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center",
+                        borderLeft: `4px solid ${accent}`,
                       }}>
-                        <div>
-                          <span style={{ fontWeight: 500, fontSize: 14 }}>{player.name}</span>
-                          {player.number && <span style={{ fontSize: 12, color: theme.textMuted, marginLeft: 6 }}>#{player.number}</span>}
-                          {player.connected && <span style={{ fontSize: 11, color: accent, marginLeft: 8, fontWeight: 600 }}>Connected</span>}
+                      <div style={{ textAlign: "left" }}>
+                        <div style={{ fontWeight: 600, fontSize: 15 }}>{team.name}</div>
+                        <div style={{ fontSize: 12, color: theme.textMuted }}>
+                          {team.ageGroup ? `${team.ageGroup} - ` : ""}{team.players?.length || 0} players
                         </div>
-                        <button onClick={() => copyJoinLink(player.joinToken)}
-                          style={{
-                            background: copiedToken === player.joinToken ? "#059669" : `${accent}15`,
-                            border: "none", borderRadius: 6, padding: "5px 10px",
-                            fontSize: 12, cursor: "pointer",
-                            color: copiedToken === player.joinToken ? "white" : accent,
-                            fontWeight: 600, transition: "all 0.2s",
+                      </div>
+                      <span style={{ fontSize: 18, color: theme.textMuted, transform: expandedTeam === team.id ? "rotate(90deg)" : "none", transition: "transform 0.2s" }}>
+                        ›
+                      </span>
+                    </button>
+                    {expandedTeam === team.id && (
+                      <div style={{ borderTop: `1px solid ${theme.borderLight}`, padding: "8px 0" }}>
+                        {(team.players || []).map((player) => (
+                          <div key={player.id} style={{
+                            display: "flex", justifyContent: "space-between", alignItems: "center",
+                            padding: "10px 16px", borderBottom: `1px solid ${theme.borderLight}`,
                           }}>
-                          {copiedToken === player.joinToken ? "Copied" : "Copy Link"}
+                            <div>
+                              <span style={{ fontWeight: 500, fontSize: 14 }}>{player.name}</span>
+                              {player.number && <span style={{ fontSize: 12, color: theme.textMuted, marginLeft: 6 }}>#{player.number}</span>}
+                              {player.connected && <span style={{ fontSize: 11, color: accent, marginLeft: 8, fontWeight: 600 }}>Connected</span>}
+                            </div>
+                            <button onClick={() => copyJoinLink(player.joinToken)}
+                              style={{
+                                background: copiedToken === player.joinToken ? "#059669" : `${accent}15`,
+                                border: "none", borderRadius: 6, padding: "5px 10px",
+                                fontSize: 12, cursor: "pointer",
+                                color: copiedToken === player.joinToken ? "white" : accent,
+                                fontWeight: 600, transition: "all 0.2s",
+                              }}>
+                              {copiedToken === player.joinToken ? "Copied" : "Copy Link"}
+                            </button>
+                          </div>
+                        ))}
+                        <button onClick={() => setAddPlayerTeamId(team.id)}
+                          style={{
+                            width: "100%", padding: "10px 16px", background: "none",
+                            border: "none", cursor: "pointer", fontSize: 13,
+                            color: accent, fontWeight: 600, textAlign: "left",
+                          }}>
+                          + Add Player
                         </button>
                       </div>
-                    ))}
-                    <button onClick={() => setAddPlayerTeamId(team.id)}
-                      style={{
-                        width: "100%", padding: "10px 16px", background: "none",
-                        border: "none", cursor: "pointer", fontSize: 13,
-                        color: accent, fontWeight: 600, textAlign: "left",
-                      }}>
-                      + Add Player
-                    </button>
+                    )}
                   </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
 
-        {/* Feed placeholder */}
-        <div style={{ marginTop: 24, padding: 20, textAlign: "center", color: theme.textMuted, fontSize: 13 }}>
-          Content feed coming soon - share join links with parents to start receiving entries
-        </div>
+        {/* FEED TAB */}
+        {activeTab === "feed" && (
+          <>
+            {/* Feed filter */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+              {[
+                { id: "pending", label: "Pending" },
+                { id: "approved", label: "Approved" },
+                { id: "all", label: "All" },
+              ].map((f) => (
+                <button key={f.id}
+                  onClick={() => setFeedFilter(f.id)}
+                  style={{
+                    padding: "6px 14px", borderRadius: 20, fontSize: 13, fontWeight: 600,
+                    border: feedFilter === f.id ? `1.5px solid ${accent}` : `1.5px solid ${theme.border}`,
+                    background: feedFilter === f.id ? `${accent}10` : "white",
+                    color: feedFilter === f.id ? accent : theme.textMuted,
+                    cursor: "pointer", transition: "all 0.15s",
+                  }}>
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            {feedLoading ? (
+              <div style={{ textAlign: "center", padding: 40, color: theme.textMuted, fontSize: 14 }}>
+                Loading entries...
+              </div>
+            ) : feedEntries.length === 0 ? (
+              <div className="card" style={{ textAlign: "center", padding: 32, color: theme.textMuted }}>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>📋</div>
+                <div style={{ fontSize: 15, marginBottom: 4 }}>
+                  {feedFilter === "pending" ? "No entries awaiting review" : "No entries yet"}
+                </div>
+                <div style={{ fontSize: 13 }}>
+                  {feedFilter === "pending"
+                    ? "When parents share entries, they'll appear here for approval"
+                    : "Share join links with parents to start receiving entries"}
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {feedEntries.map((entry) => {
+                  const entryColor = typeColors[entry.entry_type] || theme.textMuted;
+                  return (
+                    <div key={entry.id} className="card" style={{ padding: 0, overflow: "hidden" }}>
+                      <div style={{ borderLeft: `4px solid ${entryColor}`, padding: 16 }}>
+                        {/* Entry header */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                          <div>
+                            <span style={{
+                              fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5,
+                              color: entryColor,
+                            }}>
+                              {entry.entry_type}
+                            </span>
+                            <span style={{ fontSize: 11, color: theme.textLight, marginLeft: 8 }}>
+                              {entry.entry_date}
+                            </span>
+                            {entry.approved === true && (
+                              <span style={{ fontSize: 10, color: "#059669", marginLeft: 8, fontWeight: 700 }}>APPROVED</span>
+                            )}
+                            {entry.approved === false && (
+                              <span style={{ fontSize: 10, color: theme.loss, marginLeft: 8, fontWeight: 700 }}>REJECTED</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Player + team info */}
+                        <div style={{ fontSize: 12, color: theme.textMuted, marginBottom: 6 }}>
+                          {entry.player_name && (
+                            <span style={{ fontWeight: 600, color: theme.text }}>
+                              {entry.player_name}
+                              {entry.player_number ? ` #${entry.player_number}` : ""}
+                            </span>
+                          )}
+                          {entry.team_name && (
+                            <span> - {entry.team_name}</span>
+                          )}
+                          {entry.author_name && (
+                            <span> (by {entry.author_name})</span>
+                          )}
+                        </div>
+
+                        {/* Score */}
+                        {entry.score_home != null && entry.score_away != null && (
+                          <div style={{ marginBottom: 6 }}>
+                            {entry.opponent && (
+                              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 2 }}>
+                                vs {entry.opponent}
+                              </div>
+                            )}
+                            <div style={{ fontFamily: fonts.mono, fontSize: 18, fontWeight: 700, letterSpacing: 2 }}>
+                              {entry.score_home} - {entry.score_away}
+                              {entry.result && (
+                                <span style={{
+                                  fontSize: 12, fontWeight: 700, marginLeft: 8,
+                                  color: entry.result === "win" ? theme.win : entry.result === "loss" ? theme.loss : theme.draw,
+                                }}>
+                                  {resultLabels[entry.result]}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Text */}
+                        <div style={{
+                          fontSize: 14, lineHeight: 1.5, color: theme.text,
+                          fontStyle: "italic", marginBottom: entry.approved === null ? 12 : 0,
+                        }}>
+                          "{entry.text}"
+                        </div>
+
+                        {/* Approve/Reject buttons - only for pending entries */}
+                        {entry.approved === null && (
+                          <div style={{ display: "flex", gap: 8, marginTop: 12, borderTop: `1px solid ${theme.borderLight}`, paddingTop: 12 }}>
+                            <button
+                              onClick={() => handleApprove(entry.id, true)}
+                              disabled={actioningId === entry.id}
+                              style={{
+                                flex: 1, padding: "8px 0", borderRadius: 8, border: "none",
+                                background: accent, color: "white", fontSize: 13, fontWeight: 600,
+                                cursor: "pointer", opacity: actioningId === entry.id ? 0.5 : 1,
+                              }}>
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => handleApprove(entry.id, false)}
+                              disabled={actioningId === entry.id}
+                              style={{
+                                flex: 1, padding: "8px 0", borderRadius: 8,
+                                border: `1.5px solid ${theme.border}`, background: "white",
+                                color: theme.textMuted, fontSize: 13, fontWeight: 600,
+                                cursor: "pointer", opacity: actioningId === entry.id ? 0.5 : 1,
+                              }}>
+                              Skip
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
       </div>
+
+      {/* Add team modal */}
+      {showAddTeam && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20,
+        }}>
+          <div className="card" style={{ maxWidth: 360, width: "100%", padding: 24 }}>
+            <h3 style={{ fontFamily: fonts.display, fontSize: 20, marginBottom: 16 }}>Add Team</h3>
+            <div style={{ marginBottom: 12 }}>
+              <label className="label">Team Name</label>
+              <input className="input" value={newTeamName} onChange={(e) => setNewTeamName(e.target.value)}
+                placeholder="U12 Boys, Varsity, etc." autoFocus />
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label className="label">Age Group (optional)</label>
+              <input className="input" value={newTeamAge} onChange={(e) => setNewTeamAge(e.target.value)}
+                placeholder="U12, U14, JV, etc." />
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={() => setShowAddTeam(false)} className="btn" style={{ flex: 1 }}>Cancel</button>
+              <button onClick={handleAddTeam} className="btn btn-primary" style={{ flex: 1, background: accent }}>Add</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add player modal */}
+      {addPlayerTeamId && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20,
+        }}>
+          <div className="card" style={{ maxWidth: 360, width: "100%", padding: 24 }}>
+            <h3 style={{ fontFamily: fonts.display, fontSize: 20, marginBottom: 16 }}>Add Player</h3>
+            <div style={{ marginBottom: 12 }}>
+              <label className="label">Player Name</label>
+              <input className="input" value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)}
+                placeholder="Full name" autoFocus />
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label className="label">Jersey Number (optional)</label>
+              <input className="input" type="number" value={newPlayerNumber} onChange={(e) => setNewPlayerNumber(e.target.value)}
+                placeholder="#" />
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={() => setAddPlayerTeamId(null)} className="btn" style={{ flex: 1 }}>Cancel</button>
+              <button onClick={handleAddPlayer} className="btn btn-primary" style={{ flex: 1, background: accent }}>Add</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -3740,6 +3983,8 @@ export default function SportsJournalApp() {
         color: data.team_color || "#1B4332",
         logo: null,
         orgType: "club",
+        orgId: data.org_id || null,
+        orgName: data.org_name || null,
       };
       const seasonData = {
         id: data.season_id,
@@ -3911,6 +4156,7 @@ export default function SportsJournalApp() {
             score_home: newEntry.score_home != null ? newEntry.score_home : null,
             score_away: newEntry.score_away != null ? newEntry.score_away : null,
             result: newEntry.result || null,
+            consent_shared: newEntry.consent_shared || false,
           });
         } catch (e) {
           console.warn("Cloud sync (entry) failed:", e);
@@ -4073,6 +4319,7 @@ export default function SportsJournalApp() {
               onSave={handleSaveEntry}
               onClose={() => setShowComposer(false)}
               brandColor={brandPrimary}
+              orgName={team?.orgName || null}
             />
           )}
 
