@@ -114,6 +114,19 @@ const supabase = {
     };
     return builder;
   },
+  async rpc(functionName, params = {}) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${functionName}`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${supabase.auth.token || SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    });
+    const data = await res.json();
+    return { data, error: res.ok ? null : data };
+  },
   storage: {
     from(bucket) {
       return {
@@ -3299,6 +3312,184 @@ function AdminDashboard({ org, teams, onAddTeam, onAddPlayer, onSignOut, accentC
 }
 
 
+// --- JOIN SCREEN: Parent invited via join link ---
+function JoinScreen({ token, onComplete, onBack }) {
+  const [joinInfo, setJoinInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Auth state
+  const [isSignUp, setIsSignUp] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data, error: rpcError } = await supabase.rpc("get_join_info", { p_token: token });
+        if (rpcError || data?.error) {
+          setError(data?.error || "Could not load invitation");
+        } else {
+          setJoinInfo(data);
+        }
+      } catch (e) {
+        setError("Could not load invitation");
+      }
+      setLoading(false);
+    })();
+  }, [token]);
+
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError("");
+    try {
+      const result = isSignUp
+        ? await supabase.auth.signUp(email, password, { role: "parent" })
+        : await supabase.auth.signIn(email, password);
+      if (result.error) throw new Error(result.error_description || result.msg || "Auth failed");
+      onComplete(result.user, joinInfo);
+    } catch (err) {
+      setAuthError(err.message);
+    }
+    setAuthLoading(false);
+  };
+
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+        background: theme.bg,
+      }}>
+        <div style={{ textAlign: "center", color: theme.textMuted, fontFamily: fonts.body }}>
+          Loading invitation...
+        </div>
+      </div>
+    );
+  }
+
+  if (error || joinInfo?.already_claimed) {
+    return (
+      <div style={{
+        minHeight: "100vh", display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center", padding: 24,
+        background: theme.bg,
+      }}>
+        <div className="card" style={{ maxWidth: 360, padding: 32, textAlign: "center" }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>
+            {joinInfo?.already_claimed ? "✓" : "?"}
+          </div>
+          <h2 style={{ fontFamily: fonts.display, fontSize: 22, marginBottom: 8 }}>
+            {joinInfo?.already_claimed ? "Already Connected" : "Invalid Link"}
+          </h2>
+          <p style={{ color: theme.textMuted, fontSize: 14, marginBottom: 20, fontFamily: fonts.body }}>
+            {joinInfo?.already_claimed
+              ? "This invitation has already been claimed by another account."
+              : error || "This invitation link is not valid."}
+          </p>
+          <button className="btn btn-primary" onClick={onBack} style={{ width: "100%" }}>
+            Go to Team Season
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const accent = joinInfo.org_color || joinInfo.team_color || theme.primary;
+  const orgName = joinInfo.org_name;
+  const teamName = joinInfo.team_name;
+  const playerName = joinInfo.player_name;
+  const playerNumber = joinInfo.player_number;
+
+  return (
+    <div style={{
+      minHeight: "100vh", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center", padding: 24,
+      background: gradientFromColor(accent),
+    }}>
+      {/* Branded header */}
+      <div className="slide-up" style={{ textAlign: "center", marginBottom: 32 }}>
+        {joinInfo.org_logo && (
+          <img src={joinInfo.org_logo} alt="" style={{
+            width: 64, height: 64, borderRadius: "50%", objectFit: "cover",
+            border: "3px solid rgba(255,255,255,0.3)", marginBottom: 12,
+          }} />
+        )}
+        {orgName && (
+          <div style={{
+            fontFamily: fonts.body, fontSize: 13, color: "rgba(255,255,255,0.7)",
+            textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8, fontWeight: 600,
+          }}>
+            {orgName}
+          </div>
+        )}
+        <h1 style={{
+          fontFamily: fonts.display, fontSize: 32, fontWeight: 700,
+          color: "white", lineHeight: 1.2, marginBottom: 6,
+        }}>
+          Follow {playerName}'s Season
+        </h1>
+        <p style={{
+          fontFamily: fonts.display, fontSize: 16, color: "rgba(255,255,255,0.8)",
+          fontStyle: "italic",
+        }}>
+          {teamName}{playerNumber ? ` - #${playerNumber}` : ""}
+        </p>
+      </div>
+
+      {/* Auth form */}
+      <form onSubmit={handleAuth} className="fade-in" style={{
+        background: "white", borderRadius: 18, padding: 28,
+        width: "100%", maxWidth: 360,
+        boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+      }}>
+        <h2 style={{ fontFamily: fonts.display, fontSize: 20, marginBottom: 6, textAlign: "center" }}>
+          {isSignUp ? "Create Your Account" : "Welcome Back"}
+        </h2>
+        <p style={{ textAlign: "center", fontSize: 13, color: theme.textMuted, marginBottom: 20, fontFamily: fonts.body }}>
+          {isSignUp
+            ? "Sign up to start journaling your child's season"
+            : "Sign in to connect to your child's team"}
+        </p>
+
+        {authError && (
+          <div style={{
+            background: "#FEE2E2", color: "#991B1B", padding: "10px 14px",
+            borderRadius: 8, fontSize: 13, marginBottom: 16,
+          }}>{authError}</div>
+        )}
+
+        <div style={{ marginBottom: 14 }}>
+          <label className="label">Email</label>
+          <input className="input" type="email" value={email}
+            onChange={(e) => setEmail(e.target.value)} required />
+        </div>
+        <div style={{ marginBottom: 20 }}>
+          <label className="label">Password</label>
+          <input className="input" type="password" value={password}
+            onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+        </div>
+
+        <button className="btn btn-primary" type="submit" disabled={authLoading}
+          style={{ width: "100%", padding: "14px 24px", fontSize: 16, background: accent }}>
+          {authLoading ? "..." : isSignUp ? "Get Started" : "Sign In & Connect"}
+        </button>
+
+        <p style={{ textAlign: "center", marginTop: 16, fontSize: 14, color: theme.textMuted }}>
+          {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+          <span onClick={() => setIsSignUp(!isSignUp)}
+            style={{ color: accent, fontWeight: 600, cursor: "pointer" }}>
+            {isSignUp ? "Sign in" : "Sign up"}
+          </span>
+        </p>
+      </form>
+    </div>
+  );
+}
+
+
 // --- MAIN APP ---
 export default function SportsJournalApp() {
   const [authed, setAuthed] = useState(false);
@@ -3317,6 +3508,9 @@ export default function SportsJournalApp() {
   const [org, setOrg] = useState(null);
   const [orgTeams, setOrgTeams] = useState([]);
 
+  // Join flow
+  const [joinToken, setJoinToken] = useState(null);
+
   // UI state
   const [showComposer, setShowComposer] = useState(false);
   const [showBook, setShowBook] = useState(false);
@@ -3324,6 +3518,7 @@ export default function SportsJournalApp() {
   const [showMenu, setShowMenu] = useState(false);
   const [filter, setFilter] = useState("all");
   const menuRef = useRef(null);
+  const joinTokenRef = useRef(null);
 
   // Share card state
   const [shareEntry, setShareEntry] = useState(null);
@@ -3336,6 +3531,18 @@ export default function SportsJournalApp() {
 
   // Init: restore from localStorage, cloud, or show landing
   useEffect(() => {
+    // Check for join link FIRST (before localStorage restore)
+    // Use ref to survive React StrictMode double-mount (replaceState removes param on first run)
+    const urlParams = new URLSearchParams(window.location.search);
+    const joinParam = urlParams.get("join") || joinTokenRef.current;
+    if (joinParam && !DEMO) {
+      joinTokenRef.current = joinParam;
+      setJoinToken(joinParam);
+      setScreen("join");
+      window.history.replaceState({}, "", window.location.pathname);
+      return;
+    }
+
     // Migrate legacy localStorage keys
     if (!localStorage.getItem("teamSeason") && localStorage.getItem("theSeason")) {
       localStorage.setItem("teamSeason", localStorage.getItem("theSeason"));
@@ -3506,6 +3713,57 @@ export default function SportsJournalApp() {
   const handleOnboarding = (selectedRole) => {
     setRole(selectedRole);
     setScreen(selectedRole === "admin" ? "org-setup" : "setup");
+  };
+
+  // Join flow: parent authenticated from JoinScreen
+  const handleJoinAuth = async (authUser, joinInfo) => {
+    setUser(authUser);
+    setAuthed(true);
+
+    // Claim the connection via RPC
+    try {
+      const { data } = await supabase.rpc("claim_connection", { p_token: joinToken });
+      if (data?.error) {
+        console.warn("Claim failed:", data.error);
+        // Fall back to regular onboarding
+        setJoinToken(null);
+        setScreen("onboarding");
+        return;
+      }
+
+      // Set up parent state from claim response
+      const teamData = {
+        id: data.team_id,
+        name: data.team_name,
+        sport: data.team_sport || "Soccer",
+        emoji: data.team_emoji || "⚽",
+        color: data.team_color || "#1B4332",
+        logo: null,
+        orgType: "club",
+      };
+      const seasonData = {
+        id: data.season_id,
+        name: data.season_name,
+      };
+      const playerData = {
+        id: data.player_id,
+        name: data.player_name,
+        number: data.player_number || null,
+        is_my_child: true,
+      };
+
+      setRole("parent");
+      setTeam(teamData);
+      setSeason(seasonData);
+      setPlayers([playerData]);
+      setEntries([]);
+      setJoinToken(null);
+      setScreen("home");
+    } catch (e) {
+      console.warn("Join flow error:", e);
+      setJoinToken(null);
+      setScreen("onboarding");
+    }
   };
 
   const handleSetup = (data) => {
@@ -3691,6 +3949,13 @@ export default function SportsJournalApp() {
 
       {screen === "landing" && <LandingPage onDemo={handleDemo} onStart={() => setScreen("auth")} />}
       {screen === "auth" && <AuthScreen onAuth={handleAuth} onDemo={handleDemo} onSkipAuth={() => setScreen("onboarding")} />}
+      {screen === "join" && joinToken && (
+        <JoinScreen
+          token={joinToken}
+          onComplete={handleJoinAuth}
+          onBack={() => { setJoinToken(null); setScreen("landing"); }}
+        />
+      )}
       {screen === "onboarding" && <OnboardingScreen onComplete={handleOnboarding} />}
       {screen === "setup" && <TeamSetupScreen role={role} onComplete={handleSetup} />}
       {screen === "org-setup" && <OrgSetupScreen onComplete={handleOrgSetup} />}
