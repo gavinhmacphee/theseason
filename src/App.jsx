@@ -6,9 +6,9 @@ import html2canvas from "html2canvas";
 // Role-based: Parent / Player
 // ============================================
 
-// --- CONFIG (Replace with your Supabase credentials) ---
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+// --- CONFIG ---
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "YOUR_SUPABASE_URL";
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "YOUR_SUPABASE_ANON_KEY";
 
 // --- SUPABASE LITE CLIENT ---
 const supabase = {
@@ -139,6 +139,16 @@ const supabase = {
 // --- DEMO MODE ---
 const DEMO = SUPABASE_URL === "YOUR_SUPABASE_URL";
 
+// --- UUID GENERATOR ---
+function generateId() {
+  return typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+      });
+}
+
 // --- SPORT (Soccer only) ---
 const SPORTS = [{ name: "Soccer", emoji: "⚽" }];
 
@@ -178,7 +188,7 @@ function demoData() {
 
   return {
     role: "parent",
-    team: { name: "Montaña FC", sport: "Soccer", emoji: "⚽", logo: null, orgType: "club", color: "#1B4332" },
+    team: { id: "demo-team", name: "Montaña FC", sport: "Soccer", emoji: "⚽", logo: null, orgType: "club", color: "#1B4332" },
     season: { name: "Spring 2026", id: "s_demo" },
     players: [{ name: "Marco", id: "p_demo", is_my_child: true, headshot: null }],
     entries: [
@@ -694,8 +704,8 @@ function TeamSetupScreen({ role, onComplete }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     onComplete({
-      team: { name: teamName || "My Soccer Team", sport: "Soccer", emoji: "⚽", logo, orgType, color: brandColor },
-      season: { name: `Soccer ${new Date().getFullYear()}` },
+      team: { id: generateId(), name: teamName || "My Soccer Team", sport: "Soccer", emoji: "⚽", logo, orgType, color: brandColor },
+      season: { id: generateId(), name: `Soccer ${new Date().getFullYear()}` },
       myPlayer: role === "parent" ? { name: childName, headshot: childHeadshot } : null,
     });
   };
@@ -2955,7 +2965,7 @@ export default function SportsJournalApp() {
   const brandPrimaryLight = lightenColor(brandPrimary, 0.08);
   const brandGradient = gradientFromColor(brandPrimary);
 
-  // Init: restore from localStorage or show landing
+  // Init: restore from localStorage, cloud, or show landing
   useEffect(() => {
     // Migrate legacy localStorage keys
     if (!localStorage.getItem("teamSeason") && localStorage.getItem("theSeason")) {
@@ -2980,6 +2990,11 @@ export default function SportsJournalApp() {
           photoPreview: e.photoData || null,
         })));
         setScreen("home");
+        // Also restore auth session if available
+        if (!DEMO && supabase.auth.restore()) {
+          setUser(supabase.auth.user);
+          setAuthed(true);
+        }
         return;
       } catch (e) {
         // Invalid data, continue to auth
@@ -2990,10 +3005,38 @@ export default function SportsJournalApp() {
       setScreen("landing");
       return;
     }
+
+    // No localStorage data — try cloud
     if (supabase.auth.restore()) {
       setUser(supabase.auth.user);
       setAuthed(true);
-      setScreen("onboarding");
+      // Try loading from Supabase
+      (async () => {
+        try {
+          const uid = supabase.auth.user.id;
+          const { data: teams } = await supabase.from("teams").select("*").eq("user_id", uid).limit(1);
+          if (teams && teams.length > 0) {
+            const cloudTeam = teams[0];
+            const { data: seasons } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid).limit(1);
+            const cloudSeason = seasons?.[0];
+            if (cloudSeason) {
+              const { data: cloudPlayers } = await supabase.from("players").select("*").eq("team_id", cloudTeam.id);
+              const { data: cloudEntries } = await supabase.from("entries").select("*").eq("season_id", cloudSeason.id).order("entry_date", { ascending: false });
+              setRole("parent");
+              setTeam({ id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club" });
+              setSeason({ id: cloudSeason.id, name: cloudSeason.name, startDate: cloudSeason.start_date, endDate: cloudSeason.end_date });
+              setPlayers((cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child })));
+              setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: null })));
+              setScreen("home");
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn("Cloud load failed:", e);
+        }
+        // No cloud data either — go to onboarding
+        setScreen("onboarding");
+      })();
     } else {
       setScreen("landing");
     }
@@ -3073,12 +3116,41 @@ export default function SportsJournalApp() {
   };
 
   const handleSetup = (data) => {
-    setTeam(data.team);
-    setSeason(data.season);
-    if (data.myPlayer) {
-      setPlayers([{ ...data.myPlayer, id: "p_" + Date.now(), is_my_child: true }]);
-    }
+    const teamData = data.team;
+    const seasonData = data.season;
+    const playersList = data.myPlayer
+      ? [{ ...data.myPlayer, id: generateId(), is_my_child: true }]
+      : [];
+
+    setTeam(teamData);
+    setSeason(seasonData);
+    setPlayers(playersList);
     setScreen("home");
+
+    // Sync to cloud (fire and forget)
+    if (!DEMO && user) {
+      (async () => {
+        try {
+          await supabase.from("teams").insert({
+            id: teamData.id, user_id: user.id,
+            name: teamData.name, sport: teamData.sport || "Soccer",
+            emoji: teamData.emoji || "⚽", color: teamData.color || "#1B4332",
+          });
+          await supabase.from("seasons").insert({
+            id: seasonData.id, user_id: user.id,
+            team_id: teamData.id, name: seasonData.name,
+          });
+          for (const p of playersList) {
+            await supabase.from("players").insert({
+              id: p.id, user_id: user.id, team_id: teamData.id,
+              name: p.name, is_my_child: p.is_my_child || false,
+            });
+          }
+        } catch (e) {
+          console.warn("Cloud sync (setup) failed:", e);
+        }
+      })();
+    }
   };
 
   const handleSaveEntry = async (entryData) => {
@@ -3089,7 +3161,7 @@ export default function SportsJournalApp() {
     const { photo, ...rest } = entryData;
     const newEntry = {
       ...rest,
-      id: "e_" + Date.now(),
+      id: generateId(),
       entry_date: new Date().toISOString().split("T")[0],
       season_id: season?.id,
       photoData,
@@ -3100,6 +3172,27 @@ export default function SportsJournalApp() {
     setShowComposer(false);
     setShareEntry(newEntry);
     setShowSharePrompt(true);
+
+    // Sync to cloud (fire and forget)
+    if (!DEMO && user && season?.id) {
+      (async () => {
+        try {
+          await supabase.from("entries").insert({
+            id: newEntry.id, user_id: user.id, season_id: season.id,
+            entry_date: newEntry.entry_date,
+            entry_type: newEntry.entry_type || "game",
+            text: newEntry.text || "",
+            opponent: newEntry.opponent || null,
+            venue: newEntry.venue || null,
+            score_home: newEntry.score_home != null ? newEntry.score_home : null,
+            score_away: newEntry.score_away != null ? newEntry.score_away : null,
+            result: newEntry.result || null,
+          });
+        } catch (e) {
+          console.warn("Cloud sync (entry) failed:", e);
+        }
+      })();
+    }
   };
 
   const handleSignOut = () => {
