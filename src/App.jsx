@@ -3489,6 +3489,31 @@ function AdminDashboard({ org, teams, onAddTeam, onAddPlayer, onSignOut, accentC
                             </button>
                           </div>
                         )}
+
+                        {/* Create Graphic button - for approved entries */}
+                        {entry.approved === true && (
+                          <div style={{ display: "flex", gap: 8, marginTop: 12, borderTop: `1px solid ${theme.borderLight}`, paddingTop: 12 }}>
+                            <button
+                              onClick={() => {
+                                const params = new URLSearchParams();
+                                if (entry.team_name) params.set("team", entry.team_name);
+                                if (entry.opponent) params.set("opponent", entry.opponent);
+                                if (entry.score_home != null && entry.score_away != null) params.set("score", `${entry.score_home}-${entry.score_away}`);
+                                if (entry.result) params.set("result", entry.result);
+                                if (entry.player_name) params.set("player", entry.player_name);
+                                if (entry.text) params.set("quote", entry.text.slice(0, 200));
+                                if (org?.color) params.set("color", org.color.replace("#", ""));
+                                window.open(`https://giveandgo.youthsoccermarketing.com/?${params.toString()}`, "_blank");
+                              }}
+                              style={{
+                                flex: 1, padding: "8px 0", borderRadius: 8, border: "none",
+                                background: accent, color: "white", fontSize: 13, fontWeight: 600,
+                                cursor: "pointer",
+                              }}>
+                              Create Graphic
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
