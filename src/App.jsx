@@ -178,32 +178,35 @@ function demoData() {
 
   return {
     role: "parent",
-    team: { name: "Thunder SC", sport: "Soccer", emoji: "⚽", logo: null },
-    season: { name: "Soccer 2026", id: "s_demo" },
-    players: [{ name: "Alex", id: "p_demo", is_my_child: true, headshot: null }],
+    team: { name: "Montaña FC", sport: "Soccer", emoji: "⚽", logo: null },
+    season: { name: "Spring 2026", id: "s_demo" },
+    players: [{ name: "Marco", id: "p_demo", is_my_child: true, headshot: null }],
     entries: [
       {
         id: "e_demo_1", entry_type: "game",
-        text: "Hat trick day. Alex couldn't stop smiling after the third one went in off the post.",
+        text: "Two assists and the go-ahead goal. He read that through ball perfectly and didn't even hesitate.",
         entry_date: d(2), opponent: "Lightning FC",
         score_home: 3, score_away: 1, result: "win",
-        venue: "Memorial Field", photoData: null, photoPreview: null,
+        venue: "Memorial Field",
+        photoData: "/images/demo/game-action.jpg", photoPreview: "/images/demo/game-action.jpg",
         created_at: new Date().toISOString(),
       },
       {
         id: "e_demo_2", entry_type: "practice",
-        text: "First time nailing the outside-of-the-foot pass. Coach made the whole team stop and watch the replay.",
+        text: "Cone work is finally clicking. Coach pulled him aside after and said his first touch has gotten way sharper.",
         entry_date: d(5), opponent: null,
         score_home: null, score_away: null, result: null,
-        venue: null, photoData: null, photoPreview: null,
+        venue: "Training Complex",
+        photoData: "/images/demo/practice-cones.jpg", photoPreview: "/images/demo/practice-cones.jpg",
         created_at: new Date().toISOString(),
       },
       {
         id: "e_demo_3", entry_type: "game",
-        text: "Tough one but never stopped running. Tracked back on every single play in the second half.",
+        text: "Left it all on the field. Went ninety minutes in the heat and never asked to come off.",
         entry_date: d(9), opponent: "Rapids",
         score_home: 1, score_away: 2, result: "loss",
-        venue: "Riverside Park", photoData: null, photoPreview: null,
+        venue: "Riverside Park",
+        photoData: "/images/demo/water-break.jpg", photoPreview: "/images/demo/water-break.jpg",
         created_at: new Date().toISOString(),
       },
       {
@@ -215,11 +218,12 @@ function demoData() {
         created_at: new Date().toISOString(),
       },
       {
-        id: "e_demo_5", entry_type: "practice",
-        text: "Coach ran a new set piece drill. You could see it click halfway through — the spacing just made sense.",
+        id: "e_demo_5", entry_type: "moment",
+        text: "Walking back from the field with a bag of balls and that look. This kid lives for it.",
         entry_date: d(18), opponent: null,
         score_home: null, score_away: null, result: null,
-        venue: null, photoData: null, photoPreview: null,
+        venue: null,
+        photoData: "/images/demo/walking-off.jpg", photoPreview: "/images/demo/walking-off.jpg",
         created_at: new Date().toISOString(),
       },
       {
@@ -2491,7 +2495,7 @@ function LandingPage({ onDemo, onStart }) {
                     color: theme.textMuted,
                     lineHeight: 1.4,
                   }}>
-                    "Two goals in the first half. The energy was unreal."
+                    "He read that through ball perfectly and didn't even hesitate."
                   </p>
                 </div>
               </div>
@@ -2573,7 +2577,7 @@ function LandingPage({ onDemo, onStart }) {
               gap: 6,
             }}>
               <span style={{ fontSize: 11 }}>{"\u26BD"}</span>
-              <span>Thunder SC</span>
+              <span>Montaña FC</span>
             </div>
 
             {/* Headline */}
@@ -2585,7 +2589,7 @@ function LandingPage({ onDemo, onStart }) {
               lineHeight: 1.0,
               marginBottom: 10,
             }}>
-              Hat trick day
+              Two assists and the go-ahead goal
             </p>
 
             {/* Accent bar */}
@@ -2606,7 +2610,7 @@ function LandingPage({ onDemo, onStart }) {
               lineHeight: 1.4,
               marginBottom: 12,
             }}>
-              "Two goals in the first half. The energy was unreal."
+              "He read that through ball perfectly and didn't even hesitate."
             </p>
 
             {/* Score badge */}
