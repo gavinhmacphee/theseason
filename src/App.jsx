@@ -93,6 +93,10 @@ const supabase = {
         queryParams.push(`${col}=eq.${val}`);
         return builder;
       },
+      in_(col, vals) {
+        queryParams.push(`${col}=in.(${vals.join(",")})`);
+        return builder;
+      },
       order(col, { ascending = true } = {}) {
         queryParams.push(`order=${col}.${ascending ? "asc" : "desc"}`);
         return builder;
@@ -4434,9 +4438,92 @@ export default function SportsJournalApp() {
     };
   }, [showMenu]);
 
-  const handleAuth = (user) => {
-    setUser(user);
+  const handleAuth = async (authUser) => {
+    setUser(authUser);
     setAuthed(true);
+    setScreen("loading");
+
+    // Try loading existing data from Supabase before sending to onboarding
+    try {
+      const uid = authUser.id;
+
+      // Check if user is an org admin
+      const { data: memberships } = await supabase.from("org_members").select("org_id,role").eq("user_id", uid);
+      const adminMembership = memberships?.find((m) => m.role === "admin");
+
+      if (adminMembership) {
+        const { data: orgs } = await supabase.from("organizations").select("*").eq("id", adminMembership.org_id).limit(1);
+        if (orgs?.[0]) {
+          const cloudOrg = orgs[0];
+          const orgObj = { id: cloudOrg.id, name: cloudOrg.name, slug: cloudOrg.slug, orgType: cloudOrg.org_type, color: cloudOrg.color || "#1B4332", logo: cloudOrg.logo_url || null };
+          const { data: cloudTeams } = await supabase.from("teams").select("*").eq("org_id", cloudOrg.id);
+          const teamsWithPlayers = [];
+          for (const ct of (cloudTeams || [])) {
+            const { data: cloudPlayers } = await supabase.from("players").select("*").eq("team_id", ct.id);
+            const playerIds = (cloudPlayers || []).map((p) => p.id);
+            let connMap = {};
+            if (playerIds.length > 0) {
+              const { data: connections } = await supabase.from("player_connections").select("player_id,join_token,user_id").in_("player_id", playerIds);
+              (connections || []).forEach((c) => { connMap[c.player_id] = c; });
+            }
+            teamsWithPlayers.push({
+              id: ct.id, name: ct.name, ageGroup: ct.age_group,
+              players: (cloudPlayers || []).map((p) => ({
+                id: p.id, name: p.name, number: p.number, position: p.position,
+                joinToken: connMap[p.id]?.join_token || null,
+                connected: !!connMap[p.id]?.user_id,
+              })),
+            });
+          }
+          setRole("admin");
+          setOrg(orgObj);
+          setOrgTeams(teamsWithPlayers);
+          setScreen("admin");
+          return;
+        }
+      }
+
+      // Check if user has a team (parent flow - self-created)
+      const { data: teams } = await supabase.from("teams").select("*").eq("user_id", uid).limit(1);
+      if (teams?.length > 0) {
+        const cloudTeam = teams[0];
+        const { data: seasons } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid).limit(1);
+        const cloudSeason = seasons?.[0];
+        if (cloudSeason) {
+          const { data: cloudPlayers } = await supabase.from("players").select("*").eq("team_id", cloudTeam.id);
+          const { data: cloudEntries } = await supabase.from("entries").select("*").eq("season_id", cloudSeason.id).order("entry_date", { ascending: false });
+          setRole("parent");
+          setTeam({ id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club", orgId: cloudTeam.org_id || null });
+          setSeason({ id: cloudSeason.id, name: cloudSeason.name, startDate: cloudSeason.start_date, endDate: cloudSeason.end_date });
+          setPlayers((cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child })));
+          setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: null })));
+          setScreen("home");
+          return;
+        }
+      }
+
+      // Check if user has a season via join flow (team owned by admin, season owned by parent)
+      const { data: joinSeasons } = await supabase.from("seasons").select("*, teams(*)").eq("user_id", uid).limit(1);
+      if (joinSeasons?.length > 0) {
+        const js = joinSeasons[0];
+        const jt = js.teams;
+        if (jt) {
+          const { data: cloudPlayers } = await supabase.from("players").select("*").eq("team_id", jt.id);
+          const { data: cloudEntries } = await supabase.from("entries").select("*").eq("season_id", js.id).order("entry_date", { ascending: false });
+          setRole("parent");
+          setTeam({ id: jt.id, name: jt.name, sport: jt.sport, emoji: jt.emoji, color: jt.color || "#1B4332", logo: null, orgType: "club", orgId: jt.org_id || null });
+          setSeason({ id: js.id, name: js.name, startDate: js.start_date, endDate: js.end_date });
+          setPlayers((cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child })));
+          setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: null })));
+          setScreen("home");
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Cloud restore on login failed:", e);
+    }
+
+    // No existing data found — new user, go to onboarding
     setScreen("onboarding");
   };
 
@@ -4692,6 +4779,16 @@ export default function SportsJournalApp() {
     <>
       <GlobalStyle />
 
+      {screen === "loading" && (
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          minHeight: "100dvh", fontFamily: fonts.body, color: theme.textLight,
+          flexDirection: "column", gap: 12,
+        }}>
+          <div style={{ fontSize: 32 }}>&#9917;</div>
+          <span style={{ fontSize: 14 }}>Loading your journal...</span>
+        </div>
+      )}
       {screen === "landing" && <LandingPage onDemo={handleDemo} onStart={() => setScreen("auth")} />}
       {screen === "auth" && <AuthScreen onAuth={handleAuth} onDemo={handleDemo} onSkipAuth={() => setScreen("onboarding")} />}
       {screen === "join" && joinToken && (
