@@ -2476,7 +2476,7 @@ function LandingPage({ onDemo, onStart }) {
     color: theme.textMuted,
     lineHeight: 1.6,
     maxWidth: 420,
-    marginBottom: 32,
+    marginBottom: 0,
   };
 
   const phoneMockup = {
@@ -2515,28 +2515,53 @@ function LandingPage({ onDemo, onStart }) {
           <circle cx="200" cy="200" r="6" fill="white" />
         </svg>
 
-        <h1 style={{
-          fontFamily: fonts.display,
-          fontSize: 52,
-          fontWeight: 700,
-          color: "white",
-          lineHeight: 1.0,
-          marginBottom: 12,
+        <p style={{
+          fontFamily: fonts.mono,
+          fontSize: 10,
+          fontWeight: 500,
+          color: "rgba(255,255,255,0.35)",
+          letterSpacing: 4,
+          textTransform: "uppercase",
+          marginBottom: 20,
           position: "relative",
         }}>
-          Team Season
+          For parents who pay attention
+        </p>
+
+        <h1 style={{
+          fontFamily: fonts.display,
+          fontSize: 48,
+          fontWeight: 700,
+          color: "white",
+          lineHeight: 1.05,
+          marginBottom: 16,
+          position: "relative",
+          maxWidth: 560,
+          margin: "0 auto 16px",
+        }}>
+          They leave it all on the field. You remember it forever.
         </h1>
+
         <p style={{
           fontFamily: fonts.headline,
           fontStyle: "italic",
-          fontSize: 21,
-          color: "rgba(255,255,255,0.65)",
+          fontSize: 20,
+          color: "rgba(255,255,255,0.55)",
           marginBottom: 44,
           position: "relative",
         }}>
-          Every season tells a story
+          Log moments. Share success. Remember forever.
         </p>
+
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", position: "relative" }}>
+          <button onClick={onStart} className="btn" style={{
+            background: theme.accent,
+            color: "white",
+            padding: "14px 28px",
+            fontSize: 15,
+          }}>
+            Start Your Season - Free
+          </button>
           <button onClick={onDemo} className="btn" style={{
             background: "rgba(255,255,255,0.1)",
             color: "white",
@@ -2547,22 +2572,14 @@ function LandingPage({ onDemo, onStart }) {
           }}>
             Try the Demo
           </button>
-          <button onClick={onStart} className="btn" style={{
-            background: theme.accent,
-            color: "white",
-            padding: "14px 28px",
-            fontSize: 15,
-          }}>
-            Start Your Season
-          </button>
         </div>
       </div>
 
-      {/* ====== INTRO LINE ====== */}
+      {/* ====== WHAT IT IS ====== */}
       <div style={{
-        maxWidth: 640,
+        maxWidth: 600,
         margin: "0 auto",
-        padding: "56px 24px 48px",
+        padding: "56px 24px 16px",
         textAlign: "center",
       }}>
         <p style={{
@@ -2572,7 +2589,24 @@ function LandingPage({ onDemo, onStart }) {
           color: theme.text,
           lineHeight: 1.5,
         }}>
-          A journal for the season. Share cards for the highlights. A book for the shelf.
+          Team Season is a digital journal for your kid's sports season. Log the games, the practices, the moments that matter. Share highlights on social. Then turn the whole thing into a printed book.
+        </p>
+      </div>
+
+      {/* ====== WHO IT'S FOR ====== */}
+      <div style={{
+        maxWidth: 640,
+        margin: "0 auto",
+        padding: "24px 24px 56px",
+        textAlign: "center",
+      }}>
+        <p style={{
+          fontFamily: fonts.body,
+          fontSize: 15,
+          color: theme.textMuted,
+          lineHeight: 1.6,
+        }}>
+          Built for the parent in the folding chair, the one who remembers the assist nobody else saw, the coach who wants to give each kid something real at the end of the year.
         </p>
       </div>
 
@@ -2592,9 +2626,42 @@ function LandingPage({ onDemo, onStart }) {
           {/* Copy */}
           <div style={{ flex: "1 1 260px", minWidth: 240, paddingTop: 24 }}>
             <p style={sectionLabel}>Log</p>
+            <h2 style={{
+              fontFamily: fonts.display,
+              fontSize: 28,
+              fontWeight: 600,
+              color: theme.text,
+              lineHeight: 1.15,
+              marginBottom: 16,
+            }}>
+              Write the line while it's fresh
+            </h2>
             <p style={sectionCopy}>
-              After every game, practice, or moment worth remembering - write the line. Add the score, a photo, the details you'll want to look back on.
+              After every game, practice, or moment worth remembering. Add the score, a photo, what you noticed. It takes 30 seconds and you'll be glad you did.
             </p>
+            <div style={{
+              marginTop: 20,
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+            }}>
+              {["Games, practices, and free moments", "Scores, stats, and photos", "Your words - the stuff you'd forget"].map((item) => (
+                <div key={item} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{
+                    width: 4,
+                    height: 4,
+                    borderRadius: "50%",
+                    background: theme.primary,
+                    flexShrink: 0,
+                  }} />
+                  <span style={{
+                    fontFamily: fonts.body,
+                    fontSize: 14,
+                    color: theme.textMuted,
+                  }}>{item}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Phone mockup */}
@@ -2760,7 +2827,7 @@ function LandingPage({ onDemo, onStart }) {
               gap: 6,
             }}>
               <span style={{ fontSize: 11 }}>{"\u26BD"}</span>
-              <span>Montaña FC</span>
+              <span>Montana FC</span>
             </div>
 
             {/* Headline */}
@@ -2855,14 +2922,47 @@ function LandingPage({ onDemo, onStart }) {
           {/* Copy */}
           <div style={{ flex: "1 1 260px", minWidth: 240, paddingTop: 24 }}>
             <p style={sectionLabel}>Share</p>
+            <h2 style={{
+              fontFamily: fonts.display,
+              fontSize: 28,
+              fontWeight: 600,
+              color: theme.text,
+              lineHeight: 1.15,
+              marginBottom: 16,
+            }}>
+              Turn a moment into a post
+            </h2>
             <p style={sectionCopy}>
-              Turn any entry into a share card sized for Instagram Stories or your feed. Edit the caption, pick the format, share the moment.
+              Any entry becomes a share card - sized for Instagram Stories or your feed. Your words, their photo, your team's colors. One tap.
             </p>
+            <div style={{
+              marginTop: 20,
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+            }}>
+              {["Instagram Stories and feed sizes", "Auto-styled with your team colors", "Edit the caption before you share"].map((item) => (
+                <div key={item} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{
+                    width: 4,
+                    height: 4,
+                    borderRadius: "50%",
+                    background: theme.primary,
+                    flexShrink: 0,
+                  }} />
+                  <span style={{
+                    fontFamily: fonts.body,
+                    fontSize: 14,
+                    color: theme.textMuted,
+                  }}>{item}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ====== PRINT SECTION ====== */}
+      {/* ====== REMEMBER / PRINT SECTION ====== */}
       <div style={{
         maxWidth: 700,
         margin: "0 auto",
@@ -2877,9 +2977,36 @@ function LandingPage({ onDemo, onStart }) {
         }}>
           {/* Copy */}
           <div style={{ flex: "1 1 260px", minWidth: 240, paddingTop: 24 }}>
-            <p style={sectionLabel}>Print</p>
+            <p style={sectionLabel}>Remember</p>
+            <h2 style={{
+              fontFamily: fonts.display,
+              fontSize: 28,
+              fontWeight: 600,
+              color: theme.text,
+              lineHeight: 1.15,
+              marginBottom: 16,
+            }}>
+              A real book for the shelf
+            </h2>
             <p style={sectionCopy}>
-              At the end of the season, turn it all into a real, printed book. Every entry, every score, every photo - bound and on your shelf.
+              At the end of the season, turn the whole journal into a 7x7" printed softcover. Every entry, every score, every photo - bound and in their hands. The kind of thing they keep.
+            </p>
+            <p style={{
+              fontFamily: fonts.body,
+              fontSize: 14,
+              color: theme.text,
+              fontWeight: 600,
+              marginTop: 16,
+            }}>
+              $34.99 per book
+            </p>
+            <p style={{
+              fontFamily: fonts.body,
+              fontSize: 13,
+              color: theme.textMuted,
+              marginTop: 4,
+            }}>
+              Designed automatically from your journal. You just order it.
             </p>
           </div>
 
@@ -2893,22 +3020,255 @@ function LandingPage({ onDemo, onStart }) {
         </div>
       </div>
 
+      {/* ====== HOW IT WORKS ====== */}
+      <div style={{
+        borderTop: `1px solid ${theme.border}`,
+        borderBottom: `1px solid ${theme.border}`,
+        padding: "56px 24px",
+      }}>
+        <div style={{ maxWidth: 700, margin: "0 auto" }}>
+          <p style={{
+            ...sectionLabel,
+            textAlign: "center",
+            marginBottom: 40,
+          }}>How it works</p>
+          <div style={{
+            display: "flex",
+            gap: 32,
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}>
+            {[
+              { num: "1", title: "Create your team", desc: "Add your team name, pick your colors. Takes 30 seconds." },
+              { num: "2", title: "Log the season", desc: "After games and practices, write a quick entry. Add scores, photos, your own words." },
+              { num: "3", title: "Share or print", desc: "Turn entries into social cards, or order a printed book at the end of the year." },
+            ].map((step) => (
+              <div key={step.num} style={{
+                flex: "1 1 180px",
+                minWidth: 160,
+                maxWidth: 220,
+              }}>
+                <div style={{
+                  fontFamily: fonts.mono,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: theme.primary,
+                  marginBottom: 10,
+                }}>{step.num}</div>
+                <h3 style={{
+                  fontFamily: fonts.body,
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: theme.text,
+                  marginBottom: 8,
+                }}>{step.title}</h3>
+                <p style={{
+                  fontFamily: fonts.body,
+                  fontSize: 14,
+                  color: theme.textMuted,
+                  lineHeight: 1.5,
+                }}>{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ====== PRICING ====== */}
+      <div style={{
+        maxWidth: 700,
+        margin: "0 auto",
+        padding: "56px 24px",
+        textAlign: "center",
+      }}>
+        <p style={{ ...sectionLabel, marginBottom: 12 }}>Pricing</p>
+        <h2 style={{
+          fontFamily: fonts.display,
+          fontSize: 28,
+          fontWeight: 600,
+          color: theme.text,
+          marginBottom: 8,
+        }}>
+          Free to use. Pay when you print.
+        </h2>
+        <p style={{
+          fontFamily: fonts.body,
+          fontSize: 15,
+          color: theme.textMuted,
+          lineHeight: 1.6,
+          maxWidth: 460,
+          margin: "0 auto 32px",
+        }}>
+          Logging, sharing, and building your journal costs nothing. When you're ready to turn it into a book, it's $34.99 per copy - shipped to your door.
+        </p>
+        <div style={{
+          display: "flex",
+          gap: 16,
+          justifyContent: "center",
+          flexWrap: "wrap",
+          maxWidth: 520,
+          margin: "0 auto",
+        }}>
+          {/* Free tier */}
+          <div style={{
+            flex: "1 1 220px",
+            maxWidth: 250,
+            background: "white",
+            border: `1px solid ${theme.border}`,
+            borderRadius: 10,
+            padding: "24px 20px",
+            textAlign: "left",
+          }}>
+            <p style={{
+              fontFamily: fonts.mono,
+              fontSize: 10,
+              fontWeight: 600,
+              color: theme.textLight,
+              letterSpacing: 2,
+              textTransform: "uppercase",
+              marginBottom: 8,
+            }}>Journal</p>
+            <p style={{
+              fontFamily: fonts.display,
+              fontSize: 32,
+              fontWeight: 600,
+              color: theme.text,
+              marginBottom: 16,
+            }}>Free</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {["Unlimited entries", "Photos and scores", "Share cards", "Team colors and branding", "Export and backup"].map((f) => (
+                <span key={f} style={{
+                  fontFamily: fonts.body,
+                  fontSize: 13,
+                  color: theme.textMuted,
+                }}>{f}</span>
+              ))}
+            </div>
+          </div>
+          {/* Book tier */}
+          <div style={{
+            flex: "1 1 220px",
+            maxWidth: 250,
+            background: "white",
+            border: `1px solid ${theme.primary}`,
+            borderRadius: 10,
+            padding: "24px 20px",
+            textAlign: "left",
+          }}>
+            <p style={{
+              fontFamily: fonts.mono,
+              fontSize: 10,
+              fontWeight: 600,
+              color: theme.primary,
+              letterSpacing: 2,
+              textTransform: "uppercase",
+              marginBottom: 8,
+            }}>Printed Book</p>
+            <p style={{
+              fontFamily: fonts.display,
+              fontSize: 32,
+              fontWeight: 600,
+              color: theme.text,
+              marginBottom: 16,
+            }}>$34.99</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {["7x7\" softcover", "Auto-designed from your journal", "Every entry, photo, and score", "Shipped to your door", "Order anytime"].map((f) => (
+                <span key={f} style={{
+                  fontFamily: fonts.body,
+                  fontSize: 13,
+                  color: theme.textMuted,
+                }}>{f}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ====== PARENT QUOTE ====== */}
+      <div style={{
+        maxWidth: 540,
+        margin: "0 auto",
+        padding: "32px 24px 56px",
+        textAlign: "center",
+      }}>
+        <div style={{
+          width: 32,
+          height: 3,
+          background: theme.accent,
+          borderRadius: 2,
+          margin: "0 auto 24px",
+        }} />
+        <p style={{
+          fontFamily: fonts.headline,
+          fontStyle: "italic",
+          fontSize: 20,
+          color: theme.text,
+          lineHeight: 1.5,
+          marginBottom: 16,
+        }}>
+          "I started writing things down after games because I kept forgetting the details. By the end of the season I had this whole story I didn't know I was writing."
+        </p>
+        <p style={{
+          fontFamily: fonts.body,
+          fontSize: 13,
+          color: theme.textMuted,
+        }}>
+          - Soccer parent, U12
+        </p>
+      </div>
+
       {/* ====== BOTTOM CTA ====== */}
       <div style={{
         background: `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 50%, #40916C 100%)`,
         padding: "56px 24px",
         textAlign: "center",
+        position: "relative",
+        overflow: "hidden",
       }}>
+        <svg
+          viewBox="0 0 400 400"
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 300,
+            height: 300,
+            opacity: 0.04,
+          }}
+        >
+          <circle cx="200" cy="200" r="180" fill="none" stroke="white" strokeWidth="2" />
+          <circle cx="200" cy="200" r="6" fill="white" />
+        </svg>
+        <h2 style={{
+          fontFamily: fonts.display,
+          fontSize: 28,
+          fontWeight: 600,
+          color: "white",
+          marginBottom: 12,
+          position: "relative",
+        }}>
+          The season's already happening.
+        </h2>
         <p style={{
           fontFamily: fonts.headline,
           fontStyle: "italic",
-          fontSize: 22,
-          color: "rgba(255,255,255,0.8)",
+          fontSize: 18,
+          color: "rgba(255,255,255,0.6)",
           marginBottom: 32,
+          position: "relative",
         }}>
-          Your season is happening right now.
+          Start writing it down.
         </p>
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", position: "relative" }}>
+          <button onClick={onStart} className="btn" style={{
+            background: theme.accent,
+            color: "white",
+            padding: "14px 28px",
+            fontSize: 15,
+          }}>
+            Start Your Season - Free
+          </button>
           <button onClick={onDemo} className="btn" style={{
             background: "rgba(255,255,255,0.1)",
             color: "white",
@@ -2919,52 +3279,7 @@ function LandingPage({ onDemo, onStart }) {
           }}>
             Try the Demo
           </button>
-          <button onClick={onStart} className="btn" style={{
-            background: theme.accent,
-            color: "white",
-            padding: "14px 28px",
-            fontSize: 15,
-          }}>
-            Start Your Season
-          </button>
         </div>
-      </div>
-
-      {/* ====== FAN SEASON TEASER ====== */}
-      <div style={{
-        background: `${theme.primary}08`,
-        borderTop: `1px solid ${theme.border}`,
-        padding: "40px 24px",
-        textAlign: "center",
-      }}>
-        <p style={{
-          fontFamily: fonts.mono,
-          fontSize: 10,
-          color: theme.textLight,
-          letterSpacing: 3,
-          textTransform: "uppercase",
-          marginBottom: 12,
-        }}>
-          Coming soon
-        </p>
-        <h3 style={{
-          fontFamily: fonts.display,
-          fontSize: 22,
-          fontWeight: 600,
-          color: theme.primary,
-          marginBottom: 8,
-        }}>
-          Fan Season
-        </h3>
-        <p style={{
-          fontSize: 14,
-          color: theme.textMuted,
-          maxWidth: 360,
-          margin: "0 auto",
-          lineHeight: 1.5,
-        }}>
-          The fan experience - coming to teamseason.app later this year.
-        </p>
       </div>
 
       {/* ====== FOOTER ====== */}
@@ -3131,6 +3446,11 @@ function AdminDashboard({ org, teams, onAddTeam, onAddPlayer, onSignOut, accentC
   const [expandedTeam, setExpandedTeam] = useState(null);
   const [copiedToken, setCopiedToken] = useState(null);
 
+  // CSV upload state
+  const [uploadTeamId, setUploadTeamId] = useState(null);
+  const [uploadPreview, setUploadPreview] = useState([]);
+  const csvRef = useRef(null);
+
   // Feed state
   const [feedEntries, setFeedEntries] = useState([]);
   const [feedLoading, setFeedLoading] = useState(false);
@@ -3196,6 +3516,63 @@ function AdminDashboard({ org, teams, onAddTeam, onAddPlayer, onSignOut, accentC
       setCopiedToken(token);
       setTimeout(() => setCopiedToken(null), 2000);
     });
+  };
+
+  const handleCsvUpload = (e, teamId) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target.result;
+      const lines = text.split(/\r?\n/).filter((l) => l.trim());
+      if (lines.length === 0) return;
+
+      // Detect separator (tab from Excel paste, or comma)
+      const sep = lines[0].includes("\t") ? "\t" : ",";
+      const rows = lines.map((l) => l.split(sep).map((c) => c.trim().replace(/^["']|["']$/g, "")));
+
+      // Detect header row
+      const first = rows[0].map((c) => c.toLowerCase());
+      const hasHeader = first.some((c) => ["name", "player", "first", "last"].includes(c));
+      const dataRows = hasHeader ? rows.slice(1) : rows;
+
+      // Find name and number columns
+      let nameCol = 0;
+      let numCol = -1;
+      if (hasHeader) {
+        nameCol = first.findIndex((c) => ["name", "player", "full name", "player name"].includes(c));
+        if (nameCol === -1) nameCol = 0;
+        numCol = first.findIndex((c) => ["number", "#", "jersey", "no", "num", "jersey number"].includes(c));
+      } else {
+        // If second column looks like numbers, use it
+        if (rows.length > 1 && dataRows.some((r) => r[1] && /^\d{1,3}$/.test(r[1]))) {
+          numCol = 1;
+        }
+      }
+
+      const players = dataRows
+        .filter((r) => r[nameCol] && r[nameCol].trim())
+        .map((r) => ({
+          name: r[nameCol].trim(),
+          number: numCol >= 0 && r[numCol] && /^\d{1,3}$/.test(r[numCol].trim()) ? parseInt(r[numCol].trim()) : null,
+        }));
+
+      if (players.length > 0) {
+        setUploadTeamId(teamId);
+        setUploadPreview(players);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const handleImportPlayers = () => {
+    if (!uploadTeamId || uploadPreview.length === 0) return;
+    for (const p of uploadPreview) {
+      onAddPlayer(uploadTeamId, { name: p.name, number: p.number });
+    }
+    setUploadTeamId(null);
+    setUploadPreview([]);
   };
 
   const typeColors = {
@@ -3332,14 +3709,26 @@ function AdminDashboard({ org, teams, onAddTeam, onAddPlayer, onSignOut, accentC
                             </button>
                           </div>
                         ))}
-                        <button onClick={() => setAddPlayerTeamId(team.id)}
-                          style={{
-                            width: "100%", padding: "10px 16px", background: "none",
-                            border: "none", cursor: "pointer", fontSize: 13,
-                            color: accent, fontWeight: 600, textAlign: "left",
-                          }}>
-                          + Add Player
-                        </button>
+                        <div style={{ display: "flex", borderTop: `1px solid ${theme.borderLight}` }}>
+                          <button onClick={() => setAddPlayerTeamId(team.id)}
+                            style={{
+                              flex: 1, padding: "10px 16px", background: "none",
+                              border: "none", cursor: "pointer", fontSize: 13,
+                              color: accent, fontWeight: 600, textAlign: "left",
+                            }}>
+                            + Add Player
+                          </button>
+                          <input ref={csvRef} type="file" accept=".csv,.tsv,.txt,.xlsx" onChange={(e) => handleCsvUpload(e, team.id)} style={{ display: "none" }} />
+                          <button onClick={() => csvRef.current?.click()}
+                            style={{
+                              padding: "10px 16px", background: "none",
+                              border: "none", borderLeft: `1px solid ${theme.borderLight}`,
+                              cursor: "pointer", fontSize: 13,
+                              color: theme.textMuted, fontWeight: 600,
+                            }}>
+                            Upload CSV
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -3571,6 +3960,42 @@ function AdminDashboard({ org, teams, onAddTeam, onAddPlayer, onSignOut, accentC
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={() => setAddPlayerTeamId(null)} className="btn" style={{ flex: 1 }}>Cancel</button>
               <button onClick={handleAddPlayer} className="btn btn-primary" style={{ flex: 1, background: accent }}>Add</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CSV upload preview modal */}
+      {uploadTeamId && uploadPreview.length > 0 && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20,
+        }}>
+          <div className="card" style={{ maxWidth: 400, width: "100%", padding: 24, maxHeight: "80vh", overflow: "auto" }}>
+            <h3 style={{ fontFamily: fonts.display, fontSize: 20, marginBottom: 4 }}>Import Roster</h3>
+            <p style={{ fontSize: 13, color: theme.textMuted, marginBottom: 16 }}>
+              {uploadPreview.length} player{uploadPreview.length !== 1 ? "s" : ""} found
+            </p>
+
+            <div style={{ marginBottom: 16 }}>
+              {uploadPreview.map((p, i) => (
+                <div key={i} style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  padding: "8px 0", borderBottom: i < uploadPreview.length - 1 ? `1px solid ${theme.borderLight}` : "none",
+                }}>
+                  <span style={{ fontSize: 14, fontWeight: 500 }}>{p.name}</span>
+                  {p.number && <span style={{ fontSize: 12, color: theme.textMuted }}>#{p.number}</span>}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={() => { setUploadTeamId(null); setUploadPreview([]); }} className="btn" style={{ flex: 1 }}>
+                Cancel
+              </button>
+              <button onClick={handleImportPlayers} className="btn btn-primary" style={{ flex: 1, background: accent }}>
+                Import All
+              </button>
             </div>
           </div>
         </div>
