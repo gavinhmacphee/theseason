@@ -1004,7 +1004,7 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
           {photoPreview ? (
             <div style={{ position: "relative" }}>
               <img src={photoPreview} alt="" style={{
-                width: "100%", height: 180, objectFit: "cover", borderRadius: 12,
+                width: "100%", height: 180, objectFit: "cover", objectPosition: "top", borderRadius: 12,
               }} />
               <button onClick={() => { setPhoto(null); setPhotoPreview(null); }}
                 style={{
@@ -1196,7 +1196,7 @@ function EntryCard({ entry, players, onShare, brandColor }) {
       {/* Photo */}
       {(entry.photoPreview || entry.photoData) && (
         <img src={entry.photoPreview || entry.photoData} alt="" style={{
-          width: "100%", height: 180, objectFit: "cover", borderRadius: 10, marginBottom: 10,
+          width: "100%", height: 180, objectFit: "cover", objectPosition: "top", borderRadius: 10, marginBottom: 10,
         }} />
       )}
 
@@ -1457,7 +1457,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
 
               {photo && (
                 <img src={photo} alt="" style={{
-                  width: "100%", maxHeight: 280, objectFit: "cover",
+                  width: "100%", maxHeight: 280, objectFit: "cover", objectPosition: "top",
                   borderRadius: 3, marginBottom: 10, display: "block",
                 }} />
               )}
@@ -1994,24 +1994,17 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({ entry, team,
         flexDirection: "column",
       }}
     >
-      {/* Photo area */}
+      {/* Photo area - uses background-image for html2canvas compatibility */}
       {hasPhoto ? (
         <div style={{
           flex: isStory ? "1 1 55%" : "1 1 50%",
           position: "relative",
           overflow: "hidden",
+          backgroundImage: `url(${entry.photoPreview || entry.photoData})`,
+          backgroundSize: "cover",
+          backgroundPosition: "top center",
+          backgroundRepeat: "no-repeat",
         }}>
-          <img
-            src={entry.photoPreview || entry.photoData}
-            alt=""
-            crossOrigin="anonymous"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              display: "block",
-            }}
-          />
           <div style={{
             position: "absolute",
             bottom: 0,
@@ -2262,13 +2255,15 @@ function ShareCardModal({ entry, team, season, onClose }) {
   const previewWidth = 1080 * previewScale;
   const previewHeight = (aspect === "story" ? 1920 : 1080) * previewScale;
 
+  const [savedUrl, setSavedUrl] = useState(null);
+
   const handleExport = async () => {
     if (!cardRef.current || exporting) return;
     setExporting(true);
 
     try {
       await document.fonts.ready;
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, 300));
 
       const canvas = await html2canvas(cardRef.current, {
         width: 1080,
@@ -2277,36 +2272,40 @@ function ShareCardModal({ entry, team, season, onClose }) {
         useCORS: true,
         allowTaint: true,
         backgroundColor: null,
+        logging: false,
       });
 
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+      if (!blob) {
+        setExporting(false);
+        return;
+      }
+
+      const file = new File([blob], `team-season-${entry.id}.png`, { type: "image/png" });
+
+      // Try Web Share API first (best mobile experience)
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: "Team Season" });
           setExporting(false);
           return;
+        } catch (err) {
+          if (err.name === "AbortError") { setExporting(false); return; }
         }
+      }
 
-        const file = new File([blob], `team-season-${entry.id}.png`, { type: "image/png" });
+      // Try download link (works on desktop, some Android)
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `team-season-${entry.id}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
 
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: "Team Season",
-            });
-          } catch (err) {
-            if (err.name !== "AbortError") console.warn(err);
-          }
-        } else {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `team-season-${entry.id}.png`;
-          a.click();
-          URL.revokeObjectURL(url);
-        }
-
-        setExporting(false);
-      }, "image/png");
+      // Also show long-press fallback image for iOS Safari
+      setSavedUrl(url);
+      setExporting(false);
     } catch (err) {
       console.error("Export failed:", err);
       setExporting(false);
@@ -2444,6 +2443,56 @@ function ShareCardModal({ entry, team, season, onClose }) {
       >
         {exporting ? "Exporting..." : navigator.canShare ? "Share" : "Download PNG"}
       </button>
+
+      {/* Long-press save fallback for iOS */}
+      {savedUrl && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.95)",
+          zIndex: 210,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 16,
+        }}>
+          <p style={{
+            color: "rgba(255,255,255,0.7)",
+            fontSize: 15,
+            textAlign: "center",
+            marginBottom: 16,
+            maxWidth: 280,
+          }}>
+            Long-press the image below and tap <strong style={{ color: "white" }}>Save Image</strong>
+          </p>
+          <img
+            src={savedUrl}
+            alt="Share card"
+            style={{
+              maxWidth: "90%",
+              maxHeight: "70vh",
+              borderRadius: 8,
+            }}
+          />
+          <button
+            onClick={() => { URL.revokeObjectURL(savedUrl); setSavedUrl(null); }}
+            style={{
+              marginTop: 20,
+              background: "rgba(255,255,255,0.15)",
+              border: "none",
+              borderRadius: 10,
+              padding: "12px 32px",
+              color: "white",
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Done
+          </button>
+        </div>
+      )}
 
       {/* Hidden full-size card for capture */}
       <ShareCardRender
