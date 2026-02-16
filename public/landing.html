@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1B4332" />
+  <meta name="description" content="Team Season - Shareable season recap cards for youth soccer. Long after the scores are forgotten, the moments remain." />
+  <title>Team Season - Shareable Season Recap Cards</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green: #1B4332;
+      --green-deep: #122d22;
+      --green-light: #2d6a4f;
+      --gold: #c8963e;
+      --gold-light: #d4a855;
+      --cream: #f8f5ef;
+      --white: #ffffff;
+      --text: #2a2a2a;
+      --text-light: #5a5a5a;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      background: var(--cream);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Signal Bar */
+    .signal-bar {
+      background: var(--green-deep);
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+    }
+
+    /* Header */
+    .site-header {
+      background: var(--cream);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .site-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 1.5px;
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .site-nav a {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: 0.3px;
+    }
+
+    .site-nav a:hover {
+      color: var(--green);
+    }
+
+    .site-nav .nav-cta {
+      font-family: 'Bebas Neue', sans-serif;
+      background: var(--gold);
+      color: var(--green-deep);
+      padding: 8px 20px;
+      font-size: 16px;
+      letter-spacing: 1px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .site-nav .nav-cta:hover {
+      background: var(--gold-light);
+      color: var(--green-deep);
+    }
+
+    /* Gradient Stripe */
+    .gradient-stripe {
+      height: 3px;
+      background: linear-gradient(90deg, var(--green-deep), var(--green), var(--green-light));
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, var(--green-deep) 0%, var(--green) 50%, #2d6a4f 100%);
+      color: var(--white);
+      padding: 100px 32px 110px;
+      text-align: center;
+    }
+
+    .hero-inner {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(48px, 8vw, 80px);
+      line-height: 1.0;
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+    }
+
+    .hero .lead {
+      font-size: 19px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.85);
+      max-width: 560px;
+      margin: 0 auto 40px;
+    }
+
+    .hero .tagline {
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 40px;
+      font-style: italic;
+    }
+
+    .btn-primary {
+      font-family: 'Bebas Neue', sans-serif;
+      display: inline-block;
+      background: var(--gold);
+      color: var(--green-deep);
+      padding: 14px 40px;
+      font-size: 20px;
+      letter-spacing: 1.5px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--gold-light);
+    }
+
+    /* Sections */
+    .section {
+      padding: 80px 32px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .section-alt {
+      background: var(--white);
+      max-width: none;
+    }
+
+    .section-alt .section-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .section h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px;
+      letter-spacing: 1.5px;
+      color: var(--green);
+      margin-bottom: 20px;
+    }
+
+    .section-alt h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px;
+      letter-spacing: 1.5px;
+      color: var(--green);
+      margin-bottom: 20px;
+    }
+
+    .section p, .section-alt p {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-light);
+      margin-bottom: 16px;
+    }
+
+    /* Problem Section */
+    .problem-list {
+      list-style: none;
+      padding: 0;
+      margin: 24px 0 0;
+    }
+
+    .problem-list li {
+      padding: 14px 0;
+      border-bottom: 1px solid #e8e4dc;
+      font-size: 16px;
+      color: var(--text);
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .problem-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 6px;
+      background: var(--gold);
+    }
+
+    /* Steps */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      margin-top: 40px;
+    }
+
+    .step {
+      text-align: left;
+    }
+
+    .step-number {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 48px;
+      color: var(--green);
+      line-height: 1;
+      margin-bottom: 12px;
+      opacity: 0.3;
+    }
+
+    .step h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 1px;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 15px;
+      color: var(--text-light);
+      line-height: 1.6;
+    }
+
+    /* Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+      margin-top: 40px;
+    }
+
+    .feature {
+      border-left: 3px solid var(--gold);
+      padding-left: 20px;
+    }
+
+    .feature h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 1px;
+      color: var(--green);
+      margin-bottom: 6px;
+    }
+
+    .feature p {
+      font-size: 15px;
+      color: var(--text-light);
+      line-height: 1.6;
+      margin-bottom: 0;
+    }
+
+    /* Bottom CTA */
+    .bottom-cta {
+      background: linear-gradient(135deg, var(--green-deep) 0%, var(--green) 100%);
+      color: var(--white);
+      text-align: center;
+      padding: 80px 32px;
+    }
+
+    .bottom-cta h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 40px;
+      letter-spacing: 1.5px;
+      margin-bottom: 16px;
+      color: var(--white);
+    }
+
+    .bottom-cta p {
+      font-size: 17px;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 32px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Footer */
+    .site-footer {
+      background: var(--green-deep);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 32px;
+      font-size: 13px;
+    }
+
+    .site-footer a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+    }
+
+    .site-footer a:hover {
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .site-header {
+        padding: 14px 20px;
+      }
+
+      .site-nav {
+        gap: 16px;
+      }
+
+      .site-nav a:not(.nav-cta) {
+        display: none;
+      }
+
+      .hero {
+        padding: 60px 20px 70px;
+      }
+
+      .section {
+        padding: 60px 20px;
+      }
+
+      .section-alt {
+        padding: 60px 20px;
+      }
+
+      .steps {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .bottom-cta {
+        padding: 60px 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .site-logo {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Signal Bar -->
+  <div class="signal-bar">
+    Shareable season recap cards for youth soccer
+  </div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <a href="/" class="site-logo">TEAM SEASON</a>
+    <nav class="site-nav">
+      <a href="#features">Features</a>
+      <a href="/blog">Blog</a>
+      <a href="/app" class="nav-cta">OPEN APP</a>
+    </nav>
+  </header>
+
+  <!-- Gradient Stripe -->
+  <div class="gradient-stripe"></div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <p class="tagline">Long after the scores are forgotten, the moments remain.</p>
+      <h1>EVERY SEASON TELLS A STORY</h1>
+      <p class="lead">Create beautiful, shareable recap cards that capture the highlights, the growth, and the memories from your child's season.</p>
+      <a href="/app" class="btn-primary">START YOUR SEASON</a>
+    </div>
+  </section>
+
+  <!-- The Problem -->
+  <section class="section">
+    <h2>SEASONS FADE FAST</h2>
+    <p>You watched every game. You cheered every goal. But by next fall, the details start to blur. Who scored the winner against the crosstown rivals? What was the final record? When did your kid make that big jump?</p>
+    <ul class="problem-list">
+      <li>Photos get buried in your camera roll, out of order and unlabeled</li>
+      <li>Stats and standings disappear when the league app resets</li>
+      <li>End-of-season celebrations come and go without anything to hold onto</li>
+      <li>By the time you think to write it down, half the details are already gone</li>
+    </ul>
+  </section>
+
+  <!-- The Solution -->
+  <section class="section-alt">
+    <div class="section-inner" style="padding: 80px 0;">
+      <h2>ONE CARD. ONE SEASON. ALL THE MOMENTS THAT MATTERED.</h2>
+      <p>Team Season gives parents and players a simple way to build a season recap card - a single, shareable image that captures the story of the season. Add your photos, fill in the stats, write down the memories, and export a card you'll actually want to keep.</p>
+      <p>No accounts to manage. No subscriptions. Just a clean tool that helps you hold onto what matters before it slips away.</p>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="section">
+    <h2>HOW IT WORKS</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">01</div>
+        <h3>ADD YOUR DETAILS</h3>
+        <p>Player name, team, season, record, and the stats that tell the story. Fill in as much or as little as you want.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">02</div>
+        <h3>ADD YOUR PHOTOS</h3>
+        <p>Drop in your favorite photos from the season - game action, team shots, celebrations. The card arranges them for you.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">03</div>
+        <h3>SHARE IT</h3>
+        <p>Export your card as an image and share it with family, post it to social media, or print it and pin it to the wall.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section-alt" id="features">
+    <div class="section-inner" style="padding: 80px 0;">
+      <h2>FEATURES</h2>
+      <div class="features-grid">
+        <div class="feature">
+          <h3>SEASON RECAP CARDS</h3>
+          <p>Build a single card that captures the highlights of an entire season - stats, photos, memories, all in one place.</p>
+        </div>
+        <div class="feature">
+          <h3>PHOTO LAYOUT</h3>
+          <p>Add your best photos and the card arranges them into a clean layout. No design skills needed.</p>
+        </div>
+        <div class="feature">
+          <h3>STATS AND RECORDS</h3>
+          <p>Record goals, assists, wins, losses, and any custom stats that matter to your player.</p>
+        </div>
+        <div class="feature">
+          <h3>SHAREABLE IMAGES</h3>
+          <p>Export your finished card as a high-quality image ready for social media, printing, or sending to grandparents.</p>
+        </div>
+        <div class="feature">
+          <h3>WORKS ON ANY DEVICE</h3>
+          <p>Build your card on your phone, tablet, or computer. Your progress saves automatically.</p>
+        </div>
+        <div class="feature">
+          <h3>NO ACCOUNT REQUIRED</h3>
+          <p>Get started immediately. No sign-up forms, no email verification, no passwords to remember.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom CTA -->
+  <section class="bottom-cta">
+    <h2>DON'T LET THIS SEASON DISAPPEAR</h2>
+    <p>It takes five minutes to build a card your family will look back on for years.</p>
+    <a href="/app" class="btn-primary">START YOUR SEASON</a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/app">Open App</a> &nbsp;&middot;&nbsp; <a href="/blog">Blog</a></p>
+  </footer>
+
+</body>
+</html>

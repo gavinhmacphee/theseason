@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1B4332" />
+  <meta name="description" content="Team Season Blog - Tips and stories about capturing your child's soccer season." />
+  <title>Blog - Team Season</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green: #1B4332;
+      --green-deep: #122d22;
+      --green-light: #2d6a4f;
+      --gold: #c8963e;
+      --gold-light: #d4a855;
+      --cream: #f8f5ef;
+      --white: #ffffff;
+      --text: #2a2a2a;
+      --text-light: #5a5a5a;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      background: var(--cream);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .signal-bar {
+      background: var(--green-deep);
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+    }
+
+    .site-header {
+      background: var(--cream);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .site-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 1.5px;
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .site-nav a {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: 0.3px;
+    }
+
+    .site-nav a:hover {
+      color: var(--green);
+    }
+
+    .site-nav .nav-cta {
+      font-family: 'Bebas Neue', sans-serif;
+      background: var(--gold);
+      color: var(--green-deep);
+      padding: 8px 20px;
+      font-size: 16px;
+      letter-spacing: 1px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .site-nav .nav-cta:hover {
+      background: var(--gold-light);
+      color: var(--green-deep);
+    }
+
+    .gradient-stripe {
+      height: 3px;
+      background: linear-gradient(90deg, var(--green-deep), var(--green), var(--green-light));
+    }
+
+    .hero {
+      background: linear-gradient(135deg, var(--green-deep) 0%, var(--green) 50%, #2d6a4f 100%);
+      color: var(--white);
+      padding: 80px 32px 90px;
+      text-align: center;
+    }
+
+    .hero-inner {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .hero .pill-tag {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 14px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.08);
+      display: inline-block;
+      padding: 4px 16px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(40px, 6vw, 60px);
+      line-height: 1.0;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+    }
+
+    .hero p {
+      font-size: 17px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 32px;
+    }
+
+    .btn-primary {
+      font-family: 'Bebas Neue', sans-serif;
+      display: inline-block;
+      background: var(--gold);
+      color: var(--green-deep);
+      padding: 14px 40px;
+      font-size: 20px;
+      letter-spacing: 1.5px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--gold-light);
+    }
+
+    .site-footer {
+      background: var(--green-deep);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 32px;
+      font-size: 13px;
+    }
+
+    .site-footer a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+    }
+
+    .site-footer a:hover {
+      color: rgba(255,255,255,0.8);
+    }
+
+    @media (max-width: 768px) {
+      .site-header { padding: 14px 20px; }
+      .site-nav { gap: 16px; }
+      .site-nav a:not(.nav-cta) { display: none; }
+      .hero { padding: 60px 20px 70px; }
+    }
+
+    @media (max-width: 480px) {
+      .site-logo { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Signal Bar -->
+  <div class="signal-bar">
+    Shareable season recap cards for youth soccer
+  </div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <a href="/" class="site-logo">TEAM SEASON</a>
+    <nav class="site-nav">
+      <a href="/#features">Features</a>
+      <a href="/blog">Blog</a>
+      <a href="/app" class="nav-cta">OPEN APP</a>
+    </nav>
+  </header>
+
+  <!-- Gradient Stripe -->
+  <div class="gradient-stripe"></div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <span class="pill-tag">COMING SOON</span>
+      <h1>BLOG</h1>
+      <p>Tips, stories, and ideas for capturing your child's soccer season - from game-day photos to end-of-year traditions. We're working on the first posts now.</p>
+      <a href="/app" class="btn-primary">START YOUR SEASON</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/app">Open App</a></p>
+  </footer>
+
+</body>
+</html>
