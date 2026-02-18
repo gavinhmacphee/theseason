@@ -274,19 +274,19 @@ function demoData() {
 
 // --- PAGINATION ALGORITHM (for print book) ---
 function paginateEntries(entries) {
-  const PAGE_BUDGET = 1850; // px — 7.125" safe area minus bleed/margins/page-number at ~260 PPI
-  const DIVIDER = 50;
+  const PAGE_BUDGET = 2470; // px — 8.5x11" safe area minus bleed/margins/page-number at ~260 PPI
+  const DIVIDER = 56;
 
   function estimateHeight(entry) {
-    let h = 60; // type badge + date row
+    let h = 70; // type badge + date row
     if ((entry.entry_type === "game" || entry.entry_type === "tournament") &&
         entry.score_home !== null && entry.score_away !== null) {
-      h += 80; // score block
+      h += 90; // score block
     }
-    if (entry.opponent) h += 35;
-    if (entry.photoPreview || entry.photoData) h += 800;
-    if (entry.text) h += Math.ceil(entry.text.length / 42) * 48;
-    if (entry.venue) h += 35;
+    if (entry.opponent) h += 40;
+    if (entry.photoPreview || entry.photoData) h += 1100;
+    if (entry.text) h += Math.ceil(entry.text.length / 50) * 50;
+    if (entry.venue) h += 38;
     return h;
   }
 
@@ -1243,30 +1243,49 @@ function SeasonStats({ entries, brandColor }) {
   const practices = entries.filter((e) => e.entry_type === "practice").length;
   const photos = entries.filter((e) => e.photoPreview || e.photoData || e.photo_path).length;
 
+  // Book page count from pagination algorithm
+  const bookPages = entries.length > 0 ? paginateEntries(entries).length + 3 : 0; // +3 for title, summary, closing pages
+  const bookMessage = bookPages === 0 ? null
+    : bookPages < 8 ? "Keep going"
+    : bookPages < 16 ? "Building something special"
+    : bookPages < 30 ? "This is going to be a great book"
+    : "A season to remember";
+
   return (
-    <div style={{
-      display: "flex", gap: 6, marginBottom: 16, overflowX: "auto",
-      padding: "2px 0",
-    }}>
-      {[
-        { label: "Entries", value: entries.length, color: brandColor || theme.primary },
-        { label: "W-L-D", value: `${wins}-${losses}-${draws}`, color: theme.win },
-        { label: "Practices", value: practices, color: theme.practice },
-        { label: "Photos", value: photos, color: theme.accent },
-      ].map((stat) => (
-        <div key={stat.label} style={{
-          flex: "1 0 auto", padding: "10px 14px", borderRadius: 10,
-          background: `${stat.color}08`, border: `1px solid ${stat.color}20`,
-          textAlign: "center", minWidth: 75,
+    <div style={{ marginBottom: 16 }}>
+      <div style={{
+        display: "flex", gap: 6, overflowX: "auto",
+        padding: "2px 0",
+      }}>
+        {[
+          { label: "Entries", value: entries.length, color: brandColor || theme.primary },
+          { label: "W-L-D", value: `${wins}-${losses}-${draws}`, color: theme.win },
+          { label: "Practices", value: practices, color: theme.practice },
+          { label: "Photos", value: photos, color: theme.accent },
+          { label: "Book", value: `${bookPages} pg`, color: theme.tournament },
+        ].map((stat) => (
+          <div key={stat.label} style={{
+            flex: "1 0 auto", padding: "10px 14px", borderRadius: 10,
+            background: `${stat.color}08`, border: `1px solid ${stat.color}20`,
+            textAlign: "center", minWidth: 65,
+          }}>
+            <div style={{ fontFamily: fonts.mono, fontWeight: 700, fontSize: 16, color: stat.color }}>
+              {stat.value}
+            </div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: theme.textMuted, textTransform: "uppercase", marginTop: 2 }}>
+              {stat.label}
+            </div>
+          </div>
+        ))}
+      </div>
+      {bookMessage && (
+        <div style={{
+          fontSize: 12, color: theme.textMuted, fontStyle: "italic",
+          textAlign: "center", marginTop: 8, fontFamily: fonts.display,
         }}>
-          <div style={{ fontFamily: fonts.mono, fontWeight: 700, fontSize: 16, color: stat.color }}>
-            {stat.value}
-          </div>
-          <div style={{ fontSize: 10, fontWeight: 600, color: theme.textMuted, textTransform: "uppercase", marginTop: 2 }}>
-            {stat.label}
-          </div>
+          {bookMessage}
         </div>
-      ))}
+      )}
     </div>
   );
 }
@@ -1517,9 +1536,11 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
     return renderClosingPage();
   };
 
-  const RENDER_SIZE = 700;
-  const CONTAINER_SIZE = 340;
-  const scale = CONTAINER_SIZE / RENDER_SIZE;
+  const RENDER_W = 595;  // 8.5" at ~70ppi
+  const RENDER_H = 770;  // 11" at ~70ppi
+  const CONTAINER_W = 290;
+  const CONTAINER_H = 375;
+  const scale = CONTAINER_W / RENDER_W;
 
   return (
     <div style={{
@@ -1544,7 +1565,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
       {/* Page viewer */}
       <div
         style={{
-          width: CONTAINER_SIZE, height: CONTAINER_SIZE,
+          width: CONTAINER_W, height: CONTAINER_H,
           overflow: "hidden", borderRadius: 4,
           boxShadow: "0 16px 64px rgba(0,0,0,0.5)",
           marginBottom: 16, position: "relative",
@@ -1554,7 +1575,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
         onTouchEnd={handleTouchEnd}
       >
         <div style={{
-          width: RENDER_SIZE, height: RENDER_SIZE,
+          width: RENDER_W, height: RENDER_H,
           transform: `scale(${scale})`, transformOrigin: "top left",
         }}>
           {renderCurrentPage()}
@@ -1602,7 +1623,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
           background: theme.accent, color: "white",
           fontSize: 13, padding: "10px 20px",
         }}>
-          Order Book $34.99
+          Order Book $39
         </button>
       </div>
     </div>
@@ -1788,12 +1809,12 @@ function OrderFlow({ entries, team, season, players, onClose }) {
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                 <span style={{ fontSize: 14, color: theme.textMuted }}>Format</span>
-                <span style={{ fontSize: 14, fontWeight: 500 }}>7×7" Softcover</span>
+                <span style={{ fontSize: 14, fontWeight: 500 }}>8.5×11" Hardcover</span>
               </div>
               <div style={{ height: 1, background: theme.border, margin: "12px 0" }} />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontSize: 16, fontWeight: 600 }}>Total</span>
-                <span style={{ fontFamily: fonts.mono, fontSize: 16, fontWeight: 700, color: orderPrimary }}>$34.99 + shipping</span>
+                <span style={{ fontFamily: fonts.mono, fontSize: 16, fontWeight: 700, color: orderPrimary }}>$39 + shipping</span>
               </div>
             </div>
             <button className="btn btn-primary" onClick={handleContinueToShipping} style={{ width: "100%", padding: "14px 24px", fontSize: 15, background: orderPrimary }}>
@@ -1841,7 +1862,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
               <div style={{ height: 1, background: theme.border, margin: "10px 0" }} />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: 600 }}>Total</span>
-                <span style={{ fontFamily: fonts.mono, fontWeight: 700, color: orderPrimary }}>$34.99 + shipping</span>
+                <span style={{ fontFamily: fonts.mono, fontWeight: 700, color: orderPrimary }}>$39 + shipping</span>
               </div>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
@@ -1966,7 +1987,11 @@ function generateHeadline(entry) {
 }
 
 // --- SHARE CARD RENDER ---
-const ShareCardRender = React.forwardRef(function ShareCardRender({ entry, team, season, aspect, preview, headline: headlineProp }, ref) {
+const ShareCardRender = React.forwardRef(function ShareCardRender({
+  entry, team, season, aspect, preview, headline: headlineProp, entryNumber,
+  template = "classic", cardTheme = "dark", cardFont = "editorial", cardAlign = "left",
+  cardColor, photoPos = "center", hasSeasonPass = false, entries = [],
+}, ref) {
   const isStory = aspect === "story";
   const width = 1080;
   const height = isStory ? 1920 : 1080;
@@ -1976,7 +2001,28 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({ entry, team,
   const hasPhoto = !!(entry.photoPreview || entry.photoData);
   const hasScore = entry.score_home !== null && entry.score_away !== null;
 
-  const teamColor = team?.color || theme.primary;
+  const activeColor = cardColor || team?.color || theme.primary;
+  const isDark = cardTheme === "dark";
+  const isCenter = cardAlign === "center";
+  const isModern = cardFont === "modern";
+
+  // Theme-derived colors
+  const bg = isDark
+    ? (hasPhoto && template !== "statLine" && template !== "minimal" ? "#000" : gradientFromColor(activeColor))
+    : "#FAFAF7";
+  const textPrimary = isDark ? "#FFFFFF" : "#1A1A1A";
+  const textSecondary = isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)";
+  const textTertiary = isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)";
+  const textQuote = isDark ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.7)";
+  const badgeBg = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)";
+  const badgeBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
+  const watermarkColor = isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.15)";
+  const watermarkBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)";
+
+  // Font-derived styles
+  const headlineFont = isModern ? fonts.body : fonts.headline;
+  const headlineStyle = isModern ? "normal" : "italic";
+  const headlineWeight = isModern ? 800 : 400;
 
   const lineFontSize = entryText.length > 200 ? 36 : entryText.length > 100 ? 42 : 52;
 
@@ -1984,6 +2030,297 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({ entry, team,
     weekday: "long", month: "long", day: "numeric", year: "numeric",
   });
 
+  const photoPosMap = { top: "center 10%", center: "center 40%", bottom: "center 75%" };
+  const bgPosition = photoPosMap[photoPos] || "center 40%";
+
+  // Stat line computations
+  const seasonGames = entries.filter((e) => e.entry_type === "game" || e.entry_type === "tournament");
+  const wins = seasonGames.filter((e) => e.result === "win").length;
+  const losses = seasonGames.filter((e) => e.result === "loss").length;
+  const draws = seasonGames.filter((e) => e.result === "draw").length;
+  const goalsFor = seasonGames.reduce((s, e) => s + (e.score_home || 0), 0);
+  const goalsAgainst = seasonGames.reduce((s, e) => s + (e.score_away || 0), 0);
+
+  // Watermark bar (shared across templates)
+  const watermarkBar = (
+    <div style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingTop: 20,
+      borderTop: `1px solid ${watermarkBorder}`,
+    }}>
+      {hasSeasonPass ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {team.logo && (
+            <img src={team.logo} alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }} />
+          )}
+          <span style={{
+            fontFamily: fonts.body, fontSize: 22, fontWeight: 700,
+            color: watermarkColor, letterSpacing: 2, textTransform: "uppercase",
+          }}>
+            {team.name}
+          </span>
+        </div>
+      ) : (
+        <span style={{
+          fontFamily: fonts.body, fontSize: 22, fontWeight: 700,
+          color: watermarkColor, letterSpacing: 4, textTransform: "uppercase",
+        }}>
+          Team Season
+        </span>
+      )}
+      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        {entryNumber && (
+          <span style={{ fontFamily: fonts.mono, fontSize: 18, fontWeight: 500, color: watermarkColor }}>
+            Entry #{entryNumber}
+          </span>
+        )}
+        {!hasSeasonPass && (
+          <span style={{ fontFamily: fonts.body, fontSize: 20, color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.12)" }}>
+            teamseason.app
+          </span>
+        )}
+      </div>
+    </div>
+  );
+
+  // Team strip (shared)
+  const teamStrip = (
+    <div style={{
+      fontSize: 28, fontWeight: 600, color: textSecondary,
+      letterSpacing: 2, textTransform: "uppercase", marginBottom: 16,
+      display: "flex", alignItems: "center", gap: 14,
+      justifyContent: isCenter ? "center" : "flex-start",
+    }}>
+      {team.logo ? (
+        <img src={team.logo} alt="" style={{
+          width: 64, height: 64, borderRadius: "50%", objectFit: "cover",
+          border: `2px solid ${badgeBorder}`,
+        }} />
+      ) : (
+        <span style={{ fontSize: 36 }}>{team.emoji}</span>
+      )}
+      <span>{team.name}</span>
+    </div>
+  );
+
+  // --- TEMPLATE: BIG SCORE ---
+  if (template === "bigScore" && hasScore) {
+    return (
+      <div ref={ref} style={{
+        width, height,
+        ...(preview ? {} : { position: "absolute", left: -9999, top: -9999 }),
+        overflow: "hidden", fontFamily: fonts.body,
+        background: isDark ? gradientFromColor(activeColor) : bg,
+        display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center",
+        padding: "64px",
+      }}>
+        {teamStrip}
+        <h2 style={{
+          fontFamily: headlineFont, fontStyle: headlineStyle, fontWeight: headlineWeight,
+          fontSize: isStory ? 56 : 48, color: textPrimary, lineHeight: 1.1,
+          marginBottom: 40, textAlign: "center", letterSpacing: -0.5,
+        }}>
+          {headline}
+        </h2>
+        <div style={{
+          fontFamily: fonts.mono, fontSize: isStory ? 180 : 140, fontWeight: 700,
+          color: textPrimary, letterSpacing: 8, lineHeight: 1,
+          marginBottom: 24,
+        }}>
+          {entry.score_home} - {entry.score_away}
+        </div>
+        {entry.opponent && (
+          <div style={{ fontSize: 32, color: textSecondary, fontWeight: 500, marginBottom: 12 }}>
+            vs {entry.opponent}
+          </div>
+        )}
+        <div style={{ fontSize: 24, color: textTertiary, marginBottom: 48 }}>
+          {dateStr}
+        </div>
+        <div style={{
+          width: 80, height: 4, background: isDark ? "rgba(255,255,255,0.3)" : activeColor,
+          borderRadius: 2, marginBottom: 48,
+        }} />
+        <div style={{ width: "100%", marginTop: "auto" }}>{watermarkBar}</div>
+      </div>
+    );
+  }
+
+  // --- TEMPLATE: PHOTO HERO ---
+  if (template === "photoHero" && hasPhoto) {
+    return (
+      <div ref={ref} style={{
+        width, height,
+        ...(preview ? {} : { position: "absolute", left: -9999, top: -9999 }),
+        overflow: "hidden", fontFamily: fonts.body,
+        background: isDark ? "#000" : bg,
+        display: "flex", flexDirection: "column",
+      }}>
+        <div style={{
+          flex: isStory ? "1 1 75%" : "1 1 70%",
+          position: "relative", overflow: "hidden",
+          backgroundImage: `url(${entry.photoPreview || entry.photoData})`,
+          backgroundSize: "cover", backgroundPosition: bgPosition, backgroundRepeat: "no-repeat",
+        }}>
+          <div style={{
+            position: "absolute", bottom: 0, left: 0, right: 0, height: "50%",
+            background: isDark
+              ? "linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 100%)"
+              : "linear-gradient(to top, rgba(250,250,247,1) 0%, transparent 100%)",
+          }} />
+        </div>
+        <div style={{
+          flex: isStory ? "1 1 25%" : "1 1 30%",
+          background: isDark ? "#000" : bg,
+          padding: "32px 64px 48px",
+          display: "flex", flexDirection: "column", justifyContent: "flex-end",
+        }}>
+          <h1 style={{
+            fontFamily: headlineFont, fontStyle: headlineStyle, fontWeight: headlineWeight,
+            fontSize: isStory ? 80 : 64, color: textPrimary, lineHeight: 1.0,
+            marginBottom: 12, letterSpacing: -1, textAlign: isCenter ? "center" : "left",
+          }}>
+            {headline}
+          </h1>
+          {hasScore && (
+            <div style={{
+              fontFamily: fonts.mono, fontSize: 36, fontWeight: 700,
+              color: isDark ? activeColor : textPrimary, letterSpacing: 2,
+              marginBottom: 8, textAlign: isCenter ? "center" : "left",
+            }}>
+              {entry.score_home} - {entry.score_away}
+              {entry.opponent && <span style={{ fontSize: 24, color: textSecondary, fontWeight: 500, marginLeft: 16 }}>vs {entry.opponent}</span>}
+            </div>
+          )}
+          <div style={{
+            fontSize: 20, color: textTertiary, marginBottom: 24,
+            textAlign: isCenter ? "center" : "left",
+          }}>
+            {dateStr}
+          </div>
+          {watermarkBar}
+        </div>
+      </div>
+    );
+  }
+
+  // --- TEMPLATE: STAT LINE ---
+  if (template === "statLine" && hasScore) {
+    return (
+      <div ref={ref} style={{
+        width, height,
+        ...(preview ? {} : { position: "absolute", left: -9999, top: -9999 }),
+        overflow: "hidden", fontFamily: fonts.mono,
+        background: isDark ? gradientFromColor(activeColor) : bg,
+        display: "flex", flexDirection: "column",
+        padding: isStory ? "80px 64px 60px" : "64px 64px 48px",
+      }}>
+        {teamStrip}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <h1 style={{
+            fontFamily: headlineFont, fontStyle: headlineStyle, fontWeight: headlineWeight,
+            fontSize: isStory ? 72 : 60, color: textPrimary, lineHeight: 1.0,
+            marginBottom: 48, letterSpacing: -1, textAlign: isCenter ? "center" : "left",
+          }}>
+            {headline}
+          </h1>
+          {/* Today's score */}
+          <div style={{
+            display: "flex", alignItems: "baseline", gap: 20, marginBottom: 40,
+            justifyContent: isCenter ? "center" : "flex-start",
+          }}>
+            <span style={{ fontSize: 96, fontWeight: 700, color: textPrimary, letterSpacing: 4 }}>
+              {entry.score_home} - {entry.score_away}
+            </span>
+            {entry.opponent && (
+              <span style={{ fontSize: 28, color: textSecondary, fontFamily: fonts.body, fontWeight: 500 }}>
+                vs {entry.opponent}
+              </span>
+            )}
+          </div>
+          {/* Stat block */}
+          <div style={{
+            background: badgeBg, border: `1px solid ${badgeBorder}`, borderRadius: 16,
+            padding: "32px 40px", marginBottom: 40,
+          }}>
+            {[
+              { label: "RECORD", value: `${wins}W - ${losses}L - ${draws}D` },
+              { label: "GOALS FOR", value: String(goalsFor) },
+              { label: "GOALS AGAINST", value: String(goalsAgainst) },
+              { label: "ENTRIES", value: String(entries.length) },
+            ].map((row, i) => (
+              <div key={i} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "14px 0",
+                borderBottom: i < 3 ? `1px solid ${badgeBorder}` : "none",
+              }}>
+                <span style={{ fontSize: 22, color: textSecondary, letterSpacing: 3 }}>{row.label}</span>
+                <span style={{ fontSize: 28, fontWeight: 700, color: textPrimary }}>{row.value}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: 22, color: textTertiary, textAlign: isCenter ? "center" : "left" }}>
+            {dateStr}
+          </div>
+        </div>
+        {watermarkBar}
+      </div>
+    );
+  }
+
+  // --- TEMPLATE: MINIMAL ---
+  if (template === "minimal") {
+    return (
+      <div ref={ref} style={{
+        width, height,
+        ...(preview ? {} : { position: "absolute", left: -9999, top: -9999 }),
+        overflow: "hidden", fontFamily: fonts.body,
+        background: isDark ? gradientFromColor(activeColor) : bg,
+        display: "flex", flexDirection: "column",
+        padding: isStory ? "120px 80px 60px" : "80px 80px 48px",
+        justifyContent: "center",
+      }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <h1 style={{
+            fontFamily: headlineFont, fontStyle: headlineStyle, fontWeight: headlineWeight,
+            fontSize: isStory ? 120 : 96, color: textPrimary, lineHeight: 0.95,
+            marginBottom: 32, letterSpacing: -2, textAlign: isCenter ? "center" : "left",
+          }}>
+            {headline}
+          </h1>
+          <div style={{
+            width: isCenter ? 80 : 80, height: 4,
+            background: isDark ? "rgba(255,255,255,0.3)" : activeColor,
+            borderRadius: 2, marginBottom: 32,
+            marginLeft: isCenter ? "auto" : 0, marginRight: isCenter ? "auto" : undefined,
+          }} />
+          {entryText && (
+            <p style={{
+              fontFamily: fonts.display, fontStyle: "italic",
+              fontSize: entryText.length > 150 ? 40 : 52, lineHeight: 1.4,
+              color: textQuote, marginBottom: 40,
+              maxHeight: isStory ? 400 : 240, overflow: "hidden",
+              textAlign: isCenter ? "center" : "left",
+            }}>
+              &ldquo;{entryText}&rdquo;
+            </p>
+          )}
+          <div style={{
+            fontSize: 24, color: textTertiary,
+            textAlign: isCenter ? "center" : "left",
+          }}>
+            {entry.opponent && <span>vs {entry.opponent} · </span>}
+            {dateStr}
+          </div>
+        </div>
+        <div style={{ marginTop: 48 }}>{watermarkBar}</div>
+      </div>
+    );
+  }
+
+  // --- TEMPLATE: CLASSIC (default) ---
   return (
     <div
       ref={ref}
@@ -1993,12 +2330,12 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({ entry, team,
         ...(preview ? {} : { position: "absolute", left: -9999, top: -9999 }),
         overflow: "hidden",
         fontFamily: fonts.body,
-        background: hasPhoto ? "#000" : gradientFromColor(teamColor),
+        background: hasPhoto ? (isDark ? "#000" : bg) : (isDark ? gradientFromColor(activeColor) : bg),
         display: "flex",
         flexDirection: "column",
       }}
     >
-      {/* Photo area - uses background-image for html2canvas compatibility */}
+      {/* Photo area */}
       {hasPhoto ? (
         <div style={{
           flex: isStory ? "1 1 55%" : "1 1 50%",
@@ -2006,16 +2343,15 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({ entry, team,
           overflow: "hidden",
           backgroundImage: `url(${entry.photoPreview || entry.photoData})`,
           backgroundSize: "cover",
-          backgroundPosition: "top center",
+          backgroundPosition: bgPosition,
           backgroundRepeat: "no-repeat",
         }}>
           <div style={{
             position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "60%",
-            background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, transparent 100%)",
+            bottom: 0, left: 0, right: 0, height: "60%",
+            background: isDark
+              ? "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, transparent 100%)"
+              : "linear-gradient(to top, rgba(250,250,247,1) 0%, rgba(250,250,247,0.6) 40%, transparent 100%)",
           }} />
         </div>
       ) : (
@@ -2025,56 +2361,36 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({ entry, team,
       {/* Content area */}
       <div style={{
         flex: hasPhoto ? (isStory ? "1 1 45%" : "1 1 50%") : (isStory ? "1 1 70%" : "1 1 75%"),
-        background: hasPhoto ? "#000" : "transparent",
+        background: hasPhoto ? (isDark ? "#000" : bg) : "transparent",
         padding: isStory ? "48px 64px 60px" : "40px 64px 48px",
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-end",
       }}>
         {/* Team strip */}
-        <div style={{
-          fontSize: 28,
-          fontWeight: 600,
-          color: "rgba(255,255,255,0.6)",
-          letterSpacing: 2,
-          textTransform: "uppercase",
-          marginBottom: 16,
-          display: "flex",
-          alignItems: "center",
-          gap: 14,
-        }}>
-          {team.logo ? (
-            <img src={team.logo} alt="" style={{
-              width: 64, height: 64, borderRadius: "50%", objectFit: "cover",
-              border: "2px solid rgba(255,255,255,0.2)",
-            }} />
-          ) : (
-            <span style={{ fontSize: 36 }}>{team.emoji}</span>
-          )}
-          <span>{team.name}</span>
-        </div>
+        {teamStrip}
 
         {/* Headline */}
         <h1 style={{
-          fontFamily: fonts.headline,
-          fontStyle: "italic",
+          fontFamily: headlineFont,
+          fontStyle: headlineStyle,
           fontSize: isStory ? 96 : 80,
-          fontWeight: 400,
-          color: "#FFFFFF",
+          fontWeight: headlineWeight,
+          color: textPrimary,
           lineHeight: 1.0,
           marginBottom: 20,
           letterSpacing: -1,
+          textAlign: isCenter ? "center" : "left",
         }}>
           {headline}
         </h1>
 
         {/* Accent divider */}
         <div style={{
-          width: 80,
-          height: 4,
-          background: teamColor,
-          marginBottom: 24,
-          borderRadius: 2,
+          width: 80, height: 4,
+          background: isDark ? activeColor : activeColor,
+          marginBottom: 24, borderRadius: 2,
+          marginLeft: isCenter ? "auto" : 0, marginRight: isCenter ? "auto" : undefined,
         }} />
 
         {/* The line */}
@@ -2083,10 +2399,11 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({ entry, team,
           fontStyle: "italic",
           fontSize: lineFontSize,
           lineHeight: 1.4,
-          color: "rgba(255,255,255,0.85)",
+          color: textQuote,
           marginBottom: 32,
           maxHeight: isStory ? 280 : 200,
           overflow: "hidden",
+          textAlign: isCenter ? "center" : "left",
         }}>
           &ldquo;{entryText}&rdquo;
         </p>
@@ -2097,86 +2414,52 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({ entry, team,
             display: "flex",
             alignItems: "center",
             gap: 24,
-            background: "rgba(255,255,255,0.08)",
+            background: badgeBg,
             borderRadius: 16,
             padding: "20px 28px",
             marginBottom: 32,
-            border: "1px solid rgba(255,255,255,0.1)",
+            border: `1px solid ${badgeBorder}`,
+            justifyContent: isCenter ? "center" : "flex-start",
           }}>
             <span style={{
-              fontFamily: fonts.mono,
-              fontSize: 56,
-              fontWeight: 700,
-              color: "#FFFFFF",
-              letterSpacing: 2,
+              fontFamily: fonts.mono, fontSize: 56, fontWeight: 700,
+              color: textPrimary, letterSpacing: 2,
             }}>
               {entry.score_home} – {entry.score_away}
             </span>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {entry.opponent && (
-                <span style={{ fontSize: 24, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>
+                <span style={{ fontSize: 24, color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)", fontWeight: 500 }}>
                   vs {entry.opponent}
                 </span>
               )}
               {entry.venue && (
-                <span style={{ fontSize: 20, color: "rgba(255,255,255,0.4)" }}>
-                  {entry.venue}
-                </span>
+                <span style={{ fontSize: 20, color: textTertiary }}>{entry.venue}</span>
               )}
-              <span style={{ fontSize: 20, color: "rgba(255,255,255,0.4)" }}>
-                {dateStr}
-              </span>
+              <span style={{ fontSize: 20, color: textTertiary }}>{dateStr}</span>
             </div>
           </div>
         )}
 
         {/* No-score date */}
         {!hasScore && (
-          <div style={{
-            fontSize: 22,
-            color: "rgba(255,255,255,0.35)",
-            marginBottom: 32,
-          }}>
+          <div style={{ fontSize: 22, color: textTertiary, marginBottom: 32, textAlign: isCenter ? "center" : "left" }}>
             {entry.opponent && <span>vs {entry.opponent} · </span>}
             {dateStr}
           </div>
         )}
 
         {/* Watermark */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          paddingTop: 20,
-          borderTop: "1px solid rgba(255,255,255,0.1)",
-        }}>
-          <span style={{
-            fontFamily: fonts.body,
-            fontSize: 22,
-            fontWeight: 700,
-            color: "rgba(255,255,255,0.25)",
-            letterSpacing: 4,
-            textTransform: "uppercase",
-          }}>
-            Team Season
-          </span>
-          <span style={{
-            fontFamily: fonts.body,
-            fontSize: 20,
-            color: "rgba(255,255,255,0.2)",
-          }}>
-            teamseason.app
-          </span>
-        </div>
+        {watermarkBar}
       </div>
     </div>
   );
 });
 
 // --- SHARE PROMPT (post-save toast) ---
-function SharePrompt({ entry, onShare, onDismiss, brandColor }) {
+function SharePrompt({ entry, onShare, onDismiss, brandColor, bookPageCount }) {
   useEffect(() => {
-    const timer = setTimeout(onDismiss, 6000);
+    const timer = setTimeout(onDismiss, 8000);
     return () => clearTimeout(timer);
   }, [onDismiss]);
 
@@ -2197,47 +2480,57 @@ function SharePrompt({ entry, onShare, onDismiss, brandColor }) {
         color: "white",
         borderRadius: 14,
         padding: "14px 20px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 16,
         width: "100%",
         maxWidth: 440,
         boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 18 }}>✓</span>
-          <span style={{ fontSize: 14, fontWeight: 500 }}>Share this moment?</span>
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button
-            onClick={onShare}
-            style={{
-              background: "rgba(255,255,255,0.2)",
-              color: "white",
-              border: "none",
-              borderRadius: 8,
-              padding: "8px 16px",
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Share
-          </button>
-          <button
-            onClick={onDismiss}
-            style={{
-              background: "none",
-              color: "rgba(255,255,255,0.5)",
-              border: "none",
-              fontSize: 18,
-              cursor: "pointer",
-              padding: "4px 8px",
-            }}
-          >
-            ×
-          </button>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+        }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+              <span style={{ fontSize: 16 }}>&#10003;</span>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>Saved</span>
+            </div>
+            {bookPageCount > 0 && (
+              <div style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", paddingLeft: 24 }}>
+                Your book is now {bookPageCount} page{bookPageCount !== 1 ? "s" : ""}
+              </div>
+            )}
+          </div>
+          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+            <button
+              onClick={onShare}
+              style={{
+                background: "rgba(255,255,255,0.2)",
+                color: "white",
+                border: "none",
+                borderRadius: 8,
+                padding: "8px 16px",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Share
+            </button>
+            <button
+              onClick={onDismiss}
+              style={{
+                background: "none",
+                color: "rgba(255,255,255,0.5)",
+                border: "none",
+                fontSize: 18,
+                cursor: "pointer",
+                padding: "4px 8px",
+              }}
+            >
+              &#215;
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -2245,21 +2538,57 @@ function SharePrompt({ entry, onShare, onDismiss, brandColor }) {
 }
 
 // --- SHARE CARD MODAL ---
-function ShareCardModal({ entry, team, season, onClose }) {
+function ShareCardModal({ entry, team, season, onClose, entryNumber, entries = [] }) {
   const sharePrimary = team?.color || theme.primary;
   const cardRef = useRef(null);
   const [aspect, setAspect] = useState("story");
   const [exporting, setExporting] = useState(false);
   const [headline, setHeadline] = useState(generateHeadline(entry));
 
+  // --- New customization state ---
+  const hasPhoto = !!(entry.photoPreview || entry.photoData);
+  const hasScore = entry.score_home !== null && entry.score_away !== null;
+
+  // Auto-template detection
+  const autoTemplate = (() => {
+    if (hasPhoto && (entry.text || "").length < 80) return "photoHero";
+    if (hasScore && entry.result === "win" && (entry.score_home - entry.score_away) >= 2) return "bigScore";
+    if (hasScore) return "classic";
+    return "minimal";
+  })();
+
+  const [template, setTemplate] = useState(autoTemplate);
+  const [cardTheme, setCardTheme] = useState("dark");
+  const [cardFont, setCardFont] = useState("editorial");
+  const [cardAlign, setCardAlign] = useState("left");
+  const [cardColor, setCardColor] = useState(team?.color || theme.primary);
+  const [photoPos, setPhotoPos] = useState("center");
+  const [showHexInput, setShowHexInput] = useState(false);
+  const [hexValue, setHexValue] = useState(team?.color || theme.primary);
+
+  const [savedUrl, setSavedUrl] = useState(null);
+
+  const colorPresets = [
+    cardColor === (team?.color || theme.primary) ? null : team?.color || theme.primary,
+    "#3B82F6", "#EF4444", "#22C55E", "#8B5CF6", "#F97316", "#EC4899", "#14B8A6",
+  ].filter(Boolean);
+  // Ensure team color is always first
+  const swatches = [team?.color || theme.primary, ...colorPresets.filter(c => c !== (team?.color || theme.primary))].slice(0, 8);
+
+  const templates = [
+    { id: "classic", label: "Classic", available: true },
+    { id: "bigScore", label: "Big Score", available: hasScore },
+    { id: "photoHero", label: "Photo Hero", available: hasPhoto },
+    { id: "statLine", label: "Stat Line", available: hasScore },
+    { id: "minimal", label: "Minimal", available: true },
+  ];
+
   const previewScale = aspect === "story"
-    ? Math.min(340 / 1080, (window.innerHeight * 0.55) / 1920)
-    : Math.min(340 / 1080, (window.innerHeight * 0.55) / 1080);
+    ? Math.min(300 / 1080, (window.innerHeight * 0.38) / 1920)
+    : Math.min(300 / 1080, (window.innerHeight * 0.38) / 1080);
 
   const previewWidth = 1080 * previewScale;
   const previewHeight = (aspect === "story" ? 1920 : 1080) * previewScale;
-
-  const [savedUrl, setSavedUrl] = useState(null);
 
   const handleExport = async () => {
     if (!cardRef.current || exporting) return;
@@ -2287,7 +2616,6 @@ function ShareCardModal({ entry, team, season, onClose }) {
 
       const file = new File([blob], `team-season-${entry.id}.png`, { type: "image/png" });
 
-      // Try Web Share API first (best mobile experience)
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({ files: [file], title: "Team Season" });
@@ -2298,7 +2626,6 @@ function ShareCardModal({ entry, team, season, onClose }) {
         }
       }
 
-      // Try download link (works on desktop, some Android)
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -2307,7 +2634,6 @@ function ShareCardModal({ entry, team, season, onClose }) {
       a.click();
       document.body.removeChild(a);
 
-      // Also show long-press fallback image for iOS Safari
       setSavedUrl(url);
       setExporting(false);
     } catch (err) {
@@ -2315,6 +2641,28 @@ function ShareCardModal({ entry, team, season, onClose }) {
       setExporting(false);
     }
   };
+
+  // Shared toggle button style helper
+  const toggleBtn = (active) => ({
+    padding: "6px 14px",
+    borderRadius: 7,
+    border: "none",
+    background: active ? "rgba(255,255,255,0.2)" : "transparent",
+    color: active ? "white" : "rgba(255,255,255,0.45)",
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: "pointer",
+    transition: "all 0.15s",
+    letterSpacing: 0.3,
+  });
+
+  const sectionLabel = (text) => (
+    <div style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6 }}>
+      {text}
+    </div>
+  );
+
+  const controlsWidth = Math.max(previewWidth, 300);
 
   return (
     <div style={{
@@ -2325,25 +2673,16 @@ function ShareCardModal({ entry, team, season, onClose }) {
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      justifyContent: "center",
       padding: 16,
+      overflowY: "auto",
     }}>
       {/* Close button */}
       <button
         onClick={onClose}
         style={{
-          position: "absolute",
-          top: 16,
-          right: 16,
-          background: "rgba(255,255,255,0.1)",
-          border: "none",
-          borderRadius: "50%",
-          width: 40,
-          height: 40,
-          color: "white",
-          fontSize: 20,
-          cursor: "pointer",
-          zIndex: 201,
+          position: "fixed", top: 16, right: 16,
+          background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%",
+          width: 40, height: 40, color: "white", fontSize: 20, cursor: "pointer", zIndex: 201,
         }}
       >
         ×
@@ -2351,56 +2690,160 @@ function ShareCardModal({ entry, team, season, onClose }) {
 
       {/* Aspect toggle */}
       <div style={{
-        display: "flex",
-        gap: 4,
-        background: "rgba(255,255,255,0.1)",
-        borderRadius: 10,
-        padding: 4,
-        marginBottom: 20,
+        display: "flex", gap: 4, background: "rgba(255,255,255,0.1)",
+        borderRadius: 10, padding: 4, marginBottom: 12, marginTop: 8,
       }}>
         {[
           { id: "story", label: "Story 9:16" },
           { id: "square", label: "Square 1:1" },
         ].map((opt) => (
-          <button
-            key={opt.id}
-            onClick={() => setAspect(opt.id)}
-            style={{
-              padding: "8px 18px",
-              borderRadius: 8,
-              border: "none",
-              background: aspect === opt.id ? "rgba(255,255,255,0.2)" : "transparent",
-              color: aspect === opt.id ? "white" : "rgba(255,255,255,0.5)",
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-              transition: "all 0.15s",
-            }}
-          >
+          <button key={opt.id} onClick={() => setAspect(opt.id)} style={toggleBtn(aspect === opt.id)}>
             {opt.label}
           </button>
         ))}
       </div>
 
+      {/* Template picker */}
+      <div style={{ width: controlsWidth, marginBottom: 12 }}>
+        {sectionLabel("Template")}
+        <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
+          {templates.filter(t => t.available).map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTemplate(t.id)}
+              style={{
+                ...toggleBtn(template === t.id),
+                flexShrink: 0,
+                padding: "7px 14px",
+                fontSize: 11,
+                border: template === t.id ? "1px solid rgba(255,255,255,0.3)" : "1px solid transparent",
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Style controls row */}
+      <div style={{ width: controlsWidth, marginBottom: 12, display: "flex", gap: 12, flexWrap: "wrap" }}>
+        {/* Theme */}
+        <div style={{ flex: 1, minWidth: 80 }}>
+          {sectionLabel("Theme")}
+          <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: 3 }}>
+            {[{ id: "dark", label: "Dark" }, { id: "light", label: "Light" }].map((opt) => (
+              <button key={opt.id} onClick={() => setCardTheme(opt.id)} style={{ ...toggleBtn(cardTheme === opt.id), flex: 1, textAlign: "center" }}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {/* Font */}
+        <div style={{ flex: 1, minWidth: 100 }}>
+          {sectionLabel("Font")}
+          <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: 3 }}>
+            {[{ id: "editorial", label: "Editorial" }, { id: "modern", label: "Modern" }].map((opt) => (
+              <button key={opt.id} onClick={() => setCardFont(opt.id)} style={{ ...toggleBtn(cardFont === opt.id), flex: 1, textAlign: "center" }}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {/* Alignment */}
+        <div style={{ flex: 1, minWidth: 80 }}>
+          {sectionLabel("Align")}
+          <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: 3 }}>
+            {[{ id: "left", label: "Left" }, { id: "center", label: "Center" }].map((opt) => (
+              <button key={opt.id} onClick={() => setCardAlign(opt.id)} style={{ ...toggleBtn(cardAlign === opt.id), flex: 1, textAlign: "center" }}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Color picker */}
+      <div style={{ width: controlsWidth, marginBottom: 12 }}>
+        {sectionLabel("Color")}
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          {swatches.map((hex, i) => (
+            <button
+              key={hex + i}
+              onClick={() => { setCardColor(hex); setHexValue(hex); }}
+              style={{
+                width: 28, height: 28, borderRadius: "50%", border: "none", cursor: "pointer", padding: 0,
+                background: hex,
+                boxShadow: cardColor === hex
+                  ? `0 0 0 2px rgba(0,0,0,0.85), 0 0 0 4px ${hex}`
+                  : "none",
+                transition: "box-shadow 0.15s",
+              }}
+              title={hex}
+            />
+          ))}
+          <button
+            onClick={() => setShowHexInput(!showHexInput)}
+            style={{
+              width: 28, height: 28, borderRadius: "50%", border: "1px dashed rgba(255,255,255,0.3)",
+              background: showHexInput ? "rgba(255,255,255,0.15)" : "transparent",
+              color: "rgba(255,255,255,0.5)", fontSize: 16, cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
+            }}
+          >
+            +
+          </button>
+        </div>
+        {showHexInput && (
+          <div style={{ display: "flex", gap: 8, marginTop: 8, alignItems: "center" }}>
+            <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, fontFamily: fonts.mono }}>#</span>
+            <input
+              value={hexValue.replace("#", "")}
+              onChange={(e) => {
+                const v = e.target.value.replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
+                setHexValue("#" + v);
+                if (v.length === 6) setCardColor("#" + v);
+              }}
+              maxLength={6}
+              style={{
+                flex: 1, padding: "6px 10px",
+                background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: 6, color: "white", fontSize: 13, fontFamily: fonts.mono, outline: "none",
+              }}
+              placeholder="FF5500"
+            />
+            <div style={{ width: 22, height: 22, borderRadius: 4, background: hexValue, flexShrink: 0 }} />
+          </div>
+        )}
+      </div>
+
+      {/* Photo position (conditional) */}
+      {hasPhoto && (template === "classic" || template === "photoHero") && (
+        <div style={{ width: controlsWidth, marginBottom: 12 }}>
+          {sectionLabel("Photo Position")}
+          <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: 3, maxWidth: 200 }}>
+            {[{ id: "top", label: "Top" }, { id: "center", label: "Center" }, { id: "bottom", label: "Bottom" }].map((opt) => (
+              <button key={opt.id} onClick={() => setPhotoPos(opt.id)} style={{ ...toggleBtn(photoPos === opt.id), flex: 1, textAlign: "center" }}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Editable headline */}
-      <div style={{ marginBottom: 16, width: "100%", maxWidth: 340 }}>
-        <label style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4, display: "block" }}>
-          Caption
-        </label>
+      <div style={{ marginBottom: 12, width: controlsWidth }}>
+        {sectionLabel("Caption")}
         <input
           value={headline}
           onChange={(e) => setHeadline(e.target.value)}
           maxLength={40}
           style={{
-            width: "100%",
-            padding: "8px 12px",
-            background: "rgba(255,255,255,0.1)",
-            border: "1px solid rgba(255,255,255,0.15)",
-            borderRadius: 8,
-            color: "white",
-            fontSize: 15,
-            fontFamily: fonts.headline,
-            fontStyle: "italic",
+            width: "100%", padding: "8px 12px",
+            background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)",
+            borderRadius: 8, color: "white", fontSize: 14,
+            fontFamily: cardFont === "modern" ? fonts.body : fonts.headline,
+            fontStyle: cardFont === "modern" ? "normal" : "italic",
+            fontWeight: cardFont === "modern" ? 700 : 400,
             outline: "none",
           }}
         />
@@ -2408,25 +2851,20 @@ function ShareCardModal({ entry, team, season, onClose }) {
 
       {/* Scaled preview */}
       <div style={{
-        width: previewWidth,
-        height: previewHeight,
-        overflow: "hidden",
-        borderRadius: 12,
-        boxShadow: "0 12px 48px rgba(0,0,0,0.4)",
-        marginBottom: 24,
+        width: previewWidth, height: previewHeight,
+        overflow: "hidden", borderRadius: 12,
+        boxShadow: "0 12px 48px rgba(0,0,0,0.4)", marginBottom: 20,
       }}>
         <div style={{
-          width: 1080,
-          height: aspect === "story" ? 1920 : 1080,
-          transform: `scale(${previewScale})`,
-          transformOrigin: "top left",
+          width: 1080, height: aspect === "story" ? 1920 : 1080,
+          transform: `scale(${previewScale})`, transformOrigin: "top left",
         }}>
           <ShareCardRender
-            entry={entry}
-            team={team}
-            season={season}
-            aspect={aspect}
-            headline={headline}
+            entry={entry} team={team} season={season} aspect={aspect}
+            headline={headline} entryNumber={entryNumber}
+            template={template} cardTheme={cardTheme} cardFont={cardFont}
+            cardAlign={cardAlign} cardColor={cardColor} photoPos={photoPos}
+            entries={entries}
             preview
           />
         </div>
@@ -2438,11 +2876,9 @@ function ShareCardModal({ entry, team, season, onClose }) {
         disabled={exporting}
         className="btn btn-primary"
         style={{
-          padding: "14px 40px",
-          fontSize: 16,
-          opacity: exporting ? 0.6 : 1,
-          minWidth: 160,
-          background: sharePrimary,
+          padding: "14px 40px", fontSize: 16,
+          opacity: exporting ? 0.6 : 1, minWidth: 160,
+          background: sharePrimary, marginBottom: 32,
         }}
       >
         {exporting ? "Exporting..." : navigator.canShare ? "Share" : "Download PNG"}
@@ -2451,61 +2887,66 @@ function ShareCardModal({ entry, team, season, onClose }) {
       {/* Long-press save fallback for iOS */}
       {savedUrl && (
         <div style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(0,0,0,0.95)",
-          zIndex: 210,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 16,
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.95)",
+          zIndex: 210, display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center", padding: 20,
         }}>
           <p style={{
-            color: "rgba(255,255,255,0.7)",
-            fontSize: 15,
-            textAlign: "center",
-            marginBottom: 16,
-            maxWidth: 280,
+            color: "rgba(255,255,255,0.8)", fontSize: 16, textAlign: "center",
+            marginBottom: 20, maxWidth: 300, lineHeight: 1.5,
           }}>
-            Long-press the image below and tap <strong style={{ color: "white" }}>Save Image</strong>
+            Long-press the image and tap <strong style={{ color: "white" }}>Save Image</strong>
           </p>
           <img
             src={savedUrl}
             alt="Share card"
             style={{
-              maxWidth: "90%",
-              maxHeight: "70vh",
-              borderRadius: 8,
+              maxWidth: "95%", maxHeight: "65vh", borderRadius: 12,
+              boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
             }}
           />
-          <button
-            onClick={() => { URL.revokeObjectURL(savedUrl); setSavedUrl(null); }}
-            style={{
-              marginTop: 20,
-              background: "rgba(255,255,255,0.15)",
-              border: "none",
-              borderRadius: 10,
-              padding: "12px 32px",
-              color: "white",
-              fontSize: 15,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Done
-          </button>
+          <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
+            {typeof navigator.share === "function" && (
+              <button
+                onClick={async () => {
+                  try {
+                    const res = await fetch(savedUrl);
+                    const blob = await res.blob();
+                    const file = new File([blob], `team-season-${entry.id}.png`, { type: "image/png" });
+                    await navigator.share({ files: [file], title: "Team Season" });
+                  } catch (err) { /* user cancelled */ }
+                }}
+                style={{
+                  background: sharePrimary, border: "none", borderRadius: 10,
+                  padding: "12px 28px", color: "white", fontSize: 15,
+                  fontWeight: 600, cursor: "pointer",
+                }}
+              >
+                Share
+              </button>
+            )}
+            <button
+              onClick={() => { URL.revokeObjectURL(savedUrl); setSavedUrl(null); }}
+              style={{
+                background: "rgba(255,255,255,0.15)", border: "none", borderRadius: 10,
+                padding: "12px 32px", color: "white", fontSize: 15,
+                fontWeight: 600, cursor: "pointer",
+              }}
+            >
+              Done
+            </button>
+          </div>
         </div>
       )}
 
       {/* Hidden full-size card for capture */}
       <ShareCardRender
         ref={cardRef}
-        entry={entry}
-        team={team}
-        season={season}
-        aspect={aspect}
-        headline={headline}
+        entry={entry} team={team} season={season} aspect={aspect}
+        headline={headline} entryNumber={entryNumber}
+        template={template} cardTheme={cardTheme} cardFont={cardFont}
+        cardAlign={cardAlign} cardColor={cardColor} photoPos={photoPos}
+        entries={entries}
       />
     </div>
   );
@@ -3042,7 +3483,7 @@ function LandingPage({ onDemo, onStart }) {
               A real book for the shelf
             </h2>
             <p style={sectionCopy}>
-              At the end of the season, turn the whole journal into a 7x7" printed softcover. Every entry, every score, every photo - bound and in their hands. The kind of thing they keep.
+              At the end of the season, turn the whole journal into an 8.5x11" printed hardcover. Every entry, every score, every photo - bound and in their hands. The kind of thing they keep.
             </p>
             <p style={{
               fontFamily: fonts.body,
@@ -3051,7 +3492,7 @@ function LandingPage({ onDemo, onStart }) {
               fontWeight: 600,
               marginTop: 16,
             }}>
-              $34.99 per book
+              $39 per book
             </p>
             <p style={{
               fontFamily: fonts.body,
@@ -3152,7 +3593,7 @@ function LandingPage({ onDemo, onStart }) {
           maxWidth: 460,
           margin: "0 auto 32px",
         }}>
-          Logging, sharing, and building your journal costs nothing. When you're ready to turn it into a book, it's $34.99 per copy - shipped to your door.
+          Logging, sharing, and building your journal costs nothing. When you're ready to turn it into a book, it's $39 per copy - shipped to your door.
         </p>
         <div style={{
           display: "flex",
@@ -3223,9 +3664,9 @@ function LandingPage({ onDemo, onStart }) {
               fontWeight: 600,
               color: theme.text,
               marginBottom: 16,
-            }}>$34.99</p>
+            }}>$39</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {["7x7\" softcover", "Auto-designed from your journal", "Every entry, photo, and score", "Shipped to your door", "Order anytime"].map((f) => (
+              {["8.5x11\" hardcover", "Auto-designed from your journal", "Every entry, photo, and score", "Shipped to your door", "Order anytime"].map((f) => (
                 <span key={f} style={{
                   fontFamily: fonts.body,
                   fontSize: 13,
@@ -4269,6 +4710,10 @@ export default function SportsJournalApp() {
   // Share card state
   const [shareEntry, setShareEntry] = useState(null);
   const [showSharePrompt, setShowSharePrompt] = useState(false);
+  const [nudgeDismissed, setNudgeDismissed] = useState(() => {
+    const d = localStorage.getItem("ts_nudge_dismissed");
+    return d && (new Date() - new Date(d)) < 24 * 60 * 60 * 1000;
+  });
 
   // Dynamic brand color derived from team or org
   const brandPrimary = team?.color || org?.color || theme.primary;
@@ -4853,6 +5298,68 @@ export default function SportsJournalApp() {
           {/* Stats */}
           <SeasonStats entries={entries} brandColor={brandPrimary} />
 
+          {/* Post-game nudge */}
+          {(() => {
+            if (entries.length === 0 || nudgeDismissed) return null;
+            const sorted = [...entries].sort((a, b) => new Date(b.entry_date) - new Date(a.entry_date));
+            const lastDate = new Date(sorted[0].entry_date);
+            const now = new Date();
+            const daysSince = Math.floor((now - lastDate) / (1000 * 60 * 60 * 24));
+            if (daysSince < 1 || daysSince > 3) return null;
+            return (
+              <div style={{
+                background: `${brandPrimary}08`,
+                border: `1px solid ${brandPrimary}20`,
+                borderRadius: 12,
+                padding: "14px 16px",
+                marginBottom: 12,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: theme.text, marginBottom: 2 }}>
+                    How'd the weekend go?
+                  </div>
+                  <div style={{ fontSize: 12, color: theme.textMuted }}>
+                    {daysSince === 1 ? "Yesterday" : `${daysSince} days ago`} was your last entry
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                  <button
+                    onClick={() => { setShowComposer(true); }}
+                    style={{
+                      background: brandPrimary,
+                      color: "white",
+                      border: "none",
+                      borderRadius: 8,
+                      padding: "8px 14px",
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Log it
+                  </button>
+                  <button
+                    onClick={() => { localStorage.setItem("ts_nudge_dismissed", new Date().toISOString()); setNudgeDismissed(true); }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: theme.textLight,
+                      fontSize: 16,
+                      cursor: "pointer",
+                      padding: "4px 6px",
+                    }}
+                  >
+                    &#215;
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Quick Actions */}
           <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
             <button className="btn btn-primary" onClick={() => setShowComposer(true)}
@@ -4947,6 +5454,7 @@ export default function SportsJournalApp() {
         <SharePrompt
           entry={shareEntry}
           brandColor={brandPrimary}
+          bookPageCount={entries.length > 0 ? paginateEntries(entries).length + 3 : 0}
           onShare={() => {
             setShowSharePrompt(false);
           }}
@@ -4963,7 +5471,12 @@ export default function SportsJournalApp() {
           entry={shareEntry}
           team={team}
           season={season}
+          entries={entries}
           onClose={() => setShareEntry(null)}
+          entryNumber={(() => {
+            const sorted = [...entries].sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+            return sorted.findIndex((e) => e.id === shareEntry.id) + 1;
+          })()}
         />
       )}
     </>
