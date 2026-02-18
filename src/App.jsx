@@ -2016,8 +2016,8 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({
   const textQuote = isDark ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.7)";
   const badgeBg = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)";
   const badgeBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
-  const watermarkColor = isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.15)";
-  const watermarkBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)";
+  const watermarkColor = isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.35)";
+  const watermarkBorder = isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)";
 
   // Font-derived styles
   const headlineFont = isModern ? fonts.body : fonts.headline;
@@ -2056,7 +2056,7 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({
             <img src={team.logo} alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }} />
           )}
           <span style={{
-            fontFamily: fonts.body, fontSize: 22, fontWeight: 700,
+            fontFamily: fonts.body, fontSize: 24, fontWeight: 700,
             color: watermarkColor, letterSpacing: 2, textTransform: "uppercase",
           }}>
             {team.name}
@@ -2064,21 +2064,16 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({
         </div>
       ) : (
         <span style={{
-          fontFamily: fonts.body, fontSize: 22, fontWeight: 700,
-          color: watermarkColor, letterSpacing: 4, textTransform: "uppercase",
+          fontFamily: fonts.body, fontSize: 26, fontWeight: 700,
+          color: watermarkColor, letterSpacing: 5, textTransform: "uppercase",
         }}>
-          Team Season
+          teamseason.app
         </span>
       )}
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
         {entryNumber && (
-          <span style={{ fontFamily: fonts.mono, fontSize: 18, fontWeight: 500, color: watermarkColor }}>
+          <span style={{ fontFamily: fonts.mono, fontSize: 20, fontWeight: 500, color: watermarkColor }}>
             Entry #{entryNumber}
-          </span>
-        )}
-        {!hasSeasonPass && (
-          <span style={{ fontFamily: fonts.body, fontSize: 20, color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.12)" }}>
-            teamseason.app
           </span>
         )}
       </div>
