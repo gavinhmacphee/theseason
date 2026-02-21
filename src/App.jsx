@@ -2624,47 +2624,24 @@ function ShareCardModal({ entry, team, season, onClose, entryNumber, entries = [
   const [exporting, setExporting] = useState(false);
   const [headline, setHeadline] = useState(generateHeadline(entry));
 
-  // --- New customization state ---
   const hasPhoto = !!(entry.photoPreview || entry.photoData);
   const hasScore = entry.score_home !== null && entry.score_away !== null;
 
-  // Auto-template detection
-  const autoTemplate = (() => {
+  // Auto-pick the best template
+  const template = (() => {
     if (hasPhoto && (entry.text || "").length < 80) return "photoHero";
     if (hasScore && entry.result === "win" && (entry.score_home - entry.score_away) >= 2) return "bigScore";
     if (hasScore) return "classic";
     return "minimal";
   })();
 
-  const [template, setTemplate] = useState(autoTemplate);
-  const [cardTheme, setCardTheme] = useState("dark");
-  const [cardFont, setCardFont] = useState("editorial");
-  const [cardAlign, setCardAlign] = useState("left");
-  const [cardColor, setCardColor] = useState(team?.color || theme.primary);
-  const [photoPos, setPhotoPos] = useState("center");
-  const [showHexInput, setShowHexInput] = useState(false);
-  const [hexValue, setHexValue] = useState(team?.color || theme.primary);
+  const cardColor = team?.color || theme.primary;
 
   const [savedUrl, setSavedUrl] = useState(null);
 
-  const colorPresets = [
-    cardColor === (team?.color || theme.primary) ? null : team?.color || theme.primary,
-    "#3B82F6", "#EF4444", "#22C55E", "#8B5CF6", "#F97316", "#EC4899", "#14B8A6",
-  ].filter(Boolean);
-  // Ensure team color is always first
-  const swatches = [team?.color || theme.primary, ...colorPresets.filter(c => c !== (team?.color || theme.primary))].slice(0, 8);
-
-  const templates = [
-    { id: "classic", label: "Classic", available: true },
-    { id: "bigScore", label: "Big Score", available: hasScore },
-    { id: "photoHero", label: "Photo Hero", available: hasPhoto },
-    { id: "statLine", label: "Stat Line", available: hasScore },
-    { id: "minimal", label: "Minimal", available: true },
-  ];
-
   const previewScale = aspect === "story"
-    ? Math.min(300 / 1080, (window.innerHeight * 0.38) / 1920)
-    : Math.min(300 / 1080, (window.innerHeight * 0.38) / 1080);
+    ? Math.min(300 / 1080, (window.innerHeight * 0.45) / 1920)
+    : Math.min(300 / 1080, (window.innerHeight * 0.45) / 1080);
 
   const previewWidth = 1080 * previewScale;
   const previewHeight = (aspect === "story" ? 1920 : 1080) * previewScale;
@@ -2721,37 +2698,28 @@ function ShareCardModal({ entry, team, season, onClose, entryNumber, entries = [
     }
   };
 
-  // Shared toggle button style helper
   const toggleBtn = (active) => ({
-    padding: "6px 14px",
-    borderRadius: 7,
+    padding: "8px 16px",
+    borderRadius: 8,
     border: "none",
     background: active ? "rgba(255,255,255,0.2)" : "transparent",
     color: active ? "white" : "rgba(255,255,255,0.45)",
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: 600,
     cursor: "pointer",
     transition: "all 0.15s",
-    letterSpacing: 0.3,
   });
-
-  const sectionLabel = (text) => (
-    <div style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6 }}>
-      {text}
-    </div>
-  );
-
-  const controlsWidth = Math.max(previewWidth, 300);
 
   return (
     <div style={{
       position: "fixed",
       inset: 0,
-      background: "rgba(0,0,0,0.85)",
+      background: "rgba(0,0,0,0.92)",
       zIndex: 200,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
+      justifyContent: "center",
       padding: 16,
       overflowY: "auto",
     }}>
@@ -2770,7 +2738,7 @@ function ShareCardModal({ entry, team, season, onClose, entryNumber, entries = [
       {/* Aspect toggle */}
       <div style={{
         display: "flex", gap: 4, background: "rgba(255,255,255,0.1)",
-        borderRadius: 10, padding: 4, marginBottom: 12, marginTop: 8,
+        borderRadius: 10, padding: 4, marginBottom: 16,
       }}>
         {[
           { id: "story", label: "Story 9:16" },
@@ -2780,152 +2748,6 @@ function ShareCardModal({ entry, team, season, onClose, entryNumber, entries = [
             {opt.label}
           </button>
         ))}
-      </div>
-
-      {/* Template picker */}
-      <div style={{ width: controlsWidth, marginBottom: 12 }}>
-        {sectionLabel("Template")}
-        <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
-          {templates.filter(t => t.available).map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTemplate(t.id)}
-              style={{
-                ...toggleBtn(template === t.id),
-                flexShrink: 0,
-                padding: "7px 14px",
-                fontSize: 11,
-                border: template === t.id ? "1px solid rgba(255,255,255,0.3)" : "1px solid transparent",
-              }}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Style controls row */}
-      <div style={{ width: controlsWidth, marginBottom: 12, display: "flex", gap: 12, flexWrap: "wrap" }}>
-        {/* Theme */}
-        <div style={{ flex: 1, minWidth: 80 }}>
-          {sectionLabel("Theme")}
-          <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: 3 }}>
-            {[{ id: "dark", label: "Dark" }, { id: "light", label: "Light" }].map((opt) => (
-              <button key={opt.id} onClick={() => setCardTheme(opt.id)} style={{ ...toggleBtn(cardTheme === opt.id), flex: 1, textAlign: "center" }}>
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        {/* Font */}
-        <div style={{ flex: 1, minWidth: 100 }}>
-          {sectionLabel("Font")}
-          <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: 3 }}>
-            {[{ id: "editorial", label: "Editorial" }, { id: "modern", label: "Modern" }].map((opt) => (
-              <button key={opt.id} onClick={() => setCardFont(opt.id)} style={{ ...toggleBtn(cardFont === opt.id), flex: 1, textAlign: "center" }}>
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        {/* Alignment */}
-        <div style={{ flex: 1, minWidth: 80 }}>
-          {sectionLabel("Align")}
-          <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: 3 }}>
-            {[{ id: "left", label: "Left" }, { id: "center", label: "Center" }].map((opt) => (
-              <button key={opt.id} onClick={() => setCardAlign(opt.id)} style={{ ...toggleBtn(cardAlign === opt.id), flex: 1, textAlign: "center" }}>
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Color picker */}
-      <div style={{ width: controlsWidth, marginBottom: 12 }}>
-        {sectionLabel("Color")}
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-          {swatches.map((hex, i) => (
-            <button
-              key={hex + i}
-              onClick={() => { setCardColor(hex); setHexValue(hex); }}
-              style={{
-                width: 28, height: 28, borderRadius: "50%", border: "none", cursor: "pointer", padding: 0,
-                background: hex,
-                boxShadow: cardColor === hex
-                  ? `0 0 0 2px rgba(0,0,0,0.85), 0 0 0 4px ${hex}`
-                  : "none",
-                transition: "box-shadow 0.15s",
-              }}
-              title={hex}
-            />
-          ))}
-          <button
-            onClick={() => setShowHexInput(!showHexInput)}
-            style={{
-              width: 28, height: 28, borderRadius: "50%", border: "1px dashed rgba(255,255,255,0.3)",
-              background: showHexInput ? "rgba(255,255,255,0.15)" : "transparent",
-              color: "rgba(255,255,255,0.5)", fontSize: 16, cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
-            }}
-          >
-            +
-          </button>
-        </div>
-        {showHexInput && (
-          <div style={{ display: "flex", gap: 8, marginTop: 8, alignItems: "center" }}>
-            <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, fontFamily: fonts.mono }}>#</span>
-            <input
-              value={hexValue.replace("#", "")}
-              onChange={(e) => {
-                const v = e.target.value.replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
-                setHexValue("#" + v);
-                if (v.length === 6) setCardColor("#" + v);
-              }}
-              maxLength={6}
-              style={{
-                flex: 1, padding: "6px 10px",
-                background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)",
-                borderRadius: 6, color: "white", fontSize: 13, fontFamily: fonts.mono, outline: "none",
-              }}
-              placeholder="FF5500"
-            />
-            <div style={{ width: 22, height: 22, borderRadius: 4, background: hexValue, flexShrink: 0 }} />
-          </div>
-        )}
-      </div>
-
-      {/* Photo position (conditional) */}
-      {hasPhoto && (template === "classic" || template === "photoHero") && (
-        <div style={{ width: controlsWidth, marginBottom: 12 }}>
-          {sectionLabel("Photo Position")}
-          <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.06)", borderRadius: 8, padding: 3, maxWidth: 200 }}>
-            {[{ id: "top", label: "Top" }, { id: "center", label: "Center" }, { id: "bottom", label: "Bottom" }].map((opt) => (
-              <button key={opt.id} onClick={() => setPhotoPos(opt.id)} style={{ ...toggleBtn(photoPos === opt.id), flex: 1, textAlign: "center" }}>
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Editable headline */}
-      <div style={{ marginBottom: 12, width: controlsWidth }}>
-        {sectionLabel("Caption")}
-        <input
-          value={headline}
-          onChange={(e) => setHeadline(e.target.value)}
-          maxLength={40}
-          style={{
-            width: "100%", padding: "8px 12px",
-            background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)",
-            borderRadius: 8, color: "white", fontSize: 14,
-            fontFamily: cardFont === "modern" ? fonts.body : fonts.headline,
-            fontStyle: cardFont === "modern" ? "normal" : "italic",
-            fontWeight: cardFont === "modern" ? 700 : 400,
-            outline: "none",
-          }}
-        />
       </div>
 
       {/* Scaled preview */}
@@ -2941,12 +2763,28 @@ function ShareCardModal({ entry, team, season, onClose, entryNumber, entries = [
           <ShareCardRender
             entry={entry} team={team} season={season} aspect={aspect}
             headline={headline} entryNumber={entryNumber}
-            template={template} cardTheme={cardTheme} cardFont={cardFont}
-            cardAlign={cardAlign} cardColor={cardColor} photoPos={photoPos}
+            template={template} cardColor={cardColor}
             entries={entries}
             preview
           />
         </div>
+      </div>
+
+      {/* Editable headline */}
+      <div style={{ width: Math.max(previewWidth, 280), marginBottom: 16 }}>
+        <input
+          value={headline}
+          onChange={(e) => setHeadline(e.target.value)}
+          maxLength={40}
+          placeholder="Edit headline..."
+          style={{
+            width: "100%", padding: "10px 14px",
+            background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: 8, color: "white", fontSize: 14,
+            fontFamily: fonts.headline, fontStyle: "italic",
+            outline: "none", textAlign: "center",
+          }}
+        />
       </div>
 
       {/* Share button */}
@@ -3023,8 +2861,7 @@ function ShareCardModal({ entry, team, season, onClose, entryNumber, entries = [
         ref={cardRef}
         entry={entry} team={team} season={season} aspect={aspect}
         headline={headline} entryNumber={entryNumber}
-        template={template} cardTheme={cardTheme} cardFont={cardFont}
-        cardAlign={cardAlign} cardColor={cardColor} photoPos={photoPos}
+        template={template} cardColor={cardColor}
         entries={entries}
       />
     </div>
