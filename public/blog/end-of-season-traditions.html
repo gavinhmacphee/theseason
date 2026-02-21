@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1B4332" />
+  <meta name="description" content="Six simple end-of-season traditions that don't take much effort but add up over the years. Your kid won't remember the scores - they'll remember that you paid attention." />
+  <title>Simple End-of-Season Traditions Every Sports Family Should Try - Team Season</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green: #1B4332;
+      --green-deep: #122d22;
+      --green-light: #2D6A4F;
+      --accent: #E07A5F;
+      --accent-light: #e8937c;
+      --bg: #FAFAF7;
+      --white: #fff;
+      --text: #1A1A1A;
+      --text-muted: #6B7280;
+      --border: #E8E8E4;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .signal-bar {
+      background: var(--green-deep);
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+    }
+
+    .site-header {
+      background: var(--bg);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .site-logo {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .site-nav a {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: 0.3px;
+    }
+
+    .site-nav a:hover { color: var(--green); }
+
+    .site-nav .nav-cta {
+      background: var(--green);
+      color: var(--white);
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .site-nav .nav-cta:hover {
+      background: var(--green-light);
+      color: var(--white);
+    }
+
+    .gradient-stripe {
+      height: 3px;
+      background: linear-gradient(90deg, var(--green-deep), var(--green), var(--green-light));
+    }
+
+    .article-hero {
+      background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 50%, #40916C 100%);
+      color: var(--white);
+      padding: 80px 32px 90px;
+      text-align: center;
+    }
+
+    .article-hero-inner {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .article-hero h1 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: clamp(32px, 5vw, 46px);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .article-hero-meta {
+      font-size: 14px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .article-body {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 60px 24px;
+    }
+
+    .article-body h2 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--green);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+
+    .article-body h2:first-child {
+      margin-top: 0;
+    }
+
+    .article-body h3 {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 28px;
+      margin-bottom: 10px;
+    }
+
+    .article-body p {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 18px;
+    }
+
+    .article-body p strong {
+      color: var(--text);
+    }
+
+    .article-body a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .article-body a:hover {
+      color: var(--accent-light);
+    }
+
+    .article-body ul, .article-body ol {
+      color: var(--text-muted);
+      padding-left: 20px;
+      margin-bottom: 18px;
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .article-body li {
+      margin-bottom: 6px;
+    }
+
+    .article-cta {
+      background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 50%, #40916C 100%);
+      color: var(--white);
+      text-align: center;
+      padding: 60px 24px;
+      margin-top: 20px;
+    }
+
+    .article-cta h2 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--white);
+    }
+
+    .article-cta p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 24px;
+    }
+
+    .btn-accent {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--white);
+      padding: 14px 36px;
+      border-radius: 8px;
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-accent:hover {
+      background: var(--accent-light);
+    }
+
+    .site-footer {
+      background: var(--green-deep);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 32px;
+      font-size: 13px;
+    }
+
+    .site-footer a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+    }
+
+    .site-footer a:hover {
+      color: rgba(255,255,255,0.8);
+    }
+
+    @media (max-width: 768px) {
+      .site-header { padding: 14px 20px; }
+      .site-nav { gap: 16px; }
+      .site-nav a:not(.nav-cta) { display: none; }
+      .article-hero { padding: 60px 20px 70px; }
+      .article-body { padding: 40px 16px; }
+      .article-cta { padding: 48px 20px; }
+    }
+
+    @media (max-width: 480px) {
+      .site-logo { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Signal Bar -->
+  <div class="signal-bar">
+    Shareable season recap cards for youth sports
+  </div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <a href="/" class="site-logo">Team Season</a>
+    <nav class="site-nav">
+      <a href="/#features">Features</a>
+      <a href="/blog">Blog</a>
+      <a href="/app" class="nav-cta">Open App</a>
+    </nav>
+  </header>
+
+  <!-- Gradient Stripe -->
+  <div class="gradient-stripe"></div>
+
+  <!-- Article Hero -->
+  <section class="article-hero">
+    <div class="article-hero-inner">
+      <h1>Simple End-of-Season Traditions Every Sports Family Should Try</h1>
+      <div class="article-hero-meta">Feb 16, 2026 &middot; 4 min read</div>
+    </div>
+  </section>
+
+  <!-- Article Body -->
+  <article class="article-body">
+
+    <h2>Small Traditions, Big Impact</h2>
+    <p>The season ends and everyone scatters. New teams form, schedules shift, and before you know it the next season is already starting. There's rarely a clean moment to pause and mark what just happened.</p>
+    <p>But that's exactly why simple traditions matter. They don't need to be elaborate. They just need to happen consistently enough that your kid starts to expect them - and eventually, look forward to them.</p>
+    <p>Here are six ideas that take minimal effort but add up over the years.</p>
+
+    <h2>1. Create a Season Recap Card</h2>
+    <p>Of course this is on the list. But it genuinely is the easiest way to capture a season before the details fade. Five minutes, one card, done. Put the team name, the record, a good photo, and your kid's favorite memory on it. Save it. Share it. Move on.</p>
+    <p>The power is in the collection. One card is nice. Eight seasons of cards telling the story of your kid's whole sports journey? That's something they'll actually care about when they're older.</p>
+
+    <h2>2. End-of-Season Dinner</h2>
+    <p>Pick a night after the last game and go out to eat - or just order pizza. The only rule: everyone at the table shares one highlight from the season. Not the best play or the biggest win. Just the thing they remember most.</p>
+    <p>You'll hear things you didn't expect. Your kid might talk about a practice drill they loved. A sibling might mention a game they watched from the sideline. It turns the season into a shared experience instead of just something that happened.</p>
+
+    <h2>3. Write a Short Letter</h2>
+    <p>This one takes about five minutes and your kid doesn't even need to know about it right away. Write a short note - just a few sentences - about what you saw them learn that season.</p>
+    <p>Not "you scored 12 points." More like "I watched you start the season afraid to call for the ball, and by the last game you were leading the whole team." Specific observations about growth, effort, and character.</p>
+    <p>Save the letters. Give them the whole stack when they graduate, or when they hang up their gear for good. <strong>Trust me on this one.</strong></p>
+
+    <h2>4. Save One Piece of Gear</h2>
+    <p>You don't need to keep everything. But saving one item from each season - a jersey, a game ball, a pair of shoes - creates a physical connection to that time.</p>
+    <p>A box in the closet with six jerseys spanning ages eight to 14 tells a story no photo can. The sizes alone are worth it.</p>
+
+    <h2>5. Same-Spot Photo</h2>
+    <p>Pick a spot - the goal at your home field, the sign at the complex, the family car after the game - and take a photo there at the end of every season. Same spot, same pose, different kid.</p>
+    <p>This is the kind of thing that feels pointless the first two times and becomes incredible by the fifth. Growth is hard to notice in real time. A series of same-spot photos makes it obvious.</p>
+
+    <h2>6. Career Stats Page</h2>
+    <p>Keep a simple running document - nothing fancy - that tracks your kid's stats across seasons. Team name, season, record, points, highlights, whatever applies. Think of it as a career page for their sports life.</p>
+    <p>It takes two minutes to update at the end of each season. Over five or six years, it becomes a fascinating record of how they developed. Kids love looking at their own numbers, especially when they can see the progression.</p>
+
+    <h2>The Point of All This</h2>
+    <p>None of these traditions take more than a few minutes. None of them cost money. None of them require planning ahead or buying supplies.</p>
+    <p>They just require showing up after the last game and doing one small thing before the season fades into the background.</p>
+    <p><strong>Your kid won't remember the scores. They'll remember that you paid attention.</strong></p>
+
+  </article>
+
+  <!-- Bottom CTA -->
+  <section class="article-cta">
+    <h2>Start the Tradition</h2>
+    <p>Create your first season recap card in about five minutes.</p>
+    <a href="/app" class="btn-accent">Start Your Card</a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/blog">Blog</a> &nbsp;&middot;&nbsp; <a href="/app">Open App</a></p>
+  </footer>
+
+</body>
+</html>

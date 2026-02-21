@@ -3,12 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Team Season — Book Cover</title>
+<title>Team Season - Book Cover</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+  /* Lulu 7.75x7.75" square hardcover case wrap cover spread
+     Each panel = 8.375in (includes board overhang/wrap beyond 7.75" trim)
+     Height = 9.25in (includes board overhang beyond trim)
+     Spine = dynamic, calculated from page count
+     Total width = back(8.375) + spine + front(8.375) */
   @page {
-    size: 14.375in 7.25in;
+    size: var(--cover-width, 17in) 9.25in;
     margin: 0;
   }
 
@@ -23,23 +28,24 @@
   }
 
   .cover-wrap {
-    width: 14.375in;
-    height: 7.25in;
+    width: var(--cover-width, 17in);
+    height: 9.25in;
     display: flex;
     flex-direction: row;
     overflow: hidden;
     position: relative;
   }
 
-  /* --- Back Cover --- */
+  /* --- Back Cover (left panel) --- */
   .back-cover {
-    flex: 1 1 7in;
+    flex: 0 0 8.375in;
+    height: 9.25in;
     background: linear-gradient(170deg, #1B4332 0%, #2D6A4F 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    padding: 0.5in;
+    padding: 0.75in;
     position: relative;
   }
 
@@ -53,9 +59,9 @@
 
   .back-cover .brand-mark .logo-text {
     font-family: 'Instrument Serif', Georgia, serif;
-    font-size: 28px;
-    color: rgba(255,255,255,0.15);
-    letter-spacing: 2px;
+    font-size: 36px;
+    color: rgba(255,255,255,0.12);
+    letter-spacing: 3px;
   }
 
   .back-cover .bottom-bar {
@@ -68,20 +74,21 @@
   .back-cover .url {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
-    color: rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.25);
     letter-spacing: 1px;
   }
 
   .back-cover .team-color-bar {
-    width: 40px;
+    width: 48px;
     height: 4px;
     background: var(--team-color, #1B4332);
     border-radius: 2px;
   }
 
-  /* --- Spine --- */
+  /* --- Spine (center strip) --- */
   .spine {
     flex: 0 0 var(--spine-width, 0.25in);
+    height: 9.25in;
     background: linear-gradient(180deg, #163A2E 0%, #1B4332 50%, #2D6A4F 100%);
     display: flex;
     align-items: center;
@@ -93,7 +100,7 @@
     font-family: 'DM Sans', sans-serif;
     font-size: 8px;
     font-weight: 600;
-    color: rgba(255,255,255,0.5);
+    color: rgba(255,255,255,0.45);
     writing-mode: vertical-rl;
     text-orientation: mixed;
     letter-spacing: 2px;
@@ -101,15 +108,16 @@
     white-space: nowrap;
   }
 
-  /* --- Front Cover --- */
+  /* --- Front Cover (right panel) --- */
   .front-cover {
-    flex: 1 1 7in;
-    background: linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%);
+    flex: 0 0 8.375in;
+    height: 9.25in;
+    background: linear-gradient(160deg, #1B4332 0%, #2D6A4F 55%, #40916C 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0.75in;
+    padding: 1in 1.25in;
     text-align: center;
     position: relative;
   }
@@ -120,77 +128,70 @@
   }
 
   .front-cover .team-logo {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid rgba(255,255,255,0.2);
-    margin-bottom: 24px;
+    margin-bottom: 32px;
   }
 
-  .front-cover .team-name {
+  .front-cover .player-name-hero {
     font-family: 'Instrument Serif', Georgia, serif;
-    font-size: 52px;
+    font-size: 48px;
     font-weight: 400;
     color: white;
-    line-height: 1.1;
-    margin-bottom: 12px;
+    line-height: 1.08;
+    margin-bottom: 16px;
     letter-spacing: -0.5px;
   }
 
   .front-cover .accent-line {
     width: 60px;
     height: 3px;
-    background: rgba(255,255,255,0.3);
-    margin: 16px auto;
+    background: rgba(255,255,255,0.25);
+    margin: 20px auto;
   }
 
-  .front-cover .season-name {
+  .front-cover .team-season-line {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    color: rgba(255,255,255,0.6);
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
     letter-spacing: 3px;
     text-transform: uppercase;
-    margin-bottom: 32px;
   }
 
   .front-cover .player-headshot {
-    width: 64px;
-    height: 64px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(255,255,255,0.25);
-    margin-bottom: 8px;
+    border: 2px solid rgba(255,255,255,0.2);
+    margin-bottom: 10px;
   }
 
-  .front-cover .player-name {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    color: rgba(255,255,255,0.6);
-    font-weight: 400;
-  }
 
-  /* Subtle corner decoration */
+  /* Corner decorations */
   .front-cover::before {
     content: '';
     position: absolute;
-    top: 0.4in;
-    right: 0.4in;
-    width: 30px;
-    height: 30px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    border-right: 1px solid rgba(255,255,255,0.1);
+    top: 0.5in;
+    right: 0.5in;
+    width: 36px;
+    height: 36px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    border-right: 1px solid rgba(255,255,255,0.08);
   }
 
   .front-cover::after {
     content: '';
     position: absolute;
-    bottom: 0.4in;
-    left: 0.4in;
-    width: 30px;
-    height: 30px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    border-left: 1px solid rgba(255,255,255,0.1);
+    bottom: 0.5in;
+    left: 0.5in;
+    width: 36px;
+    height: 36px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-left: 1px solid rgba(255,255,255,0.08);
   }
 
   @media print {
@@ -205,8 +206,8 @@
 const DEMO_DATA = {
   team: { name: "Monta\u00f1a FC", emoji: "\u26BD", logo: null, color: "#1B4332" },
   season: { name: "Spring 2026" },
-  players: [{ name: "Marco", headshot: null }],
-  pageCount: 8
+  players: [{ name: "Marco Fuentes", headshot: "https://images.unsplash.com/photo-1596720426673-e4e14290f0cc?w=200&h=200&fit=crop&crop=face" }],
+  pageCount: 48
 };
 
 function esc(str) {
@@ -221,12 +222,16 @@ function renderCover(data) {
   const playerName = players[0]?.name || '';
   const playerHeadshot = players[0]?.headshot || null;
   const teamColor = team.color || '#1B4332';
-  const spineWidth = Math.max(0.15, (pageCount || 8) * 0.0025);
+
+  // Lulu spine width formula for 7.75" square hardcover case wrap
+  const spineWidth = Math.max(0.15, (pageCount || 24) * 0.0025 + 0.13);
+  const coverWidth = 8.375 + spineWidth + 8.375;
 
   document.documentElement.style.setProperty('--team-color', teamColor);
   document.documentElement.style.setProperty('--spine-width', spineWidth + 'in');
+  document.documentElement.style.setProperty('--cover-width', coverWidth + 'in');
 
-  const spineText = `${esc(team.name)}  \u2022  ${esc(season.name)}`;
+  const spineText = `${esc(playerName)}  \u2022  ${esc(team.name)}  \u2022  ${esc(season.name)}`;
 
   document.getElementById('cover').innerHTML = `
     <div class="cover-wrap">
@@ -245,18 +250,15 @@ function renderCover(data) {
       </div>
 
       <div class="front-cover">
-        ${team.logo
-          ? `<img class="team-logo" src="${team.logo}" alt="">`
-          : `<div class="team-emoji">${team.emoji || '\u26BD'}</div>`
-        }
-        <div class="team-name">${esc(team.name)}</div>
-        <div class="accent-line"></div>
-        <div class="season-name">${esc(season.name)}</div>
         ${playerHeadshot
           ? `<img class="player-headshot" src="${playerHeadshot}" alt="">`
-          : ''
+          : (team.logo
+            ? `<img class="team-logo" src="${team.logo}" alt="">`
+            : `<div class="team-emoji">${team.emoji || '\u26BD'}</div>`)
         }
-        ${playerName ? `<div class="player-name">${esc(playerName)}</div>` : ''}
+        ${playerName ? `<div class="player-name-hero">${esc(playerName)}</div>` : ''}
+        <div class="accent-line"></div>
+        <div class="team-season-line">${esc(team.name)}  \u2022  ${esc(season.name)}</div>
       </div>
     </div>
   `;

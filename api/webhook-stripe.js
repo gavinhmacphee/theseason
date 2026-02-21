@@ -1,10 +1,11 @@
-// api/webhook-stripe.js — Stripe webhook handler
-// On checkout.session.completed: fetch book data -> generate PDFs -> upload -> submit to RPI
+// api/webhook-stripe.js - Stripe webhook handler
+// On checkout.session.completed: fetch book data -> generate PDFs -> upload -> submit to Lulu
 
 import Stripe from 'stripe';
 import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core';
 import { put } from '@vercel/blob';
+import { createPrintOrder } from './lib/lulu.js';
 
 export const config = {
   api: { bodyParser: false },
@@ -18,12 +19,25 @@ async function buffer(readable) {
   return Buffer.concat(chunks);
 }
 
-async function generatePdf(browser, origin, bookData, type) {
+// Lulu 7.75x7.75" square hardcover case wrap specs with 0.125" bleed
+const INTERIOR_WIDTH = '8in';    // 7.75 + 0.125 bleed each side
+const INTERIOR_HEIGHT = '8in';   // 7.75 + 0.125 bleed each side
+// Cover: back + spine + front. Spine width depends on page count.
+// Hardcover case wrap panels include board overhang beyond trim.
+// At 48 pages: total cover = 17in wide x 9.25in tall, spine = 0.25in
+// Each panel = (17 - 0.25) / 2 = 8.375in
+const COVER_HEIGHT = '9.25in';
+function getCoverWidth(pageCount) {
+  const spineWidth = 0.0025 * pageCount + 0.13; // Lulu spine formula for this product
+  return `${8.375 + spineWidth + 8.375}in`;
+}
+
+async function generatePdf(browser, origin, bookData, type, pageCount) {
   const page = await browser.newPage();
 
   await page.goto(`${origin}/book-template/${type}.html`, {
     waitUntil: 'networkidle0',
-    timeout: 15000,
+    timeout: 20000,
   });
 
   await page.evaluate((data) => {
@@ -32,11 +46,21 @@ async function generatePdf(browser, origin, bookData, type) {
   }, bookData);
 
   await page.evaluate(() => document.fonts.ready);
-  await new Promise((r) => setTimeout(r, 500));
+  await new Promise((r) => setTimeout(r, 1000));
 
   const pdfOptions = type === 'cover'
-    ? { width: '14.375in', height: '7.25in', printBackground: true, margin: { top: 0, right: 0, bottom: 0, left: 0 } }
-    : { width: '7.125in', height: '7.125in', printBackground: true, margin: { top: 0, right: 0, bottom: 0, left: 0 } };
+    ? {
+        width: getCoverWidth(pageCount),
+        height: COVER_HEIGHT,
+        printBackground: true,
+        margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      }
+    : {
+        width: INTERIOR_WIDTH,
+        height: INTERIOR_HEIGHT,
+        printBackground: true,
+        margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      };
 
   const pdfBuffer = await page.pdf(pdfOptions);
   await page.close();
@@ -71,22 +95,21 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: err.message });
   }
 
-  // Acknowledge receipt immediately - Stripe expects fast responses
+  // Acknowledge receipt immediately
   res.status(200).json({ received: true });
 
-  // Process the event (runs after response is sent on platforms that support it)
   if (event.type === 'checkout.session.completed') {
     try {
       await fulfillOrder(event.data.object);
     } catch (err) {
       console.error('Fulfillment error:', err);
-      // Stripe will retry the webhook, so this will get another chance
     }
   }
 }
 
 async function fulfillOrder(session) {
-  const { bookDataUrl } = session.metadata || {};
+  const meta = session.metadata || {};
+  const { bookDataUrl } = meta;
 
   if (!bookDataUrl) {
     console.error('No bookDataUrl in session metadata, session:', session.id);
@@ -102,7 +125,10 @@ async function fulfillOrder(session) {
     throw new Error(`Failed to fetch book data: ${bookDataRes.status}`);
   }
   const bookData = await bookDataRes.json();
-  console.log(`Book data fetched: ${bookData.entries?.length || 0} entries`);
+  const entryCount = bookData.entries?.length || 0;
+  // Title + summary + entries (2 pages each estimate) + closing
+  const estimatedPageCount = Math.max(24, 2 + 2 + entryCount * 2 + 1);
+  console.log(`Book data fetched: ${entryCount} entries, ~${estimatedPageCount} pages`);
 
   // 2. Generate PDFs with Puppeteer
   const browser = await puppeteer.launch({
@@ -118,12 +144,11 @@ async function fulfillOrder(session) {
 
   try {
     const [coverPdf, interiorPdf] = await Promise.all([
-      generatePdf(browser, origin, bookData, 'cover'),
-      generatePdf(browser, origin, bookData, 'interior'),
+      generatePdf(browser, origin, bookData, 'cover', estimatedPageCount),
+      generatePdf(browser, origin, bookData, 'interior', estimatedPageCount),
     ]);
 
     console.log(`PDFs generated: cover=${coverPdf.length}b, interior=${interiorPdf.length}b`);
-
     await browser.close();
 
     // 3. Upload PDFs to Vercel Blob
@@ -134,49 +159,33 @@ async function fulfillOrder(session) {
 
     console.log(`PDFs uploaded: cover=${coverBlob.url}, interior=${interiorBlob.url}`);
 
-    // 4. Submit to RPI Print (if configured)
-    const { RPI_API_KEY, RPI_API_URL } = process.env;
+    // 4. Submit to Lulu Print API
+    const { LULU_CLIENT_KEY } = process.env;
 
-    if (RPI_API_KEY && !RPI_API_KEY.startsWith('...')) {
-      const shipping = session.shipping_details?.address || {};
-
-      const rpiPayload = {
-        external_id: orderId,
-        line_items: [{
-          sku: '7x7_softcover_lustre',
-          quantity: 1,
-          cover_url: coverBlob.url,
-          guts_url: interiorBlob.url,
-        }],
-        shipping_address: {
-          name: session.shipping_details?.name || session.metadata?.shippingName || '',
-          street1: shipping.line1 || '',
-          city: shipping.city || '',
-          state: shipping.state || '',
-          zip: shipping.postal_code || '',
-          country: shipping.country || 'US',
-        },
-        shipping_method: 'standard',
+    if (LULU_CLIENT_KEY) {
+      const shippingAddress = {
+        name: meta.shipping_name || '',
+        email: meta.shipping_email || '',
+        street: meta.shipping_street || '',
+        city: meta.shipping_city || '',
+        state: meta.shipping_state || '',
+        zip: meta.shipping_zip || '',
+        teamName: bookData.team?.name || 'Team',
       };
 
-      const rpiRes = await fetch(`${RPI_API_URL}/v1/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${RPI_API_KEY}`,
-        },
-        body: JSON.stringify(rpiPayload),
+      const luluOrder = await createPrintOrder({
+        pdfUrl: interiorBlob.url,
+        coverPdfUrl: coverBlob.url,
+        shippingAddress,
+        externalId: orderId,
       });
 
-      const rpiData = await rpiRes.json();
-
-      if (!rpiRes.ok) {
-        console.error('RPI submission failed:', rpiData);
-      } else {
-        console.log('RPI order submitted:', { rpiOrderId: rpiData.id, status: rpiData.status });
-      }
+      console.log('Lulu order submitted:', {
+        luluId: luluOrder.id,
+        status: luluOrder.status?.name,
+      });
     } else {
-      console.log('RPI not configured, skipping print submission. PDFs available at:', {
+      console.log('Lulu not configured, skipping print submission. PDFs available at:', {
         cover: coverBlob.url,
         interior: interiorBlob.url,
       });

@@ -1,9 +1,21 @@
-// api/generate-pdf.js — Puppeteer renders HTML templates to PDF
+// api/generate-pdf.js - Puppeteer renders HTML templates to print-ready PDF
 // Uses @sparticuz/chromium for serverless Chromium
-// Templates are served from public/book-template/ via the app URL
+// Templates served from public/book-template/ via the app URL
+// Lulu specs: 7.75x7.75" square, sRGB, 300dpi, 0.125" bleed, all fonts embedded
 
 import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core';
+
+// Lulu 7.75x7.75" square hardcover case wrap with 0.125" bleed
+const INTERIOR_WIDTH = '8in';    // 7.75 + 0.125 bleed each side
+const INTERIOR_HEIGHT = '8in';   // 7.75 + 0.125 bleed each side
+const COVER_HEIGHT = '9.25in';   // hardcover case wrap height
+
+function getCoverWidth(pageCount) {
+  // Lulu spine width formula for 7.75" square hardcover case wrap
+  const spineWidth = 0.0025 * pageCount + 0.13;
+  return `${8.375 + spineWidth + 8.375}in`;
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -11,7 +23,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { bookData, type = 'interior' } = req.body;
+    const { bookData, type = 'interior', pageCount = 24 } = req.body;
 
     if (!bookData) {
       return res.status(400).json({ error: 'bookData is required' });
@@ -26,29 +38,37 @@ export default async function handler(req, res) {
 
     const page = await browser.newPage();
 
-    // Load template from deployed static files
     const origin = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
       : `http://localhost:${process.env.PORT || 3000}`;
 
     await page.goto(`${origin}/book-template/${type}.html`, {
       waitUntil: 'networkidle0',
+      timeout: 20000,
     });
 
-    // Inject book data and trigger re-render
+    // Inject book data and trigger template render
     await page.evaluate((data) => {
       window.__BOOK_DATA__ = data;
       window.dispatchEvent(new Event('bookDataReady'));
     }, bookData);
 
-    // Wait for fonts and rendering to settle
     await page.evaluate(() => document.fonts.ready);
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 1000));
 
-    // Generate PDF with print specs
     const pdfOptions = type === 'cover'
-      ? { width: '14.375in', height: '7.25in', printBackground: true, margin: { top: 0, right: 0, bottom: 0, left: 0 } }
-      : { width: '7.125in', height: '7.125in', printBackground: true, margin: { top: 0, right: 0, bottom: 0, left: 0 } };
+      ? {
+          width: getCoverWidth(pageCount),
+          height: COVER_HEIGHT,
+          printBackground: true,
+          margin: { top: 0, right: 0, bottom: 0, left: 0 },
+        }
+      : {
+          width: INTERIOR_WIDTH,
+          height: INTERIOR_HEIGHT,
+          printBackground: true,
+          margin: { top: 0, right: 0, bottom: 0, left: 0 },
+        };
 
     const pdfBuffer = await page.pdf(pdfOptions);
     await browser.close();

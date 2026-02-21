@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import html2canvas from "html2canvas";
 
 // ============================================
-// TEAM SEASON — Soccer Journal
+// TEAM SEASON — Youth Sports Journal
 // Role-based: Parent / Player
 // ============================================
 
@@ -171,8 +171,21 @@ function slugify(text) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-// --- SPORT (Soccer only) ---
-const SPORTS = [{ name: "Soccer", emoji: "⚽" }];
+// --- SPORTS ---
+const SPORTS = [
+  { name: "Soccer", emoji: "⚽" },
+  { name: "Basketball", emoji: "🏀" },
+  { name: "Baseball", emoji: "⚾" },
+  { name: "Softball", emoji: "🥎" },
+  { name: "Hockey", emoji: "🏒" },
+  { name: "Lacrosse", emoji: "🥍" },
+  { name: "Football", emoji: "🏈" },
+  { name: "Volleyball", emoji: "🏐" },
+  { name: "Swimming", emoji: "🏊" },
+  { name: "Track & Field", emoji: "🏃" },
+  { name: "Tennis", emoji: "🎾" },
+  { name: "Other", emoji: "🏅" },
+];
 
 // --- IMAGE RESIZE HELPER ---
 function resizeImage(file, maxSize) {
@@ -210,13 +223,13 @@ function demoData() {
 
   return {
     role: "parent",
-    team: { id: "demo-team", name: "Montaña FC", sport: "Soccer", emoji: "⚽", logo: null, orgType: "club", color: "#1B4332" },
+    team: { id: "demo-team", name: "Thunder", sport: "Soccer", emoji: "⚽", logo: null, orgType: "club", color: "#1B4332" },
     season: { name: "Spring 2026", id: "s_demo" },
     players: [{ name: "Marco", id: "p_demo", is_my_child: true, headshot: null }],
     entries: [
       {
         id: "e_demo_1", entry_type: "game",
-        text: "Two assists and the go-ahead goal. He read that through ball perfectly and didn't even hesitate.",
+        text: "Two assists and the go-ahead goal. He found the open space and made the right pass every time.",
         entry_date: d(2), opponent: "Lightning FC",
         score_home: 3, score_away: 1, result: "win",
         venue: "Memorial Field",
@@ -225,7 +238,7 @@ function demoData() {
       },
       {
         id: "e_demo_2", entry_type: "practice",
-        text: "Cone work is finally clicking. Coach pulled him aside after and said his first touch has gotten way sharper.",
+        text: "Footwork drills are finally clicking. Coach pulled him aside after and said his speed has gotten way sharper.",
         entry_date: d(5), opponent: null,
         score_home: null, score_away: null, result: null,
         venue: "Training Complex",
@@ -234,7 +247,7 @@ function demoData() {
       },
       {
         id: "e_demo_3", entry_type: "game",
-        text: "Left it all on the field. Went ninety minutes in the heat and never asked to come off.",
+        text: "Left it all out there. Played the whole game in the heat and never asked to come off.",
         entry_date: d(9), opponent: "Rapids",
         score_home: 1, score_away: 2, result: "loss",
         venue: "Riverside Park",
@@ -243,7 +256,7 @@ function demoData() {
       },
       {
         id: "e_demo_4", entry_type: "tournament",
-        text: "Semifinal shutout. The whole bench was on their feet when the final whistle blew.",
+        text: "Semifinal shutout. The whole bench was on their feet when the final buzzer sounded.",
         entry_date: d(14), opponent: null,
         score_home: 2, score_away: 0, result: "win",
         venue: "City Cup",
@@ -252,7 +265,7 @@ function demoData() {
       },
       {
         id: "e_demo_5", entry_type: "moment",
-        text: "Walking back from the field with a bag of balls and that look. This kid lives for it.",
+        text: "Walking back from practice with his bag over his shoulder and that look. This kid lives for it.",
         entry_date: d(18), opponent: null,
         score_home: null, score_away: null, result: null,
         venue: null,
@@ -261,7 +274,7 @@ function demoData() {
       },
       {
         id: "e_demo_6", entry_type: "game",
-        text: "Dominated possession but couldn't find the finish. Hit the crossbar twice in the last ten minutes.",
+        text: "Controlled the game but couldn't finish. Hit the post twice in the last few minutes.",
         entry_date: d(23), opponent: "United",
         score_home: 1, score_away: 1, result: "draw",
         venue: "Home Field",
@@ -274,18 +287,18 @@ function demoData() {
 
 // --- PAGINATION ALGORITHM (for print book) ---
 function paginateEntries(entries) {
-  const PAGE_BUDGET = 2470; // px — 8.5x11" safe area minus bleed/margins/page-number at ~260 PPI
+  const PAGE_BUDGET = 1500; // px — 7.75x7.75" square safe area minus bleed/margins at ~260 PPI
   const DIVIDER = 56;
 
   function estimateHeight(entry) {
     let h = 70; // type badge + date row
-    if ((entry.entry_type === "game" || entry.entry_type === "tournament") &&
+    if ((entry.entry_type === "game" || entry.entry_type === "tournament" || entry.entry_type === "event") &&
         entry.score_home !== null && entry.score_away !== null) {
       h += 90; // score block
     }
     if (entry.opponent) h += 40;
-    if (entry.photoPreview || entry.photoData) h += 1100;
-    if (entry.text) h += Math.ceil(entry.text.length / 50) * 50;
+    if (entry.photoPreview || entry.photoData) h += 750;
+    if (entry.text) h += Math.ceil(entry.text.length / 40) * 50;
     if (entry.venue) h += 38;
     return h;
   }
@@ -658,8 +671,7 @@ function AuthScreen({ onAuth, onDemo, onSkipAuth }) {
 function OnboardingScreen({ onComplete }) {
   const options = [
     { role: "parent", emoji: "📸", title: "My child's season", desc: "Capture your kid's games, practices, and milestones" },
-    { role: "player", emoji: "⚽", title: "My own season", desc: "Document your own games and development" },
-    { role: "admin", emoji: "🏟️", title: "I run a club", desc: "Manage teams, rosters, and content across your organization" },
+    { role: "player", emoji: "🏅", title: "My own season", desc: "Document your own games and development" },
   ];
 
   return (
@@ -699,6 +711,8 @@ function OnboardingScreen({ onComplete }) {
 
 // --- TEAM SETUP ---
 function TeamSetupScreen({ role, onComplete }) {
+  const [selectedSport, setSelectedSport] = useState(null);
+  const [customSport, setCustomSport] = useState("");
   const [teamName, setTeamName] = useState("");
   const [childName, setChildName] = useState("");
   const [logo, setLogo] = useState(null);
@@ -709,6 +723,9 @@ function TeamSetupScreen({ role, onComplete }) {
   const [showCustom, setShowCustom] = useState(false);
   const logoRef = useRef(null);
   const headshotRef = useRef(null);
+
+  const sportName = selectedSport?.name === "Other" ? (customSport || "Sports") : (selectedSport?.name || "Sports");
+  const sportEmoji = selectedSport?.emoji || "🏅";
 
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
@@ -727,8 +744,8 @@ function TeamSetupScreen({ role, onComplete }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     onComplete({
-      team: { id: generateId(), name: teamName || "My Soccer Team", sport: "Soccer", emoji: "⚽", logo, orgType, color: brandColor },
-      season: { id: generateId(), name: `Soccer ${new Date().getFullYear()}` },
+      team: { id: generateId(), name: teamName || "My Team", sport: sportName, emoji: sportEmoji, logo, orgType, color: brandColor },
+      season: { id: generateId(), name: `${sportName} ${new Date().getFullYear()}` },
       myPlayer: role === "parent" ? { name: childName, headshot: childHeadshot } : null,
     });
   };
@@ -742,6 +759,35 @@ function TeamSetupScreen({ role, onComplete }) {
         <p style={{ fontSize: 14, color: theme.textMuted, marginBottom: 28 }}>
           Quick setup — you can edit everything later
         </p>
+
+        {/* Sport picker */}
+        <div style={{ marginBottom: 20 }}>
+          <label className="label">Sport</label>
+          <div style={{
+            display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8,
+          }}>
+            {SPORTS.map((s) => (
+              <button key={s.name} type="button" onClick={() => setSelectedSport(s)}
+                style={{
+                  padding: "10px 4px", cursor: "pointer",
+                  border: `1.5px solid ${selectedSport?.name === s.name ? brandColor : theme.border}`,
+                  background: selectedSport?.name === s.name ? `${brandColor}10` : "white",
+                  borderRadius: 8, display: "flex", flexDirection: "column",
+                  alignItems: "center", gap: 4, transition: "all 0.15s",
+                }}>
+                <span style={{ fontSize: 22 }}>{s.emoji}</span>
+                <span style={{
+                  fontSize: 11, fontWeight: selectedSport?.name === s.name ? 600 : 400,
+                  color: selectedSport?.name === s.name ? brandColor : theme.textMuted,
+                }}>{s.name}</span>
+              </button>
+            ))}
+          </div>
+          {selectedSport?.name === "Other" && (
+            <input className="input" value={customSport} onChange={(e) => setCustomSport(e.target.value)}
+              placeholder="Enter sport name" style={{ marginTop: 8 }} />
+          )}
+        </div>
 
         {/* Child headshot + name (parent mode) */}
         {role === "parent" && (
@@ -779,7 +825,7 @@ function TeamSetupScreen({ role, onComplete }) {
           </>
         )}
 
-        {/* Club logo */}
+        {/* Team logo */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 20 }}>
           <input ref={logoRef} type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: "none" }} />
           <button type="button" onClick={() => logoRef.current?.click()}
@@ -792,7 +838,7 @@ function TeamSetupScreen({ role, onComplete }) {
             {logo ? (
               <img src={logo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             ) : (
-              <span style={{ fontSize: 12, color: theme.textLight, textAlign: "center", lineHeight: 1.3 }}>Club<br/>Logo</span>
+              <span style={{ fontSize: 12, color: theme.textLight, textAlign: "center", lineHeight: 1.3 }}>Team<br/>Logo</span>
             )}
           </button>
           {logo ? (
@@ -812,13 +858,14 @@ function TeamSetupScreen({ role, onComplete }) {
             placeholder="Thunder U12, Varsity, etc." />
         </div>
 
-        {/* Organization type */}
+        {/* Team type */}
         <div style={{ marginBottom: 20 }}>
-          <label className="label">Organization</label>
+          <label className="label">Team Type</label>
           <div style={{ display: "flex", gap: 8 }}>
             {[
-              { id: "club", label: "Club" },
-              { id: "school", label: "High School" },
+              { id: "club", label: "Travel/Club" },
+              { id: "rec", label: "Rec League" },
+              { id: "school", label: "School" },
               { id: "other", label: "Other" },
             ].map((o) => (
               <button key={o.id} type="button" onClick={() => setOrgType(o.id)}
@@ -917,6 +964,9 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
     { id: "game", label: "Game", emoji: "🏟️" },
     { id: "practice", label: "Practice", emoji: "🔄" },
     { id: "tournament", label: "Tournament", emoji: "🏆" },
+    { id: "event", label: "Event", emoji: "✈️" },
+    { id: "sightseeing", label: "Sightseeing", emoji: "📍" },
+    { id: "food", label: "Food", emoji: "🍕" },
     { id: "moment", label: "Moment", emoji: "⭐" },
   ];
 
@@ -969,17 +1019,17 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
         </div>
 
         {/* Entry Type */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 16 }}>
           {entryTypes.map((t) => (
             <button key={t.id} onClick={() => setEntryType(t.id)}
               style={{
-                flex: 1, padding: "10px 8px", borderRadius: 10, border: `1.5px solid ${entryType === t.id ? composerPrimary : theme.border}`,
+                padding: "10px 4px", borderRadius: 10, border: `1.5px solid ${entryType === t.id ? composerPrimary : theme.border}`,
                 background: entryType === t.id ? `${composerPrimary}10` : "white",
                 cursor: "pointer", textAlign: "center", transition: "all 0.15s",
               }}>
               <div style={{ fontSize: 18 }}>{t.emoji}</div>
               <div style={{
-                fontSize: 11, fontWeight: 600, marginTop: 2,
+                fontSize: 10, fontWeight: 600, marginTop: 2,
                 color: entryType === t.id ? composerPrimary : theme.textMuted,
               }}>{t.label}</div>
             </button>
@@ -1031,7 +1081,7 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
         </div>
 
         {/* Optional Game Data Toggle */}
-        {(entryType === "game" || entryType === "tournament") && (
+        {(entryType === "game" || entryType === "tournament" || entryType === "event") && (
           <>
             <button onClick={() => setShowGameData(!showGameData)}
               style={{
@@ -1040,7 +1090,7 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
                 marginBottom: showGameData ? 12 : 0,
                 display: "flex", alignItems: "center", gap: 6,
               }}>
-              {showGameData ? "▾" : "▸"} Game Details (optional)
+              {showGameData ? "▾" : "▸"} {entryType === "event" ? "Event Details" : "Game Details"} (optional)
             </button>
 
             {showGameData && (
@@ -1085,7 +1135,7 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
                 Share with {orgName}
               </div>
               <div style={{ fontSize: 11, color: theme.textMuted }}>
-                Your club can feature this entry
+                Your team can feature this entry
               </div>
             </div>
             <button onClick={() => setConsentShared(!consentShared)}
@@ -1126,10 +1176,13 @@ function EntryCard({ entry, players, onShare, brandColor }) {
     game: entry.result === "win" ? theme.win : entry.result === "loss" ? theme.loss : theme.draw,
     practice: theme.practice,
     tournament: theme.tournament,
+    event: theme.tournament,
+    sightseeing: "#6B7280",
+    food: "#C2410C",
     moment: theme.moment,
   };
 
-  const typeEmojis = { game: "🏟️", practice: "🔄", tournament: "🏆", moment: "⭐" };
+  const typeEmojis = { game: "🏟️", practice: "🔄", tournament: "🏆", event: "✈️", sightseeing: "📍", food: "🍕", moment: "⭐" };
   const resultLabels = { win: "W", loss: "L", draw: "D" };
 
   const color = typeColors[entry.entry_type] || theme.textMuted;
@@ -1236,7 +1289,7 @@ function EntryCard({ entry, players, onShare, brandColor }) {
 
 // --- SEASON STATS BAR ---
 function SeasonStats({ entries, brandColor }) {
-  const games = entries.filter((e) => e.entry_type === "game" || e.entry_type === "tournament");
+  const games = entries.filter((e) => e.entry_type === "game" || e.entry_type === "tournament" || e.entry_type === "event");
   const wins = games.filter((e) => e.result === "win").length;
   const losses = games.filter((e) => e.result === "loss").length;
   const draws = games.filter((e) => e.result === "draw").length;
@@ -1300,7 +1353,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
   const entryPages = paginateEntries(entries);
   const totalPages = 2 + entryPages.length + 1; // title + summary + entries + closing
 
-  const games = sortedEntries.filter((e) => e.entry_type === "game" || e.entry_type === "tournament");
+  const games = sortedEntries.filter((e) => e.entry_type === "game" || e.entry_type === "tournament" || e.entry_type === "event");
   const wins = games.filter((e) => e.result === "win").length;
   const losses = games.filter((e) => e.result === "loss").length;
   const draws = games.filter((e) => e.result === "draw").length;
@@ -1536,10 +1589,10 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
     return renderClosingPage();
   };
 
-  const RENDER_W = 595;  // 8.5" at ~70ppi
-  const RENDER_H = 770;  // 11" at ~70ppi
+  const RENDER_W = 544;  // 7.75" at ~70ppi
+  const RENDER_H = 544;  // 7.75" square
   const CONTAINER_W = 290;
-  const CONTAINER_H = 375;
+  const CONTAINER_H = 290;
   const scale = CONTAINER_W / RENDER_W;
 
   return (
@@ -1809,7 +1862,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                 <span style={{ fontSize: 14, color: theme.textMuted }}>Format</span>
-                <span style={{ fontSize: 14, fontWeight: 500 }}>8.5×11" Hardcover</span>
+                <span style={{ fontSize: 14, fontWeight: 500 }}>7.75" Square Hardcover</span>
               </div>
               <div style={{ height: 1, background: theme.border, margin: "12px 0" }} />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -2034,7 +2087,7 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({
   const bgPosition = photoPosMap[photoPos] || "center 40%";
 
   // Stat line computations
-  const seasonGames = entries.filter((e) => e.entry_type === "game" || e.entry_type === "tournament");
+  const seasonGames = entries.filter((e) => e.entry_type === "game" || e.entry_type === "tournament" || e.entry_type === "event");
   const wins = seasonGames.filter((e) => e.result === "win").length;
   const losses = seasonGames.filter((e) => e.result === "loss").length;
   const draws = seasonGames.filter((e) => e.result === "draw").length;
@@ -3478,7 +3531,7 @@ function LandingPage({ onDemo, onStart }) {
               A real book for the shelf
             </h2>
             <p style={sectionCopy}>
-              At the end of the season, turn the whole journal into an 8.5x11" printed hardcover. Every entry, every score, every photo - bound and in their hands. The kind of thing they keep.
+              At the end of the season, turn the whole journal into a printed hardcover photo book. Every entry, every score, every photo - bound and in their hands. The kind of thing they keep.
             </p>
             <p style={{
               fontFamily: fonts.body,
@@ -3661,7 +3714,7 @@ function LandingPage({ onDemo, onStart }) {
               marginBottom: 16,
             }}>$39</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {["8.5x11\" hardcover", "Auto-designed from your journal", "Every entry, photo, and score", "Shipped to your door", "Order anytime"].map((f) => (
+              {["7.75\" square hardcover", "Auto-designed from your journal", "Every entry, photo, and score", "Shipped to your door", "Order anytime"].map((f) => (
                 <span key={f} style={{
                   fontFamily: fonts.body,
                   fontSize: 13,
@@ -3702,7 +3755,7 @@ function LandingPage({ onDemo, onStart }) {
           fontSize: 13,
           color: theme.textMuted,
         }}>
-          - Soccer parent, U12
+          - Sports parent, U12
         </p>
       </div>
 
@@ -4068,6 +4121,9 @@ function AdminDashboard({ org, teams, onAddTeam, onAddPlayer, onSignOut, accentC
     game: theme.win,
     practice: theme.practice,
     tournament: theme.tournament,
+    event: theme.tournament,
+    sightseeing: "#6B7280",
+    food: "#C2410C",
     moment: theme.moment,
   };
 
@@ -4690,6 +4746,11 @@ export default function SportsJournalApp() {
   const [org, setOrg] = useState(null);
   const [orgTeams, setOrgTeams] = useState([]);
 
+  // Multi-season
+  const [allSeasons, setAllSeasons] = useState([]); // Array of { team, season, players, entries, role }
+  const [activeSeasonIdx, setActiveSeasonIdx] = useState(0);
+  const [showSeasonSwitcher, setShowSeasonSwitcher] = useState(false);
+
   // Join flow
   const [joinToken, setJoinToken] = useState(null);
 
@@ -4739,16 +4800,29 @@ export default function SportsJournalApp() {
       localStorage.removeItem("theSeasonOrder");
     }
 
-    // Check admin localStorage first
-    const adminSaved = localStorage.getItem("teamSeasonAdmin");
-    if (adminSaved) {
+    // Admin restore disabled (admin flow hidden, code kept for future use)
+    // const adminSaved = localStorage.getItem("teamSeasonAdmin");
+    // if (adminSaved) { ... }
+
+    // Restore multi-season data
+    const allSaved = localStorage.getItem("teamSeasonAll");
+    if (allSaved) {
       try {
-        const data = JSON.parse(adminSaved);
-        if (data.role === "admin" && data.org) {
-          setRole("admin");
-          setOrg(data.org);
-          setOrgTeams(data.orgTeams || []);
-          setScreen("admin");
+        const { seasons, activeIdx } = JSON.parse(allSaved);
+        if (seasons && seasons.length > 0) {
+          setAllSeasons(seasons);
+          const idx = Math.min(activeIdx || 0, seasons.length - 1);
+          setActiveSeasonIdx(idx);
+          const data = seasons[idx];
+          setRole(data.role);
+          setTeam(data.team);
+          setSeason(data.season);
+          setPlayers(data.players);
+          setEntries(data.entries.map((e) => ({
+            ...e,
+            photoPreview: e.photoData || null,
+          })));
+          setScreen("home");
           if (!DEMO && supabase.auth.restore()) {
             setUser(supabase.auth.user);
             setAuthed(true);
@@ -4758,7 +4832,7 @@ export default function SportsJournalApp() {
       } catch (e) { /* continue */ }
     }
 
-    // Check parent localStorage
+    // Check legacy single-season localStorage
     const saved = localStorage.getItem("teamSeason");
     if (saved) {
       try {
@@ -4771,6 +4845,9 @@ export default function SportsJournalApp() {
           ...e,
           photoPreview: e.photoData || null,
         })));
+        // Migrate to allSeasons
+        setAllSeasons([data]);
+        setActiveSeasonIdx(0);
         setScreen("home");
         if (!DEMO && supabase.auth.restore()) {
           setUser(supabase.auth.user);
@@ -4829,6 +4906,19 @@ export default function SportsJournalApp() {
     if (screen === "home" && team && season) {
       const data = { role, team, season, players, entries };
       localStorage.setItem("teamSeason", JSON.stringify(data));
+
+      // Also persist to allSeasons array
+      setAllSeasons((prev) => {
+        const updated = [...prev];
+        if (updated.length === 0) {
+          updated.push(data);
+          setActiveSeasonIdx(0);
+        } else {
+          updated[activeSeasonIdx] = data;
+        }
+        localStorage.setItem("teamSeasonAll", JSON.stringify({ seasons: updated, activeIdx: activeSeasonIdx }));
+        return updated;
+      });
     }
     if (screen === "admin" && org) {
       const data = { role: "admin", org, orgTeams };
@@ -5004,8 +5094,8 @@ export default function SportsJournalApp() {
       const teamData = {
         id: data.team_id,
         name: data.team_name,
-        sport: data.team_sport || "Soccer",
-        emoji: data.team_emoji || "⚽",
+        sport: data.team_sport || "Sports",
+        emoji: data.team_emoji || "🏅",
         color: data.team_color || "#1B4332",
         logo: null,
         orgType: "club",
@@ -5037,6 +5127,34 @@ export default function SportsJournalApp() {
     }
   };
 
+  const switchToSeason = (idx) => {
+    if (idx < 0 || idx >= allSeasons.length) return;
+    const s = allSeasons[idx];
+    setActiveSeasonIdx(idx);
+    setRole(s.role);
+    setTeam(s.team);
+    setSeason(s.season);
+    setPlayers(s.players);
+    setEntries((s.entries || []).map((e) => ({ ...e, photoPreview: e.photoData || null })));
+    setFilter("all");
+    setShowSeasonSwitcher(false);
+    localStorage.setItem("teamSeasonAll", JSON.stringify({ seasons: allSeasons, activeIdx: idx }));
+  };
+
+  const startNewSeason = () => {
+    // Save current season first
+    if (team && season) {
+      setAllSeasons((prev) => {
+        const updated = [...prev];
+        updated[activeSeasonIdx] = { role, team, season, players, entries };
+        localStorage.setItem("teamSeasonAll", JSON.stringify({ seasons: updated, activeIdx: activeSeasonIdx }));
+        return updated;
+      });
+    }
+    setShowSeasonSwitcher(false);
+    setScreen("setup");
+  };
+
   const handleSetup = (data) => {
     const teamData = data.team;
     const seasonData = data.season;
@@ -5047,7 +5165,18 @@ export default function SportsJournalApp() {
     setTeam(teamData);
     setSeason(seasonData);
     setPlayers(playersList);
+    setEntries([]);
     setScreen("home");
+
+    // Add to allSeasons
+    const newSeasonData = { role: role || "parent", team: teamData, season: seasonData, players: playersList, entries: [] };
+    setAllSeasons((prev) => {
+      const updated = [...prev, newSeasonData];
+      const newIdx = updated.length - 1;
+      setActiveSeasonIdx(newIdx);
+      localStorage.setItem("teamSeasonAll", JSON.stringify({ seasons: updated, activeIdx: newIdx }));
+      return updated;
+    });
 
     // Sync to cloud (fire and forget)
     if (!DEMO && user) {
@@ -5055,8 +5184,8 @@ export default function SportsJournalApp() {
         try {
           await supabase.from("teams").insert({
             id: teamData.id, user_id: user.id,
-            name: teamData.name, sport: teamData.sport || "Soccer",
-            emoji: teamData.emoji || "⚽", color: teamData.color || "#1B4332",
+            name: teamData.name, sport: teamData.sport || "Sports",
+            emoji: teamData.emoji || "🏅", color: teamData.color || "#1B4332",
           });
           await supabase.from("seasons").insert({
             id: seasonData.id, user_id: user.id,
@@ -5107,7 +5236,7 @@ export default function SportsJournalApp() {
         try {
           await supabase.from("teams").insert({
             id: newTeam.id, user_id: user.id, org_id: org.id,
-            name: newTeam.name, sport: "Soccer",
+            name: newTeam.name, sport: newTeam.sport || "Sports",
             age_group: newTeam.ageGroup || null,
             color: org.color || "#1B4332",
           });
@@ -5210,8 +5339,11 @@ export default function SportsJournalApp() {
   };
 
   // Filter entries
+  const offFieldTypes = ["event", "sightseeing", "food"];
   const filteredEntries = filter === "all"
     ? entries
+    : filter === "off-field"
+    ? entries.filter((e) => offFieldTypes.includes(e.entry_type))
     : entries.filter((e) => e.entry_type === filter);
 
   // --- RENDER ---
@@ -5225,7 +5357,7 @@ export default function SportsJournalApp() {
           minHeight: "100dvh", fontFamily: fonts.body, color: theme.textLight,
           flexDirection: "column", gap: 12,
         }}>
-          <div style={{ fontSize: 32 }}>&#9917;</div>
+          <div style={{ fontSize: 32 }}>🏆</div>
           <span style={{ fontSize: 14 }}>Loading your journal...</span>
         </div>
       )}
@@ -5261,7 +5393,21 @@ export default function SportsJournalApp() {
               width: 28, height: 28, borderRadius: "50%", objectFit: "cover",
             }} />
           ) : null}
-          subtitle={role === "parent" && players[0]?.name ? `${players[0].name}'s season` : season.name}
+          subtitle={
+            <button
+              onClick={() => setShowSeasonSwitcher(!showSeasonSwitcher)}
+              style={{
+                background: `${brandPrimary}08`, border: `1px solid ${brandPrimary}20`,
+                borderRadius: 20, padding: "3px 10px 3px 6px", cursor: "pointer",
+                display: "inline-flex", alignItems: "center", gap: 4,
+                fontSize: 13, color: theme.textMuted, transition: "all 0.15s",
+              }}
+            >
+              <span>{team.emoji}</span>
+              <span>{season.name}</span>
+              <span style={{ fontSize: 10, marginLeft: 2 }}>{showSeasonSwitcher ? "▲" : "▼"}</span>
+            </button>
+          }
           subtitleIcon={role === "parent" && players[0]?.headshot ? (
             <img src={players[0].headshot} alt="" style={{
               width: 20, height: 20, borderRadius: "50%", objectFit: "cover",
@@ -5290,6 +5436,48 @@ export default function SportsJournalApp() {
             </div>
           }
         >
+          {/* Season Switcher Dropdown */}
+          {showSeasonSwitcher && (
+            <div style={{
+              background: "white", border: `1px solid ${theme.border}`,
+              borderRadius: 12, padding: 8, marginBottom: 16,
+              boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+            }}>
+              {allSeasons.map((s, idx) => (
+                <button key={idx} onClick={() => switchToSeason(idx)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    width: "100%", padding: "10px 12px", border: "none",
+                    background: idx === activeSeasonIdx ? `${brandPrimary}10` : "transparent",
+                    cursor: "pointer", borderRadius: 8, textAlign: "left",
+                    transition: "background 0.15s",
+                  }}>
+                  <span style={{ fontSize: 20 }}>{s.team?.emoji || "🏅"}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{
+                      fontSize: 14, fontWeight: idx === activeSeasonIdx ? 600 : 400,
+                      color: idx === activeSeasonIdx ? brandPrimary : theme.text,
+                    }}>{s.team?.name || "Team"}</div>
+                    <div style={{ fontSize: 12, color: theme.textMuted }}>{s.season?.name || "Season"}</div>
+                  </div>
+                  {idx === activeSeasonIdx && (
+                    <span style={{ fontSize: 12, color: brandPrimary, fontWeight: 600 }}>Active</span>
+                  )}
+                </button>
+              ))}
+              <button onClick={startNewSeason}
+                style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  width: "100%", padding: "10px 12px", border: `1px dashed ${theme.border}`,
+                  background: "transparent", cursor: "pointer", borderRadius: 8,
+                  marginTop: 4, textAlign: "left",
+                }}>
+                <span style={{ fontSize: 18, color: theme.textMuted }}>+</span>
+                <span style={{ fontSize: 14, color: theme.textMuted, fontWeight: 500 }}>New Season</span>
+              </button>
+            </div>
+          )}
+
           {/* Stats */}
           <SeasonStats entries={entries} brandColor={brandPrimary} />
 
@@ -5373,6 +5561,7 @@ export default function SportsJournalApp() {
               { id: "game", label: "Games" },
               { id: "practice", label: "Practice" },
               { id: "tournament", label: "Tournaments" },
+              { id: "off-field", label: "Off Field" },
               { id: "moment", label: "Moments" },
             ].map((tab) => (
               <button key={tab.id} onClick={() => setFilter(tab.id)}

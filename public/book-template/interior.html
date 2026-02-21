@@ -3,12 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Team Season — Book Interior</title>
+<title>Team Season - Book Interior</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+  /* Lulu 7.75x7.75" square hardcover case wrap, 0.125" bleed on all edges
+     Total page: 8in x 8in
+     Safe area starts 0.3125in (bleed + safe margin) from each edge */
   @page {
-    size: 7.125in 7.125in;
+    size: 8in 8in;
     margin: 0;
   }
 
@@ -25,10 +28,13 @@
     --win: #2D6A4F;
     --loss: #C1121F;
     --draw: #6B7280;
-    --page-size: 7.125in;
+    --page-w: 8in;
+    --page-h: 8in;
     --bleed: 0.125in;
     --safe: 0.1875in;
-    --padding: 0.3125in; /* bleed + safe */
+    --pad: 0.5in; /* bleed + safe + comfortable margin */
+    --pad-top: 0.5in;
+    --pad-bottom: 0.5in;
   }
 
   body {
@@ -41,9 +47,9 @@
   }
 
   .page {
-    width: var(--page-size);
-    height: var(--page-size);
-    padding: var(--padding);
+    width: var(--page-w);
+    height: var(--page-h);
+    padding: var(--pad-top) var(--pad) var(--pad-bottom);
     position: relative;
     overflow: hidden;
     page-break-after: always;
@@ -56,9 +62,15 @@
     break-after: avoid;
   }
 
+  .page-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
   .page-number {
     position: absolute;
-    bottom: 0.35in;
+    bottom: 0.4in;
     left: 0;
     right: 0;
     text-align: center;
@@ -75,21 +87,21 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 1in;
+    padding: 2in 1.25in;
   }
 
   .title-page .team-accent {
     width: 60px;
     height: 3px;
     background: var(--team-color);
-    margin-bottom: 40px;
+    margin-bottom: 48px;
   }
 
   .title-page .team-name {
     font-family: 'Instrument Serif', Georgia, serif;
-    font-size: 48px;
+    font-size: 42px;
     font-weight: 400;
-    line-height: 1.1;
+    line-height: 1.08;
     color: var(--text);
     margin-bottom: 16px;
     letter-spacing: -0.5px;
@@ -100,14 +112,14 @@
     font-size: 18px;
     font-weight: 400;
     color: var(--text-muted);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
 
   .title-page .season-label {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-light);
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     text-transform: uppercase;
   }
 
@@ -115,7 +127,7 @@
     width: 60px;
     height: 3px;
     background: var(--team-color);
-    margin-top: 40px;
+    margin-top: 48px;
   }
 
   /* --- Summary Page --- */
@@ -125,7 +137,7 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 0.8in;
+    padding: 1.5in 1.25in;
   }
 
   .summary-page .section-label {
@@ -134,12 +146,12 @@
     color: var(--text-light);
     letter-spacing: 3px;
     text-transform: uppercase;
-    margin-bottom: 32px;
+    margin-bottom: 40px;
   }
 
   .summary-page .record {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 64px;
+    font-size: 52px;
     font-weight: 700;
     color: var(--text);
     letter-spacing: 4px;
@@ -152,13 +164,13 @@
     color: var(--text-light);
     letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 40px;
+    margin-bottom: 48px;
   }
 
   .summary-page .stat-row {
     display: flex;
-    gap: 48px;
-    margin-bottom: 40px;
+    gap: 56px;
+    margin-bottom: 48px;
   }
 
   .summary-page .stat {
@@ -167,7 +179,7 @@
 
   .summary-page .stat-value {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 600;
     color: var(--text);
   }
@@ -183,7 +195,7 @@
 
   .summary-page .date-range {
     font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-muted);
   }
 
@@ -191,7 +203,7 @@
     width: 40px;
     height: 2px;
     background: var(--team-color-light);
-    margin: 0 auto 40px;
+    margin: 0 auto 48px;
   }
 
   /* --- Entry Pages --- */
@@ -200,8 +212,8 @@
   }
 
   .entry + .entry {
-    padding-top: 28px;
-    margin-top: 28px;
+    padding-top: 32px;
+    margin-top: 32px;
     border-top: 1px solid var(--team-color-faint);
   }
 
@@ -209,7 +221,7 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
 
   .entry-type {
@@ -230,13 +242,13 @@
   .entry-score {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
+    gap: 14px;
+    margin-bottom: 16px;
   }
 
   .entry-score .score-num {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 36px;
+    font-size: 32px;
     font-weight: 700;
     color: var(--text);
     letter-spacing: 2px;
@@ -258,9 +270,9 @@
 
   .entry-opponent {
     font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text-muted);
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
 
   .entry-photo {
@@ -268,15 +280,15 @@
     max-height: 4.5in;
     object-fit: cover;
     border-radius: 4px;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
     display: block;
   }
 
   .entry-text {
     font-family: Georgia, 'Times New Roman', serif;
     font-style: italic;
-    font-size: 15px;
-    line-height: 1.65;
+    font-size: 16px;
+    line-height: 1.7;
     color: #2A2A2A;
   }
 
@@ -284,7 +296,7 @@
     font-family: 'DM Sans', sans-serif;
     font-size: 11px;
     color: var(--text-light);
-    margin-top: 10px;
+    margin-top: 12px;
   }
 
   /* --- Text-only page (single entry, no photo) --- */
@@ -292,16 +304,21 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 0.8in;
+    padding: 1in 0.75in;
   }
 
   .text-only-page .entry-text {
-    font-size: 20px;
-    line-height: 1.7;
+    font-size: 18px;
+    line-height: 1.75;
   }
 
   .text-only-page .entry-score .score-num {
-    font-size: 48px;
+    font-size: 44px;
+  }
+
+  /* --- Photo page (entry with image) --- */
+  .page.photo-page .entry-photo {
+    max-height: 5in;
   }
 
   /* --- Closing Page --- */
@@ -311,7 +328,7 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 1.2in;
+    padding: 2in 1.5in;
   }
 
   .closing-page .closing-text {
@@ -320,14 +337,14 @@
     font-size: 24px;
     line-height: 1.5;
     color: var(--text-muted);
-    margin-bottom: 48px;
+    margin-bottom: 56px;
   }
 
   .closing-page .closing-accent {
     width: 40px;
     height: 2px;
     background: var(--team-color);
-    margin-bottom: 24px;
+    margin-bottom: 28px;
   }
 
   .closing-page .brand {
@@ -338,7 +355,7 @@
     text-transform: uppercase;
   }
 
-  /* Print-specific */
+  /* Print overrides */
   @media print {
     body { background: white; }
     .page { background: white; }
@@ -350,59 +367,167 @@
 
 <script>
 // Fallback demo data (used when opened directly in browser)
+const P = (id) => [
+  "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=500&fit=crop",
+  "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=800&h=500&fit=crop",
+  "https://images.unsplash.com/photo-1553778263-73a83bab9b0c?w=800&h=500&fit=crop",
+  "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=800&h=500&fit=crop",
+  "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=800&h=500&fit=crop",
+  "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&h=500&fit=crop",
+  "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800&h=500&fit=crop",
+  "https://images.unsplash.com/photo-1606925797300-0b35e9d1794e?w=800&h=500&fit=crop",
+][id % 8];
 const DEMO_DATA = {
   team: { name: "Monta\u00f1a FC", emoji: "\u26BD", logo: null, color: "#1B4332" },
   season: { name: "Spring 2026" },
   players: [{ name: "Marco", headshot: null }],
   entries: [
-    {
-      id: "e1", entry_type: "game", text: "Two assists and the go-ahead goal. He read that through ball perfectly and didn't even hesitate.",
-      entry_date: "2026-02-11", opponent: "Lightning FC", score_home: 3, score_away: 1, result: "win",
-      venue: "Memorial Field", photoData: "/images/demo/game-action.jpg", photoPreview: "/images/demo/game-action.jpg"
-    },
-    {
-      id: "e2", entry_type: "practice", text: "Cone work is finally clicking. Coach pulled him aside after and said his first touch has gotten way sharper.",
-      entry_date: "2026-02-08", opponent: null, score_home: null, score_away: null, result: null,
-      venue: "Training Complex", photoData: "/images/demo/practice-cones.jpg", photoPreview: "/images/demo/practice-cones.jpg"
-    },
-    {
-      id: "e3", entry_type: "game", text: "Left it all on the field. Went ninety minutes in the heat and never asked to come off.",
-      entry_date: "2026-02-04", opponent: "Rapids", score_home: 1, score_away: 2, result: "loss",
-      venue: "Riverside Park", photoData: "/images/demo/water-break.jpg", photoPreview: "/images/demo/water-break.jpg"
-    },
-    {
-      id: "e4", entry_type: "tournament", text: "Semifinal shutout. The whole bench was on their feet when the final whistle blew.",
-      entry_date: "2026-01-30", opponent: null, score_home: 2, score_away: 0, result: "win",
-      venue: "City Cup", photoData: "/images/demo/game-action.jpg", photoPreview: "/images/demo/game-action.jpg"
-    },
-    {
-      id: "e5", entry_type: "moment", text: "Walking back from the field with a bag of balls and that look. This kid lives for it.",
-      entry_date: "2026-01-26", opponent: null, score_home: null, score_away: null, result: null,
-      venue: null, photoData: "/images/demo/walking-off.jpg", photoPreview: "/images/demo/walking-off.jpg"
-    },
-    {
-      id: "e6", entry_type: "game", text: "Dominated possession but couldn't find the finish. Hit the crossbar twice in the last ten minutes.",
-      entry_date: "2026-01-21", opponent: "United", score_home: 1, score_away: 1, result: "draw",
-      venue: "Home Field", photoData: "/images/demo/water-break.jpg", photoPreview: "/images/demo/water-break.jpg"
-    }
+    // --- February ---
+    { id: "e1", entry_type: "game", text: "First game of the season. Nerves everywhere but he settled in after ten minutes. Won a header he had no business winning and the whole bench lost it.",
+      entry_date: "2026-02-07", opponent: "FC Dynamo", score_home: 2, score_away: 1, result: "win",
+      venue: "Memorial Field", photoData: null, photoPreview: P(0) },
+    { id: "e2", entry_type: "practice", text: "New formation day. Coach moved him into the eight role and it just clicked. He was finding pockets of space nobody else saw. Even the older kids on the next field stopped to watch the scrimmage.",
+      entry_date: "2026-02-09", opponent: null, score_home: null, score_away: null, result: null,
+      venue: "Training Complex", photoData: null, photoPreview: null },
+    { id: "e3", entry_type: "game", text: "Tough road loss. Their keeper was unreal but we also gave away two soft goals on set pieces. He played hard though. Won every fifty-fifty in the second half.",
+      entry_date: "2026-02-14", opponent: "Rapids SC", score_home: 1, score_away: 3, result: "loss",
+      venue: "Riverside Park", photoData: null, photoPreview: null },
+    { id: "e4", entry_type: "moment", text: "Stayed after practice for an extra thirty minutes working on free kicks with his buddy Jalen. Just the two of them and a bag of balls. This is the stuff you remember.",
+      entry_date: "2026-02-16", opponent: null, score_home: null, score_away: null, result: null,
+      venue: null, photoData: null, photoPreview: P(1) },
+    { id: "e5", entry_type: "game", text: "Hat trick. Three goals in eighteen minutes in the second half. The third one was a left-footed curler from outside the box that dipped right under the bar. Absolute screamer.",
+      entry_date: "2026-02-21", opponent: "Lightning FC", score_home: 4, score_away: 0, result: "win",
+      venue: "Home Field", photoData: null, photoPreview: P(2) },
+    { id: "e6", entry_type: "practice", text: "Defensive shape session. He was not thrilled about tracking back but did the work without complaining. Growth.",
+      entry_date: "2026-02-23", opponent: null, score_home: null, score_away: null, result: null,
+      venue: "Training Complex", photoData: null, photoPreview: null },
+    { id: "e7", entry_type: "game", text: "Back and forth the whole game. We went up, they equalized, we went up again, they equalized again. He was gassed by the seventy-fifth minute but gutted it out. Draw feels like a loss after being up twice.",
+      entry_date: "2026-02-28", opponent: "Strikers United", score_home: 2, score_away: 2, result: "draw",
+      venue: "Central Park", photoData: null, photoPreview: null },
+
+    // --- March ---
+    { id: "e8", entry_type: "game", text: "Shutout. Their forwards couldn't get past the back line and he controlled the midfield all game. Completed something like forty passes without a turnover.",
+      entry_date: "2026-03-01", opponent: "Metro FC", score_home: 1, score_away: 0, result: "win",
+      venue: "Home Field", photoData: null, photoPreview: P(3) },
+    { id: "e9", entry_type: "practice", text: "Crossing and finishing drill. He put three perfect balls into the box from the right side. Coach said his delivery is the best on the team right now. The kid beamed.",
+      entry_date: "2026-03-04", opponent: null, score_home: null, score_away: null, result: null,
+      venue: "Training Complex", photoData: null, photoPreview: null },
+    { id: "e10", entry_type: "game", text: "Rainy game on a waterlogged field. Nobody could keep their footing. He slid for a tackle in the box, won the ball clean, and launched a counterattack that led to the winner. Soaked and grinning ear to ear.",
+      entry_date: "2026-03-07", opponent: "Wolves Academy", score_home: 2, score_away: 1, result: "win",
+      venue: "Westside Complex", photoData: null, photoPreview: P(4) },
+    { id: "e11", entry_type: "moment", text: "Team dinner at the pizza place after the Wolves win. Whole squad together, laughing, recapping goals. These are the nights they will talk about in ten years.",
+      entry_date: "2026-03-07", opponent: null, score_home: null, score_away: null, result: null,
+      venue: "Mario's Pizza", photoData: null, photoPreview: null },
+    { id: "e12", entry_type: "practice", text: "Goalkeeper session with the whole team taking turns in net. He made three saves and let in about fifteen. Everybody was dying laughing. Good energy before the tournament weekend.",
+      entry_date: "2026-03-11", opponent: null, score_home: null, score_away: null, result: null,
+      venue: "Training Complex", photoData: null, photoPreview: P(5) },
+    { id: "e13", entry_type: "tournament", text: "Spring Invitational opener. We came out flat and they punished us early. Fought back to 2-2 but couldn't find a third. Still advance on goal difference.",
+      entry_date: "2026-03-14", opponent: "Coastal United", score_home: 2, score_away: 2, result: "draw",
+      venue: "Spring Invitational", photoData: null, photoPreview: null },
+    { id: "e14", entry_type: "tournament", text: "Second group game. He scored from the spot after getting fouled in the box. Cool as you like. Sent the keeper the wrong way. We controlled the whole second half.",
+      entry_date: "2026-03-14", opponent: "Bay Area SC", score_home: 3, score_away: 1, result: "win",
+      venue: "Spring Invitational", photoData: null, photoPreview: P(6) },
+    { id: "e15", entry_type: "tournament", text: "Semifinal. Best game of the season so far. End to end, physical, intense. He won a header at the back post in the eighty-eighth minute. Pandemonium. The whole sideline rushed the field.",
+      entry_date: "2026-03-15", opponent: "Vipers Elite", score_home: 2, score_away: 1, result: "win",
+      venue: "Spring Invitational", photoData: null, photoPreview: P(7) },
+    { id: "e16", entry_type: "tournament", text: "Championship final. We left everything on the field. Lost on penalties after a scoreless draw. He buried his penalty but two teammates missed. He hugged them both after. Proud of this team.",
+      entry_date: "2026-03-15", opponent: "Legends FC", score_home: 0, score_away: 0, result: "loss",
+      venue: "Spring Invitational", photoData: null, photoPreview: P(0) },
+    { id: "e17", entry_type: "practice", text: "Recovery session after the tournament. Light jog, stretching, small-sided games. He was still replaying the final in his head. You could see it in his eyes.",
+      entry_date: "2026-03-18", opponent: null, score_home: null, score_away: null, result: null,
+      venue: "Training Complex", photoData: null, photoPreview: null },
+    { id: "e18", entry_type: "game", text: "Bounce-back win. Came out with something to prove after the tournament loss. He was everywhere. Two goals, an assist, and a perfectly timed block on a goal-bound shot.",
+      entry_date: "2026-03-21", opponent: "Phoenix Rising", score_home: 4, score_away: 1, result: "win",
+      venue: "Home Field", photoData: null, photoPreview: P(1) },
+    { id: "e19", entry_type: "game", text: "Close road game. We sat deep and tried to hit them on the counter. It almost worked. They scored a late free kick to win it. Frustrating but the defensive effort was solid.",
+      entry_date: "2026-03-28", opponent: "Atlas Academy", score_home: 0, score_away: 1, result: "loss",
+      venue: "Atlas Sports Park", photoData: null, photoPreview: null },
+
+    // --- April ---
+    { id: "e20", entry_type: "practice", text: "Fitness testing day. He ran the fastest beep test on the squad and then immediately went to the water cooler and pretended to pass out. Classic Marco.",
+      entry_date: "2026-04-01", opponent: null, score_home: null, score_away: null, result: null,
+      venue: "Training Complex", photoData: null, photoPreview: null },
+    { id: "e21", entry_type: "game", text: "Dominated from start to finish. He dropped deep to collect the ball and sprayed passes everywhere. Looked like a completely different player than the start of the season. The development is real.",
+      entry_date: "2026-04-04", opponent: "FC Dynamo", score_home: 3, score_away: 0, result: "win",
+      venue: "Memorial Field", photoData: null, photoPreview: P(2) },
+    { id: "e22", entry_type: "moment", text: "Car ride home after the Dynamo game. He was quiet for a while and then said he thinks this is his best season ever. No prompting, just said it. Sometimes you just listen.",
+      entry_date: "2026-04-04", opponent: null, score_home: null, score_away: null, result: null,
+      venue: null, photoData: null, photoPreview: null },
+    { id: "e23", entry_type: "game", text: "Rematch against Rapids. This time we were ready. He marked their best player out of the game and still found time to get forward. Complete performance.",
+      entry_date: "2026-04-11", opponent: "Rapids SC", score_home: 2, score_away: 0, result: "win",
+      venue: "Riverside Park", photoData: null, photoPreview: null },
+    { id: "e24", entry_type: "practice", text: "Small-sided tournament within the team. His squad won the whole thing. He was talking trash the entire time. The coaches were laughing. The other kids were not.",
+      entry_date: "2026-04-13", opponent: null, score_home: null, score_away: null, result: null,
+      venue: "Training Complex", photoData: null, photoPreview: P(3) },
+    { id: "e25", entry_type: "game", text: "Wild game. Up 3-1, almost blew it, held on 3-2. He scored the third goal and then spent the last twenty minutes defending for his life. Heart was in my throat the whole time.",
+      entry_date: "2026-04-18", opponent: "Strikers United", score_home: 3, score_away: 2, result: "win",
+      venue: "Home Field", photoData: null, photoPreview: P(4) },
+    { id: "e26", entry_type: "practice", text: "Set piece rehearsal. Corners, free kicks, throw-in routines. He was on delivery duty and got annoyed when the timing was off. Leadership showing up in small ways.",
+      entry_date: "2026-04-20", opponent: null, score_home: null, score_away: null, result: null,
+      venue: "Training Complex", photoData: null, photoPreview: null },
+    { id: "e27", entry_type: "game", text: "Scoreless draw against a very good team. Nobody creates anything. Physical, chippy, hard. A point on the road against these guys is a good result. He got a yellow for a late challenge and was furious with himself.",
+      entry_date: "2026-04-25", opponent: "Metro FC", score_home: 0, score_away: 0, result: "draw",
+      venue: "Metro Stadium", photoData: null, photoPreview: null },
+    { id: "e28", entry_type: "moment", text: "Found him in the backyard after dinner juggling in the dark. Just the sound of the ball and the crickets. Didn't say anything. Just watched from the window.",
+      entry_date: "2026-04-27", opponent: null, score_home: null, score_away: null, result: null,
+      venue: null, photoData: null, photoPreview: P(5) },
+
+    // --- May ---
+    { id: "e29", entry_type: "game", text: "Senior night for the older players. Emotional pregame ceremony. He played inspired. Two assists, both to seniors. That kind of awareness does not show up on a stat sheet.",
+      entry_date: "2026-05-02", opponent: "Wolves Academy", score_home: 3, score_away: 1, result: "win",
+      venue: "Home Field", photoData: null, photoPreview: P(6) },
+    { id: "e30", entry_type: "practice", text: "Last real training session before playoffs. Intensity was through the roof. He got into a shouting match with his buddy over a foul call in the scrimmage. They were best friends again five minutes later.",
+      entry_date: "2026-05-05", opponent: null, score_home: null, score_away: null, result: null,
+      venue: "Training Complex", photoData: null, photoPreview: null },
+    { id: "e31", entry_type: "game", text: "Regular season finale. Nothing on the line standings-wise but he played like it was a cup final. Coaches rested him at halftime and he looked personally offended. Wanted every minute.",
+      entry_date: "2026-05-09", opponent: "Phoenix Rising", score_home: 2, score_away: 0, result: "win",
+      venue: "Phoenix Sports Center", photoData: null, photoPreview: null },
+    { id: "e32", entry_type: "tournament", text: "State Cup first round. Nerves from both teams. Sloppy first half. He calmed everyone down at the break and we came out sharp. Two quick goals and the game was over.",
+      entry_date: "2026-05-16", opponent: "Valley FC", score_home: 3, score_away: 0, result: "win",
+      venue: "State Cup - Round 1", photoData: null, photoPreview: P(7) },
+    { id: "e33", entry_type: "practice", text: "Film session at coach's house. Watching tape of the next opponent. He was pointing out defensive patterns before the coaches did. His soccer brain has leveled up this season.",
+      entry_date: "2026-05-18", opponent: null, score_home: null, score_away: null, result: null,
+      venue: "Coach's House", photoData: null, photoPreview: null },
+    { id: "e34", entry_type: "tournament", text: "State Cup quarterfinal. Tight, tense, tactical. One goal separated us. He made a goal-line clearance in the seventy-second minute that saved the season. The kind of play you replay in your head forever.",
+      entry_date: "2026-05-23", opponent: "Summit SC", score_home: 1, score_away: 0, result: "win",
+      venue: "State Cup - Quarterfinal", photoData: null, photoPreview: P(0) },
+    { id: "e35", entry_type: "moment", text: "Team pool party the day before the semifinal. Cannonball contest. He won, obviously. Sometimes you need to remember they are still just kids having the time of their lives.",
+      entry_date: "2026-05-28", opponent: null, score_home: null, score_away: null, result: null,
+      venue: "The Hendersons' Pool", photoData: null, photoPreview: null },
+    { id: "e36", entry_type: "tournament", text: "State Cup semifinal. We went down early and I thought it was over. He pulled the team together, demanded the ball, and dragged us back into it. Equalized in the sixty-fifth minute with a volley from the edge of the box. Won in extra time. Tears on the sideline.",
+      entry_date: "2026-05-30", opponent: "Coastal United", score_home: 3, score_away: 2, result: "win",
+      venue: "State Cup - Semifinal", photoData: null, photoPreview: P(1) },
+    { id: "e37", entry_type: "practice", text: "Light session before the final. Passing drills, team talk, group photo. Coach told them win or lose, this has been the best season he has coached. Everyone believed it.",
+      entry_date: "2026-06-01", opponent: null, score_home: null, score_away: null, result: null,
+      venue: "Training Complex", photoData: null, photoPreview: P(2) },
+    { id: "e38", entry_type: "moment", text: "Night before the final. He set out his kit on the chair by his bed like he always does. Boots cleaned, shin guards stacked, socks folded. A ritual since he was six years old. Some things never change.",
+      entry_date: "2026-06-02", opponent: null, score_home: null, score_away: null, result: null,
+      venue: null, photoData: null, photoPreview: null },
+    { id: "e39", entry_type: "tournament", text: "State Cup Final. The biggest game of his life. Sold-out bleachers, announcer, the whole thing. He was nervous in warm-ups but the second the whistle blew he was locked in. Scored the opener from a corner. They equalized before half. He set up the winner with a perfectly weighted through ball in the seventy-eighth minute. When the final whistle blew he dropped to his knees. I have never seen him that happy. Champions.",
+      entry_date: "2026-06-03", opponent: "Legends FC", score_home: 2, score_away: 1, result: "win",
+      venue: "State Cup - Final", photoData: null, photoPreview: P(3) },
+    { id: "e40", entry_type: "moment", text: "Trophy ceremony. Medal around his neck. Holding the cup with his teammates. Biggest smile I have ever seen. This is what it is all about. Every early morning, every long drive, every rain-soaked Tuesday practice. Worth it. All of it.",
+      entry_date: "2026-06-03", opponent: null, score_home: null, score_away: null, result: null,
+      venue: "State Cup - Final", photoData: null, photoPreview: P(4) },
   ]
 };
 
-// --- Pagination (mirrors App.jsx logic) ---
+// --- Pagination (mirrors App.jsx logic, adjusted for 7.75x7.75" square) ---
 function paginateEntries(entries) {
-  const PAGE_BUDGET = 1850;
-  const DIVIDER = 50;
+  // 7.75x7.75" square at ~260 PPI = ~2080px, minus ~580px padding = ~1500px
+  const PAGE_BUDGET = 1500;
+  const DIVIDER = 56;
 
   function estimateHeight(entry) {
-    let h = 60;
+    let h = 70; // header (type + date)
     if ((entry.entry_type === "game" || entry.entry_type === "tournament") &&
         entry.score_home !== null && entry.score_away !== null) {
-      h += 80;
+      h += 90; // score block
     }
-    if (entry.opponent) h += 35;
-    if (entry.photoPreview || entry.photoData) h += 800;
-    if (entry.text) h += Math.ceil(entry.text.length / 42) * 48;
-    if (entry.venue) h += 35;
+    if (entry.opponent) h += 40;
+    if (entry.photoPreview || entry.photoData) h += 750; // photo (smaller on square page)
+    if (entry.text) h += Math.ceil(entry.text.length / 40) * 50; // narrower page = fewer chars per line
+    if (entry.venue) h += 38;
     return h;
   }
 
@@ -415,6 +540,7 @@ function paginateEntries(entries) {
     const h = estimateHeight(entry);
     const hasPhoto = !!(entry.photoPreview || entry.photoData);
 
+    // Photos get their own page
     if (hasPhoto) {
       if (currentPage.length > 0) {
         pages.push(currentPage);
@@ -458,13 +584,21 @@ function formatDateRange(entries) {
   return `${first.toLocaleDateString('en-US', opts)} \u2013 ${last.toLocaleDateString('en-US', opts)}`;
 }
 
+function esc(str) {
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
 function renderBook(data) {
   const { team, season, players, entries } = data;
   const playerName = players[0]?.name || '';
   const teamColor = team.color || '#1B4332';
 
-  // Set CSS custom property for team color
+  // Set CSS custom properties for team color
   document.documentElement.style.setProperty('--team-color', teamColor);
+  // Use hex + alpha for light/faint variants
   document.documentElement.style.setProperty('--team-color-light', teamColor + '1F');
   document.documentElement.style.setProperty('--team-color-faint', teamColor + '0F');
 
@@ -477,9 +611,7 @@ function renderBook(data) {
   const tournaments = sorted.filter(e => e.entry_type === 'tournament').length;
 
   const entryPages = paginateEntries(entries);
-  const totalPages = 2 + entryPages.length + 1; // title + summary + entries + closing
   let pageNum = 0;
-
   let html = '';
 
   // --- Title Page ---
@@ -532,7 +664,7 @@ function renderBook(data) {
     let entriesHtml = '';
     for (const entry of pageEntries) {
       const hasScore = entry.score_home !== null && entry.score_away !== null;
-      const photo = entry.photoPreview || entry.photoData;
+      const photo = entry.photoData || entry.photoPreview;
       const resultClass = entry.result || '';
       const resultLabel = { win: 'W', loss: 'L', draw: 'D' }[entry.result] || '';
 
@@ -555,11 +687,11 @@ function renderBook(data) {
       `;
     }
 
-    const hasAnyPhoto = pageEntries.some(e => e.photoPreview || e.photoData);
+    const hasAnyPhoto = pageEntries.some(e => e.photoData || e.photoPreview);
     const isTextOnly = pageEntries.length === 1 && !hasAnyPhoto;
 
     html += `
-      <div class="page${isTextOnly ? ' text-only-page' : ''}">
+      <div class="page${isTextOnly ? ' text-only-page' : ''}${hasAnyPhoto ? ' photo-page' : ''}">
         ${entriesHtml}
         <div class="page-number">${pageNum}</div>
       </div>
@@ -581,13 +713,6 @@ function renderBook(data) {
   `;
 
   document.getElementById('book').innerHTML = html;
-}
-
-function esc(str) {
-  if (!str) return '';
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
 }
 
 // --- Init ---

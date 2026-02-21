@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1B4332" />
+  <meta name="description" content="Seasons blur together and photos get lost. A recap card captures the whole story in one place. Here's why it matters more than you think." />
+  <title>Why Season Recap Cards Matter More Than You Think - Team Season</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green: #1B4332;
+      --green-deep: #122d22;
+      --green-light: #2D6A4F;
+      --accent: #E07A5F;
+      --accent-light: #e8937c;
+      --bg: #FAFAF7;
+      --white: #fff;
+      --text: #1A1A1A;
+      --text-muted: #6B7280;
+      --border: #E8E8E4;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .signal-bar {
+      background: var(--green-deep);
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+    }
+
+    .site-header {
+      background: var(--bg);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .site-logo {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .site-nav a {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: 0.3px;
+    }
+
+    .site-nav a:hover { color: var(--green); }
+
+    .site-nav .nav-cta {
+      background: var(--green);
+      color: var(--white);
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .site-nav .nav-cta:hover {
+      background: var(--green-light);
+      color: var(--white);
+    }
+
+    .gradient-stripe {
+      height: 3px;
+      background: linear-gradient(90deg, var(--green-deep), var(--green), var(--green-light));
+    }
+
+    .article-hero {
+      background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 50%, #40916C 100%);
+      color: var(--white);
+      padding: 80px 32px 90px;
+      text-align: center;
+    }
+
+    .article-hero-inner {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .article-hero h1 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: clamp(32px, 5vw, 46px);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .article-hero-meta {
+      font-size: 14px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .article-body {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 60px 24px;
+    }
+
+    .article-body h2 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--green);
+      margin-top: 40px;
+      margin-bottom: 14px;
+    }
+
+    .article-body h3 {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 28px;
+      margin-bottom: 10px;
+    }
+
+    .article-body p {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 18px;
+    }
+
+    .article-body p strong {
+      color: var(--text);
+    }
+
+    .article-body a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .article-body a:hover {
+      color: var(--accent-light);
+    }
+
+    .article-body ul, .article-body ol {
+      color: var(--text-muted);
+      padding-left: 20px;
+      margin-bottom: 18px;
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .article-body li {
+      margin-bottom: 6px;
+    }
+
+    .article-cta {
+      background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 50%, #40916C 100%);
+      color: var(--white);
+      text-align: center;
+      padding: 60px 24px;
+      margin-top: 20px;
+    }
+
+    .article-cta h2 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--white);
+    }
+
+    .article-cta p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 24px;
+    }
+
+    .btn-accent {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--white);
+      padding: 14px 36px;
+      border-radius: 8px;
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-accent:hover {
+      background: var(--accent-light);
+    }
+
+    .site-footer {
+      background: var(--green-deep);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 32px;
+      font-size: 13px;
+    }
+
+    .site-footer a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+    }
+
+    .site-footer a:hover {
+      color: rgba(255,255,255,0.8);
+    }
+
+    @media (max-width: 768px) {
+      .site-header { padding: 14px 20px; }
+      .site-nav { gap: 16px; }
+      .site-nav a:not(.nav-cta) { display: none; }
+      .article-hero { padding: 60px 20px 70px; }
+      .article-body { padding: 40px 16px; }
+      .article-cta { padding: 48px 20px; }
+    }
+
+    @media (max-width: 480px) {
+      .site-logo { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Signal Bar -->
+  <div class="signal-bar">
+    Shareable season recap cards for youth sports
+  </div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <a href="/" class="site-logo">Team Season</a>
+    <nav class="site-nav">
+      <a href="/#features">Features</a>
+      <a href="/blog">Blog</a>
+      <a href="/app" class="nav-cta">Open App</a>
+    </nav>
+  </header>
+
+  <!-- Gradient Stripe -->
+  <div class="gradient-stripe"></div>
+
+  <!-- Article Hero -->
+  <section class="article-hero">
+    <div class="article-hero-inner">
+      <h1>Why Season Recap Cards Matter More Than You Think</h1>
+      <div class="article-hero-meta">Feb 16, 2026 &middot; 4 min read</div>
+    </div>
+  </section>
+
+  <!-- Article Body -->
+  <article class="article-body">
+
+    <h2>Seasons Blur Together</h2>
+    <p>Think about your kid's last three sports seasons. Can you remember the record for each one? The name of every coach? Which tournament they played in two falls ago?</p>
+    <p>Probably not. And that's normal. Life moves fast, seasons overlap, and the details start to fade almost as soon as the last game ends. You might remember the big moments - the first goal, the championship game - but the rest quietly disappears.</p>
+
+    <h2>The Photo Problem</h2>
+    <p>You took photos. Lots of them. They're somewhere in your camera roll, buried between grocery lists and screenshots. Maybe a few made it to Instagram. But finding that perfect action shot from the spring season? Good luck scrolling through 4,000 photos to find it.</p>
+    <p>League apps are even worse. Most of them reset stats at the end of each season. That game log your kid was so proud of? Gone. The standings page you checked every weekend? Wiped clean for the next group of teams.</p>
+
+    <h2>One Card, One Story</h2>
+    <p>A season recap card captures the whole story in one place. The team name, the record, the standout stats, the best photo, the coach - all of it, in a format you can actually save and share.</p>
+    <p><strong>It's not about being sentimental.</strong> It's about having something tangible to look back on. Something your kid can flip through when they're older and say, "Oh yeah, that was the season we went undefeated" or "That's the team where I finally made the starting lineup."</p>
+
+    <h2>Five Minutes Now, Years of Memories Later</h2>
+    <p>Creating a recap card takes about five minutes. You already know the details - you lived the season. You just need a place to put them.</p>
+    <p>Compare that to the alternative: trying to piece together a season from memory three years from now. Digging through old texts to your spouse asking "what was the final score?" Searching your email for the end-of-season newsletter the coach sent.</p>
+    <p><strong>Kids grow up fast. Seasons fly by.</strong> The window to capture each one is short. Once the next season starts, the last one fades into the background.</p>
+
+    <h2>It Adds Up</h2>
+    <p>One card is nice. But imagine a collection of them - season after season, year after year. Your kid's whole sports journey, documented in a series of cards they can actually look at and share.</p>
+    <p>That's not a scrapbook project. That's five minutes after the last game, repeated a few times a year. The kind of small effort that pays off in a big way down the road.</p>
+    <p>The season just ended. The details are still fresh. That's exactly when you should capture them.</p>
+
+  </article>
+
+  <!-- Bottom CTA -->
+  <section class="article-cta">
+    <h2>Ready to Capture This Season?</h2>
+    <p>It takes about five minutes. The details are still fresh.</p>
+    <a href="/app" class="btn-accent">Start Your Card</a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/blog">Blog</a> &nbsp;&middot;&nbsp; <a href="/app">Open App</a></p>
+  </footer>
+
+</body>
+</html>

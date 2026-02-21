@@ -4,30 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#1B4332" />
-  <meta name="description" content="Team Season Blog - Tips and stories about capturing your child's soccer season." />
+  <meta name="description" content="Team Season Blog - Tips and stories about capturing your child's sports season." />
   <title>Blog - Team Season</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
       --green: #1B4332;
       --green-deep: #122d22;
-      --green-light: #2d6a4f;
-      --gold: #c8963e;
-      --gold-light: #d4a855;
-      --cream: #f8f5ef;
-      --white: #ffffff;
-      --text: #2a2a2a;
-      --text-light: #5a5a5a;
+      --green-light: #2D6A4F;
+      --accent: #E07A5F;
+      --accent-light: #e8937c;
+      --bg: #FAFAF7;
+      --white: #fff;
+      --text: #1A1A1A;
+      --text-muted: #6B7280;
+      --border: #E8E8E4;
     }
 
     body {
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'DM Sans', -apple-system, sans-serif;
       color: var(--text);
-      background: var(--cream);
+      background: var(--bg);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
@@ -42,7 +43,7 @@
     }
 
     .site-header {
-      background: var(--cream);
+      background: var(--bg);
       padding: 18px 32px;
       display: flex;
       align-items: center;
@@ -52,9 +53,9 @@
     }
 
     .site-logo {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 28px;
-      letter-spacing: 1.5px;
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 24px;
+      font-weight: 700;
       color: var(--green);
       text-decoration: none;
     }
@@ -66,7 +67,7 @@
     }
 
     .site-nav a {
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'DM Sans', -apple-system, sans-serif;
       font-size: 14px;
       font-weight: 600;
       color: var(--text);
@@ -79,19 +80,19 @@
     }
 
     .site-nav .nav-cta {
-      font-family: 'Bebas Neue', sans-serif;
-      background: var(--gold);
-      color: var(--green-deep);
+      background: var(--green);
+      color: var(--white);
       padding: 8px 20px;
-      font-size: 16px;
-      letter-spacing: 1px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
       text-decoration: none;
       display: inline-block;
     }
 
     .site-nav .nav-cta:hover {
-      background: var(--gold-light);
-      color: var(--green-deep);
+      background: var(--green-light);
+      color: var(--white);
     }
 
     .gradient-stripe {
@@ -100,7 +101,7 @@
     }
 
     .hero {
-      background: linear-gradient(135deg, var(--green-deep) 0%, var(--green) 50%, #2d6a4f 100%);
+      background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 50%, #40916C 100%);
       color: var(--white);
       padding: 80px 32px 90px;
       text-align: center;
@@ -111,46 +112,60 @@
       margin: 0 auto;
     }
 
-    .hero .pill-tag {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 14px;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.6);
-      background: rgba(255,255,255,0.08);
-      display: inline-block;
-      padding: 4px 16px;
-      margin-bottom: 24px;
-    }
-
     .hero h1 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(40px, 6vw, 60px);
-      line-height: 1.0;
-      letter-spacing: 2px;
-      margin-bottom: 20px;
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: clamp(40px, 6vw, 56px);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 16px;
     }
 
     .hero p {
       font-size: 17px;
       line-height: 1.7;
       color: rgba(255,255,255,0.75);
-      margin-bottom: 32px;
     }
 
-    .btn-primary {
-      font-family: 'Bebas Neue', sans-serif;
-      display: inline-block;
-      background: var(--gold);
-      color: var(--green-deep);
-      padding: 14px 40px;
-      font-size: 20px;
-      letter-spacing: 1.5px;
+    .blog-list {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+
+    .blog-card {
+      background: var(--white);
+      padding: 28px 32px;
+      border-left: 3px solid var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .blog-card-title {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .blog-card-title a {
+      color: var(--green);
       text-decoration: none;
-      transition: background 0.2s;
     }
 
-    .btn-primary:hover {
-      background: var(--gold-light);
+    .blog-card-title a:hover {
+      color: var(--green-light);
+    }
+
+    .blog-card-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .blog-card-excerpt {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.6;
     }
 
     .site-footer {
@@ -175,10 +190,12 @@
       .site-nav { gap: 16px; }
       .site-nav a:not(.nav-cta) { display: none; }
       .hero { padding: 60px 20px 70px; }
+      .blog-list { padding: 32px 16px 48px; }
+      .blog-card { padding: 22px 20px; }
     }
 
     @media (max-width: 480px) {
-      .site-logo { font-size: 22px; }
+      .site-logo { font-size: 20px; }
     }
   </style>
 </head>
@@ -186,16 +203,16 @@
 
   <!-- Signal Bar -->
   <div class="signal-bar">
-    Shareable season recap cards for youth soccer
+    Shareable season recap cards for youth sports
   </div>
 
   <!-- Header -->
   <header class="site-header">
-    <a href="/" class="site-logo">TEAM SEASON</a>
+    <a href="/" class="site-logo">Team Season</a>
     <nav class="site-nav">
       <a href="/#features">Features</a>
       <a href="/blog">Blog</a>
-      <a href="/app" class="nav-cta">OPEN APP</a>
+      <a href="/app" class="nav-cta">Open App</a>
     </nav>
   </header>
 
@@ -205,12 +222,47 @@
   <!-- Hero -->
   <section class="hero">
     <div class="hero-inner">
-      <span class="pill-tag">COMING SOON</span>
-      <h1>BLOG</h1>
-      <p>Tips, stories, and ideas for capturing your child's soccer season - from game-day photos to end-of-year traditions. We're working on the first posts now.</p>
-      <a href="/app" class="btn-primary">START YOUR SEASON</a>
+      <h1>Blog</h1>
+      <p>Tips, stories, and ideas for capturing your child's sports season - from game-day photos to end-of-year traditions.</p>
     </div>
   </section>
+
+  <!-- Blog List -->
+  <div class="blog-list">
+
+    <div class="blog-card">
+      <div class="blog-card-title">
+        <a href="/blog/why-season-recap-cards-matter.html">Why Season Recap Cards Matter More Than You Think</a>
+      </div>
+      <div class="blog-card-meta">Feb 16, 2026 &middot; 4 min read</div>
+      <div class="blog-card-excerpt">Seasons blur together, photos get lost in camera rolls, and league apps reset every year. A recap card captures the whole story in one place - the record, the highlights, the growth.</div>
+    </div>
+
+    <div class="blog-card">
+      <div class="blog-card-title">
+        <a href="/blog/what-to-include-in-season-recap.html">What to Include in Your Child's Season Recap Card</a>
+      </div>
+      <div class="blog-card-meta">Feb 16, 2026 &middot; 3 min read</div>
+      <div class="blog-card-excerpt">A practical guide to the details that make a great recap card - from win-loss records and standout stats to the one question you should always ask your kid.</div>
+    </div>
+
+    <div class="blog-card">
+      <div class="blog-card-title">
+        <a href="/blog/best-photos-for-recap-cards.html">How to Pick the Best Photos for Your Season Recap Card</a>
+      </div>
+      <div class="blog-card-meta">Feb 16, 2026 &middot; 3 min read</div>
+      <div class="blog-card-excerpt">Action shots beat posed photos every time. Here's how to find the right images in your camera roll - and why phone photos work just fine.</div>
+    </div>
+
+    <div class="blog-card">
+      <div class="blog-card-title">
+        <a href="/blog/end-of-season-traditions.html">Simple End-of-Season Traditions Every Sports Family Should Try</a>
+      </div>
+      <div class="blog-card-meta">Feb 16, 2026 &middot; 4 min read</div>
+      <div class="blog-card-excerpt">Your kid won't remember the scores - they'll remember that you paid attention. Six simple traditions that don't take much effort but add up over the years.</div>
+    </div>
+
+  </div>
 
   <!-- Footer -->
   <footer class="site-footer">
