@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Seeding Season Data...</title>
+  <style>
+    body { font-family: system-ui; background: #1B4332; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .msg { text-align: center; }
+    h1 { font-size: 24px; margin-bottom: 12px; }
+    p { opacity: 0.7; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="msg">
+    <h1>Loading season data...</h1>
+    <p>Redirecting to app in a moment.</p>
+  </div>
+  <script>
+    // Full basketball season for testing - 20+ entries across 3 months
+    const team = {
+      id: "test-team-001",
+      name: "Wildcats",
+      sport: "Basketball",
+      emoji: "\u{1F3C0}",
+      logo: null,
+      orgType: "club",
+      color: "#3B82F6"
+    };
+
+    const season = {
+      id: "test-season-001",
+      name: "Basketball 2026"
+    };
+
+    const players = [
+      { id: "p_test_1", name: "Jake", is_my_child: true, headshot: null }
+    ];
+
+    // Stock images from picsum - reliable, free, no auth
+    const photos = [
+      "https://picsum.photos/seed/game1/800/600",
+      "https://picsum.photos/seed/game2/800/600",
+      "https://picsum.photos/seed/game3/800/600",
+      "https://picsum.photos/seed/practice1/800/600",
+      "https://picsum.photos/seed/practice2/800/600",
+      "https://picsum.photos/seed/tourney1/800/600",
+      "https://picsum.photos/seed/tourney2/800/600",
+      "https://picsum.photos/seed/moment1/800/600",
+      "https://picsum.photos/seed/moment2/800/600",
+      "https://picsum.photos/seed/moment3/800/600",
+      "https://picsum.photos/seed/event1/800/600",
+      "https://picsum.photos/seed/food1/800/600",
+      "https://picsum.photos/seed/sight1/800/600",
+      "https://picsum.photos/seed/game4/800/600",
+      "https://picsum.photos/seed/game5/800/600",
+      "https://picsum.photos/seed/game6/800/600",
+      "https://picsum.photos/seed/practice3/800/600",
+      "https://picsum.photos/seed/moment4/800/600",
+      "https://picsum.photos/seed/tourney3/800/600",
+      "https://picsum.photos/seed/game7/800/600",
+      "https://picsum.photos/seed/game8/800/600",
+      "https://picsum.photos/seed/moment5/800/600",
+      "https://picsum.photos/seed/practice4/800/600",
+      "https://picsum.photos/seed/game9/800/600",
+    ];
+
+    const entries = [
+      // WEEK 1 - Season opener
+      {
+        id: "e_test_01", entry_type: "game",
+        text: "First game of the season and he looked nervous in warmups. But once the whistle blew he settled in fast. Three steals and a beautiful drive to the basket in the third quarter.",
+        entry_date: "2025-11-08", opponent: "Hawks",
+        score_home: 28, score_away: 22, result: "win",
+        venue: "Westside Gym",
+        photoData: photos[0], photoPreview: photos[0],
+        created_at: "2025-11-08T18:00:00Z",
+      },
+      {
+        id: "e_test_02", entry_type: "practice",
+        text: "Coach ran a new press break drill today. Jake picked it up faster than most of the team. He's starting to see the floor differently this year.",
+        entry_date: "2025-11-11", opponent: null,
+        score_home: null, score_away: null, result: null,
+        venue: "Practice Gym",
+        photoData: photos[1], photoPreview: photos[1],
+        created_at: "2025-11-11T18:00:00Z",
+      },
+
+      // WEEK 2
+      {
+        id: "e_test_03", entry_type: "game",
+        text: "Tough loss. They were bigger at every position and we couldn't get anything going inside. Jake kept fighting though - never stopped hustling on defense.",
+        entry_date: "2025-11-15", opponent: "Titans",
+        score_home: 18, score_away: 31, result: "loss",
+        venue: "Eastside Community Center",
+        photoData: photos[2], photoPreview: photos[2],
+        created_at: "2025-11-15T18:00:00Z",
+      },
+      {
+        id: "e_test_04", entry_type: "moment",
+        text: "Overheard him in the car telling his sister about the play he messed up. Then he said 'but I'll get it next time.' That's growth right there.",
+        entry_date: "2025-11-16", opponent: null,
+        score_home: null, score_away: null, result: null,
+        venue: null,
+        photoData: null, photoPreview: null,
+        created_at: "2025-11-16T10:00:00Z",
+      },
+
+      // WEEK 3
+      {
+        id: "e_test_05", entry_type: "practice",
+        text: "Shooting drills all practice. He was the last one to leave the gym - stayed for 20 extra free throws on his own. Coach noticed.",
+        entry_date: "2025-11-18", opponent: null,
+        score_home: null, score_away: null, result: null,
+        venue: "Practice Gym",
+        photoData: photos[4], photoPreview: photos[4],
+        created_at: "2025-11-18T18:00:00Z",
+      },
+      {
+        id: "e_test_06", entry_type: "game",
+        text: "Bounce-back game. The energy was totally different from tipoff. Jake had his best game - two threes and a no-look pass that brought the bench to their feet.",
+        entry_date: "2025-11-22", opponent: "Blazers",
+        score_home: 35, score_away: 24, result: "win",
+        venue: "Westside Gym",
+        photoData: photos[3], photoPreview: photos[3],
+        created_at: "2025-11-22T18:00:00Z",
+      },
+
+      // THANKSGIVING TOURNAMENT - WEEK 4
+      {
+        id: "e_test_07", entry_type: "tournament",
+        text: "Pool play game one. Shaky start but they found their rhythm in the second half. Jake played all four quarters - he was gassed but wouldn't come out.",
+        entry_date: "2025-11-28", opponent: "Storm",
+        score_home: 26, score_away: 21, result: "win",
+        venue: "Thanksgiving Classic",
+        photoData: photos[5], photoPreview: photos[5],
+        created_at: "2025-11-28T12:00:00Z",
+      },
+      {
+        id: "e_test_08", entry_type: "tournament",
+        text: "Semifinal. Best team game of the season so far. Everyone moved the ball, everyone played defense. Jake had six assists - he was the engine.",
+        entry_date: "2025-11-29", opponent: "Celtics",
+        score_home: 33, score_away: 19, result: "win",
+        venue: "Thanksgiving Classic",
+        photoData: photos[6], photoPreview: photos[6],
+        created_at: "2025-11-29T10:00:00Z",
+      },
+      {
+        id: "e_test_09", entry_type: "tournament",
+        text: "Championship game. Lost by two on a last-second shot. Heartbreaking but they left everything on the floor. Jake was in tears after but I've never been prouder.",
+        entry_date: "2025-11-29", opponent: "Thunder",
+        score_home: 28, score_away: 30, result: "loss",
+        venue: "Thanksgiving Classic",
+        photoData: photos[7], photoPreview: photos[7],
+        created_at: "2025-11-29T16:00:00Z",
+      },
+      {
+        id: "e_test_10", entry_type: "food",
+        text: "Post-tournament team dinner at Tony's. Twelve kids crammed into a booth meant for six. They ordered three pizzas and talked about every play from the final. This is why we do it.",
+        entry_date: "2025-11-29", opponent: null,
+        score_home: null, score_away: null, result: null,
+        venue: "Tony's Pizza",
+        photoData: photos[11], photoPreview: photos[11],
+        created_at: "2025-11-29T19:00:00Z",
+      },
+
+      // WEEK 5-6 - December regular season
+      {
+        id: "e_test_11", entry_type: "game",
+        text: "Back to regular season. Played with a chip on their shoulder after the tournament loss. Dominated from start to finish.",
+        entry_date: "2025-12-06", opponent: "Rockets",
+        score_home: 38, score_away: 15, result: "win",
+        venue: "Central Rec",
+        photoData: photos[13], photoPreview: photos[13],
+        created_at: "2025-12-06T18:00:00Z",
+      },
+      {
+        id: "e_test_12", entry_type: "practice",
+        text: "First time running the zone offense. Jake was confused at first but by the end of practice he was calling out the rotations himself. Coach gave him a fist bump on the way out.",
+        entry_date: "2025-12-09", opponent: null,
+        score_home: null, score_away: null, result: null,
+        venue: "Practice Gym",
+        photoData: photos[16], photoPreview: photos[16],
+        created_at: "2025-12-09T18:00:00Z",
+      },
+      {
+        id: "e_test_13", entry_type: "game",
+        text: "Close one. Tied going into the fourth and Jake hit a runner in the lane with 40 seconds left that ended up being the game winner. The gym erupted.",
+        entry_date: "2025-12-13", opponent: "Wolves",
+        score_home: 29, score_away: 27, result: "win",
+        venue: "Westside Gym",
+        photoData: photos[14], photoPreview: photos[14],
+        created_at: "2025-12-13T18:00:00Z",
+      },
+      {
+        id: "e_test_14", entry_type: "moment",
+        text: "Found him in the driveway at 7am working on his left hand. Didn't say a word to me - just headphones in, ball bouncing. He's locked in this year.",
+        entry_date: "2025-12-15", opponent: null,
+        score_home: null, score_away: null, result: null,
+        venue: null,
+        photoData: photos[17], photoPreview: photos[17],
+        created_at: "2025-12-15T08:00:00Z",
+      },
+      {
+        id: "e_test_15", entry_type: "game",
+        text: "Last game before the holiday break. Played sloppy - too many turnovers. They pulled it out but it wasn't pretty.",
+        entry_date: "2025-12-20", opponent: "Eagles",
+        score_home: 24, score_away: 22, result: "win",
+        venue: "North Side Gym",
+        photoData: photos[15], photoPreview: photos[15],
+        created_at: "2025-12-20T18:00:00Z",
+      },
+
+      // HOLIDAY BREAK
+      {
+        id: "e_test_16", entry_type: "event",
+        text: "Holiday team bowling night. Coach organized it. The kids were more competitive about bowling than they are about basketball. Jake got a turkey and wouldn't let anyone forget it.",
+        entry_date: "2025-12-28", opponent: null,
+        score_home: null, score_away: null, result: null,
+        venue: "Lucky Lanes",
+        photoData: photos[10], photoPreview: photos[10],
+        created_at: "2025-12-28T14:00:00Z",
+      },
+
+      // JANUARY - Back at it
+      {
+        id: "e_test_17", entry_type: "practice",
+        text: "First practice back after break. Legs were heavy but spirits were high. Coach introduced a new inbound play that looks like it could be deadly.",
+        entry_date: "2026-01-06", opponent: null,
+        score_home: null, score_away: null, result: null,
+        venue: "Practice Gym",
+        photoData: photos[22], photoPreview: photos[22],
+        created_at: "2026-01-06T18:00:00Z",
+      },
+      {
+        id: "e_test_18", entry_type: "game",
+        text: "Rematch against the Titans. Different game this time. Jake took their best player and held him to four points. The whole team played with something to prove.",
+        entry_date: "2026-01-11", opponent: "Titans",
+        score_home: 30, score_away: 24, result: "win",
+        venue: "Eastside Community Center",
+        photoData: photos[19], photoPreview: photos[19],
+        created_at: "2026-01-11T18:00:00Z",
+      },
+      {
+        id: "e_test_19", entry_type: "game",
+        text: "Off night. Nothing was falling. Jake forced some shots he normally wouldn't take. Good learning game - Coach talked to him after about trusting his teammates.",
+        entry_date: "2026-01-18", opponent: "Panthers",
+        score_home: 19, score_away: 25, result: "loss",
+        venue: "South Gym",
+        photoData: photos[20], photoPreview: photos[20],
+        created_at: "2026-01-18T18:00:00Z",
+      },
+      {
+        id: "e_test_20", entry_type: "moment",
+        text: "His teammate Marcus twisted his ankle at practice. Jake was the first one there, helped him off the court, and brought him ice without anyone asking. That's the kid I'm raising.",
+        entry_date: "2026-01-21", opponent: null,
+        score_home: null, score_away: null, result: null,
+        venue: null,
+        photoData: null, photoPreview: null,
+        created_at: "2026-01-21T18:00:00Z",
+      },
+
+      // FEBRUARY - Playoffs
+      {
+        id: "e_test_21", entry_type: "game",
+        text: "Final regular season game. Needed this win to clinch second seed. Team came out focused and never let up. Jake ran the offense like a veteran.",
+        entry_date: "2026-02-01", opponent: "Blazers",
+        score_home: 32, score_away: 20, result: "win",
+        venue: "Westside Gym",
+        photoData: photos[23], photoPreview: photos[23],
+        created_at: "2026-02-01T18:00:00Z",
+      },
+      {
+        id: "e_test_22", entry_type: "sightseeing",
+        text: "Drove past the high school gym on the way to the playoff game. Jake pointed at it and said 'I'm going to play there someday.' Filed that one away forever.",
+        entry_date: "2026-02-07", opponent: null,
+        score_home: null, score_away: null, result: null,
+        venue: "Lincoln High School",
+        photoData: photos[12], photoPreview: photos[12],
+        created_at: "2026-02-07T10:00:00Z",
+      },
+      {
+        id: "e_test_23", entry_type: "tournament",
+        text: "Playoff quarterfinal. Tight game all the way. Jake hit two clutch free throws in the final minute to seal it. His hands were shaking but he drained them both.",
+        entry_date: "2026-02-07", opponent: "Hawks",
+        score_home: 27, score_away: 24, result: "win",
+        venue: "City Playoffs",
+        photoData: photos[18], photoPreview: photos[18],
+        created_at: "2026-02-07T18:00:00Z",
+      },
+      {
+        id: "e_test_24", entry_type: "tournament",
+        text: "Semifinal rematch against Thunder - the team that beat them in the Thanksgiving final. This time the Wildcats were ready. Wire to wire. The bench was electric.",
+        entry_date: "2026-02-14", opponent: "Thunder",
+        score_home: 34, score_away: 26, result: "win",
+        venue: "City Playoffs",
+        photoData: photos[8], photoPreview: photos[8],
+        created_at: "2026-02-14T18:00:00Z",
+      },
+      {
+        id: "e_test_25", entry_type: "tournament",
+        text: "Championship game. They did it. Down six at halftime and came roaring back. Jake scored the go-ahead bucket and then got the stop on the other end. Final buzzer - pure chaos. Kids piling on each other. Parents crying. Best day of his sports life so far.",
+        entry_date: "2026-02-15", opponent: "Celtics",
+        score_home: 31, score_away: 28, result: "win",
+        venue: "City Championship",
+        photoData: photos[9], photoPreview: photos[9],
+        created_at: "2026-02-15T18:00:00Z",
+      },
+      {
+        id: "e_test_26", entry_type: "food",
+        text: "Championship dinner at Sal's. Coach bought the whole team burgers. Jake held the trophy the entire meal and wouldn't put it down, even to eat. This is the season we'll talk about forever.",
+        entry_date: "2026-02-15", opponent: null,
+        score_home: null, score_away: null, result: null,
+        venue: "Sal's Burgers",
+        photoData: photos[21], photoPreview: photos[21],
+        created_at: "2026-02-15T20:00:00Z",
+      },
+      {
+        id: "e_test_27", entry_type: "moment",
+        text: "Found the trophy on his nightstand this morning with his jersey draped over the back of his chair. Season's over but he's still living in it. I hope he never forgets how this felt.",
+        entry_date: "2026-02-16", opponent: null,
+        score_home: null, score_away: null, result: null,
+        venue: null,
+        photoData: null, photoPreview: null,
+        created_at: "2026-02-16T09:00:00Z",
+      },
+    ];
+
+    // Build the localStorage data
+    const seasonData = {
+      role: "parent",
+      team: team,
+      season: season,
+      players: players,
+      entries: entries,
+    };
+
+    // Write to both keys for full compatibility
+    localStorage.setItem("teamSeason", JSON.stringify(seasonData));
+    localStorage.setItem("teamSeasonAll", JSON.stringify({
+      seasons: [seasonData],
+      activeIdx: 0,
+    }));
+
+    // Clear any existing admin or order data that might interfere
+    localStorage.removeItem("teamSeasonAdmin");
+
+    document.querySelector("h1").textContent = "Season loaded!";
+    document.querySelector("p").textContent = "27 entries across a full basketball season. Redirecting...";
+
+    setTimeout(() => {
+      window.location.href = "/app";
+    }, 1500);
+  </script>
+</body>
+</html>
