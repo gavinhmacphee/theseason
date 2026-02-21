@@ -542,7 +542,7 @@ function AppShell({ children, title, titleIcon, subtitle, subtitleIcon, onBack, 
             {subtitle && (
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
                 {subtitleIcon}
-                <p style={{ fontSize: 13, color: theme.textMuted }}>{subtitle}</p>
+                <div style={{ fontSize: 13, color: theme.textMuted }}>{subtitle}</div>
               </div>
             )}
           </div>
@@ -741,8 +741,19 @@ function TeamSetupScreen({ role, onComplete }) {
     setChildHeadshot(data);
   };
 
+  const [sportError, setSportError] = useState(false);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!selectedSport) {
+      setSportError(true);
+      return;
+    }
+    if (selectedSport.name === "Other" && !customSport.trim()) {
+      setSportError(true);
+      return;
+    }
+    setSportError(false);
     onComplete({
       team: { id: generateId(), name: teamName || "My Team", sport: sportName, emoji: sportEmoji, logo, orgType, color: brandColor },
       season: { id: generateId(), name: `${sportName} ${new Date().getFullYear()}` },
@@ -762,12 +773,14 @@ function TeamSetupScreen({ role, onComplete }) {
 
         {/* Sport picker */}
         <div style={{ marginBottom: 20 }}>
-          <label className="label">Sport</label>
+          <label className="label" style={sportError ? { color: "#B91C1C" } : {}}>
+            Sport {sportError && <span style={{ fontWeight: 400 }}>— pick one</span>}
+          </label>
           <div style={{
             display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8,
           }}>
             {SPORTS.map((s) => (
-              <button key={s.name} type="button" onClick={() => setSelectedSport(s)}
+              <button key={s.name} type="button" onClick={() => { setSelectedSport(s); setSportError(false); }}
                 style={{
                   padding: "10px 4px", cursor: "pointer",
                   border: `1.5px solid ${selectedSport?.name === s.name ? brandColor : theme.border}`,
@@ -1021,7 +1034,13 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
         {/* Entry Type */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 16 }}>
           {entryTypes.map((t) => (
-            <button key={t.id} onClick={() => setEntryType(t.id)}
+            <button key={t.id} onClick={() => {
+                setEntryType(t.id);
+                // Clear game fields when switching to non-game types
+                if (!["game", "tournament", "event"].includes(t.id)) {
+                  setScoreHome(""); setScoreAway(""); setOpponent(""); setShowGameData(false);
+                }
+              }}
               style={{
                 padding: "10px 4px", borderRadius: 10, border: `1.5px solid ${entryType === t.id ? composerPrimary : theme.border}`,
                 background: entryType === t.id ? `${composerPrimary}10` : "white",
@@ -2020,6 +2039,18 @@ function generateHeadline(entry) {
 
   if (type === "moment") {
     return pick(["The moment", "One for the books"]);
+  }
+
+  if (type === "event") {
+    return pick(["Event day", "Off the field", "The experience"]);
+  }
+
+  if (type === "sightseeing") {
+    return pick(["Taking it in", "The view", "Off the field"]);
+  }
+
+  if (type === "food") {
+    return pick(["Fuel up", "Team dinner", "The spread"]);
   }
 
   if (result === "win") {
@@ -3269,7 +3300,7 @@ function LandingPage({ onDemo, onStart }) {
                     color: theme.text,
                     marginBottom: 4,
                   }}>
-                    vs Lightning FC
+                    vs Lightning
                   </p>
                   <p style={{
                     fontFamily: fonts.mono,
@@ -3287,7 +3318,7 @@ function LandingPage({ onDemo, onStart }) {
                     color: theme.textMuted,
                     lineHeight: 1.4,
                   }}>
-                    "He read that through ball perfectly and didn't even hesitate."
+                    "Found the open lane and made the right play every time."
                   </p>
                 </div>
               </div>
@@ -3320,7 +3351,7 @@ function LandingPage({ onDemo, onStart }) {
                   color: theme.textMuted,
                   lineHeight: 1.4,
                 }}>
-                  "Finally nailed the outside-foot pass. Coach noticed."
+                  "Finally nailed the crossover. Coach noticed."
                 </p>
               </div>
             </div>
@@ -3368,8 +3399,8 @@ function LandingPage({ onDemo, onStart }) {
               alignItems: "center",
               gap: 6,
             }}>
-              <span style={{ fontSize: 11 }}>{"\u26BD"}</span>
-              <span>Montana FC</span>
+              <span style={{ fontSize: 11 }}>🏅</span>
+              <span>Thunder</span>
             </div>
 
             {/* Headline */}
@@ -3402,7 +3433,7 @@ function LandingPage({ onDemo, onStart }) {
               lineHeight: 1.4,
               marginBottom: 12,
             }}>
-              "He read that through ball perfectly and didn't even hesitate."
+              "Found the open lane and didn't even hesitate."
             </p>
 
             {/* Score badge */}
@@ -4900,6 +4931,10 @@ export default function SportsJournalApp() {
     }
   }, []);
 
+  // Keep a ref for activeSeasonIdx so persist useEffect always reads current value
+  const activeIdxRef = useRef(activeSeasonIdx);
+  useEffect(() => { activeIdxRef.current = activeSeasonIdx; }, [activeSeasonIdx]);
+
   // Persist to localStorage (skip demo, skip mid-setup)
   useEffect(() => {
     if (isDemo) return;
@@ -4907,16 +4942,16 @@ export default function SportsJournalApp() {
       const data = { role, team, season, players, entries };
       localStorage.setItem("teamSeason", JSON.stringify(data));
 
-      // Also persist to allSeasons array
+      // Also persist to allSeasons array using ref for current index
+      const idx = activeIdxRef.current;
       setAllSeasons((prev) => {
         const updated = [...prev];
         if (updated.length === 0) {
           updated.push(data);
-          setActiveSeasonIdx(0);
-        } else {
-          updated[activeSeasonIdx] = data;
+        } else if (idx < updated.length) {
+          updated[idx] = data;
         }
-        localStorage.setItem("teamSeasonAll", JSON.stringify({ seasons: updated, activeIdx: activeSeasonIdx }));
+        localStorage.setItem("teamSeasonAll", JSON.stringify({ seasons: updated, activeIdx: idx }));
         return updated;
       });
     }
@@ -5064,6 +5099,9 @@ export default function SportsJournalApp() {
     setSeason(data.season);
     setPlayers(data.players);
     setEntries(data.entries);
+    setAllSeasons([data]);
+    setActiveSeasonIdx(0);
+    activeIdxRef.current = 0;
     setIsDemo(true);
     setAuthed(true);
     setScreen("home");
@@ -5129,25 +5167,41 @@ export default function SportsJournalApp() {
 
   const switchToSeason = (idx) => {
     if (idx < 0 || idx >= allSeasons.length) return;
-    const s = allSeasons[idx];
+    // Save current season before switching
+    const currentIdx = activeIdxRef.current;
+    setAllSeasons((prev) => {
+      const updated = [...prev];
+      if (currentIdx < updated.length && team && season) {
+        updated[currentIdx] = { role, team, season, players, entries };
+      }
+      localStorage.setItem("teamSeasonAll", JSON.stringify({ seasons: updated, activeIdx: idx }));
+      // Now hydrate the target season
+      const s = updated[idx];
+      if (s) {
+        setRole(s.role);
+        setTeam(s.team);
+        setSeason(s.season);
+        setPlayers(s.players);
+        setEntries((s.entries || []).map((e) => ({ ...e, photoPreview: e.photoData || null })));
+      }
+      return updated;
+    });
     setActiveSeasonIdx(idx);
-    setRole(s.role);
-    setTeam(s.team);
-    setSeason(s.season);
-    setPlayers(s.players);
-    setEntries((s.entries || []).map((e) => ({ ...e, photoPreview: e.photoData || null })));
+    activeIdxRef.current = idx;
     setFilter("all");
     setShowSeasonSwitcher(false);
-    localStorage.setItem("teamSeasonAll", JSON.stringify({ seasons: allSeasons, activeIdx: idx }));
   };
 
   const startNewSeason = () => {
     // Save current season first
+    const idx = activeIdxRef.current;
     if (team && season) {
       setAllSeasons((prev) => {
         const updated = [...prev];
-        updated[activeSeasonIdx] = { role, team, season, players, entries };
-        localStorage.setItem("teamSeasonAll", JSON.stringify({ seasons: updated, activeIdx: activeSeasonIdx }));
+        if (idx < updated.length) {
+          updated[idx] = { role, team, season, players, entries };
+        }
+        localStorage.setItem("teamSeasonAll", JSON.stringify({ seasons: updated, activeIdx: idx }));
         return updated;
       });
     }
@@ -5173,9 +5227,16 @@ export default function SportsJournalApp() {
     setAllSeasons((prev) => {
       const updated = [...prev, newSeasonData];
       const newIdx = updated.length - 1;
-      setActiveSeasonIdx(newIdx);
+      // Update ref and state for active index
+      activeIdxRef.current = newIdx;
       localStorage.setItem("teamSeasonAll", JSON.stringify({ seasons: updated, activeIdx: newIdx }));
       return updated;
+    });
+    // Set active index after allSeasons update is queued
+    setActiveSeasonIdx((prev) => {
+      const newIdx = allSeasons.length; // will be the index of the appended item
+      activeIdxRef.current = newIdx;
+      return newIdx;
     });
 
     // Sync to cloud (fire and forget)
@@ -5324,6 +5385,7 @@ export default function SportsJournalApp() {
     supabase.auth.signOut();
     localStorage.removeItem("teamSeason");
     localStorage.removeItem("teamSeasonAdmin");
+    localStorage.removeItem("teamSeasonAll");
     setAuthed(false);
     setUser(null);
     setIsDemo(false);
@@ -5332,6 +5394,9 @@ export default function SportsJournalApp() {
     setSeason(null);
     setPlayers([]);
     setEntries([]);
+    setAllSeasons([]);
+    setActiveSeasonIdx(0);
+    activeIdxRef.current = 0;
     setOrg(null);
     setOrgTeams([]);
     setRole(null);
