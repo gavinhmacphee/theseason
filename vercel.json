@@ -12,8 +12,8 @@
   "routes": [
     { "src": "^/$", "dest": "/landing.html" },
     { "src": "^/app$", "dest": "/app.html" },
-    { "src": "^/gamechanger-alternative$", "dest": "/gamechanger-alternative.html" },
     { "src": "^/season-recap$", "dest": "/season-recap.html" },
+    { "src": "^/youth-sports-memory-book$", "dest": "/youth-sports-memory-book.html" },
     { "handle": "filesystem" }
   ]
 }
