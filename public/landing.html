@@ -4,8 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#1B4332" />
-  <meta name="description" content="Team Season - The season journal for youth sports families. Capture every game, practice, and moment. Turn it into a printed hardcover book." />
-  <title>Team Season - The Season Journal for Youth Sports Families</title>
+  <meta name="description" content="Free youth sports journal app for families. Capture every game, practice, and season moment. Turn your entries into a $39 hardcover photo book shipped to your door." />
+  <title>Youth Sports Season Journal &amp; Photo Book | Team Season</title>
+  <link rel="canonical" href="https://teamseason.app/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Team Season — The Season Journal for Youth Sports Families" />
+  <meta property="og:description" content="Capture every game. Print the book. Free for families." />
+  <meta property="og:url" content="https://teamseason.app/" />
+  <meta property="og:site_name" content="Team Season" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Team Season — Youth Sports Season Journal" />
+  <meta name="twitter:description" content="Capture every game. Print the book. Free for families." />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -68,9 +82,7 @@
       letter-spacing: 0.3px;
     }
 
-    .site-nav a:hover {
-      color: var(--green);
-    }
+    .site-nav a:hover { color: var(--green); }
 
     .site-nav .nav-cta {
       background: var(--green);
@@ -81,18 +93,11 @@
       letter-spacing: 0.3px;
       text-decoration: none;
       display: inline-block;
-      border-radius: 6px;
     }
 
-    .site-nav .nav-cta:hover {
-      background: var(--green-light);
-      color: white;
-    }
+    .site-nav .nav-cta:hover { background: var(--green-light); color: white; }
 
-    .site-nav .nav-sign-in {
-      color: var(--green);
-      font-weight: 500;
-    }
+    .site-nav .nav-sign-in { color: var(--green); font-weight: 500; }
 
     /* Gradient Stripe */
     .gradient-stripe {
@@ -104,7 +109,7 @@
     .hero {
       background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 50%, #40916C 100%);
       color: var(--white);
-      padding: 100px 32px 110px;
+      padding: 90px 32px 100px;
       text-align: center;
     }
 
@@ -113,41 +118,51 @@
       margin: 0 auto;
     }
 
+    .hero-badge {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.9);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 6px 16px;
+      margin-bottom: 28px;
+    }
+
     .hero h1 {
       font-family: 'Crimson Pro', Georgia, serif;
       font-size: clamp(40px, 7vw, 64px);
       line-height: 1.1;
       font-weight: 700;
-      margin-bottom: 24px;
-    }
-
-    .hero .lead {
-      font-size: 18px;
-      line-height: 1.7;
-      color: rgba(255,255,255,0.85);
-      max-width: 540px;
-      margin: 0 auto 40px;
+      margin-bottom: 20px;
     }
 
     .hero .tagline {
       font-family: 'Crimson Pro', Georgia, serif;
-      font-size: 15px;
-      letter-spacing: 0.3px;
-      color: rgba(255,255,255,0.5);
-      margin-bottom: 40px;
+      font-size: 20px;
+      color: rgba(255,255,255,0.7);
       font-style: italic;
+      margin-bottom: 36px;
+    }
+
+    .hero .lead {
+      font-size: 17px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.8);
+      max-width: 540px;
+      margin: 0 auto 40px;
     }
 
     .btn-primary {
       display: inline-block;
       background: var(--accent);
       color: white;
-      padding: 14px 36px;
-      font-size: 15px;
-      font-weight: 600;
+      padding: 16px 40px;
+      font-size: 16px;
+      font-weight: 700;
       letter-spacing: 0.3px;
       text-decoration: none;
-      border-radius: 8px;
       transition: background 0.2s, transform 0.2s;
     }
 
@@ -158,39 +173,19 @@
 
     .hero-ctas {
       display: flex;
-      gap: 16px;
+      gap: 20px;
       justify-content: center;
       align-items: center;
       flex-wrap: wrap;
     }
 
-    .btn-secondary {
-      display: inline-block;
-      color: rgba(255,255,255,0.8);
-      padding: 14px 24px;
-      font-size: 15px;
-      font-weight: 500;
-      letter-spacing: 0.3px;
+    .hero-sign-in {
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
       text-decoration: none;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.25);
-      transition: all 0.2s;
     }
 
-    .btn-secondary:hover {
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-
-    /* Sports strip */
-    .sports-strip {
-      text-align: center;
-      padding: 20px 32px;
-      font-size: 28px;
-      letter-spacing: 12px;
-      background: var(--white);
-      border-bottom: 1px solid var(--border);
-    }
+    .hero-sign-in:hover { color: white; }
 
     /* Sections */
     .section {
@@ -261,9 +256,7 @@
       margin-top: 40px;
     }
 
-    .step {
-      text-align: left;
-    }
+    .step { text-align: left; }
 
     .step-number {
       font-family: 'Crimson Pro', Georgia, serif;
@@ -289,6 +282,77 @@
       font-size: 15px;
       color: var(--text-muted);
       line-height: 1.6;
+    }
+
+    /* Sports Tags */
+    .sports-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 32px;
+    }
+
+    .sport-tag {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--green);
+      background: #1B433210;
+      border: 1px solid #1B433218;
+      padding: 6px 14px;
+      letter-spacing: 0.3px;
+    }
+
+    /* Social proof / trust */
+    .trust-section {
+      background: var(--bg);
+      padding: 60px 32px;
+      text-align: center;
+    }
+
+    .trust-inner {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .trust-quote {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 24px;
+      font-style: italic;
+      color: var(--green);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .trust-attr {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    .trust-facts {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+
+    .trust-fact {
+      text-align: center;
+    }
+
+    .trust-fact-value {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1.2;
+    }
+
+    .trust-fact-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
     }
 
     /* Features Grid */
@@ -325,15 +389,9 @@
     .book-callout {
       background: linear-gradient(135deg, #1B433210, #2D6A4F10);
       border: 1px solid #1B433220;
-      border-radius: 16px;
       padding: 48px 40px;
       text-align: center;
       margin-top: 40px;
-    }
-
-    .book-callout .book-emoji {
-      font-size: 48px;
-      margin-bottom: 16px;
     }
 
     .book-callout h3 {
@@ -350,6 +408,15 @@
       max-width: 500px;
       margin: 0 auto;
       line-height: 1.7;
+    }
+
+    .book-price {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--green);
+      margin-top: 16px;
+      display: inline-block;
     }
 
     /* Bottom CTA */
@@ -377,6 +444,12 @@
       margin-right: auto;
     }
 
+    .bottom-cta .cta-note {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 16px;
+    }
+
     /* Footer */
     .site-footer {
       background: var(--green-deep);
@@ -391,61 +464,68 @@
       text-decoration: none;
     }
 
-    .site-footer a:hover {
-      color: rgba(255,255,255,0.8);
-    }
+    .site-footer a:hover { color: rgba(255,255,255,0.8); }
 
     /* Responsive */
     @media (max-width: 768px) {
-      .site-header {
-        padding: 14px 20px;
-      }
-
-      .site-nav {
-        gap: 16px;
-      }
-
-      .site-nav a:not(.nav-cta):not(.nav-sign-in) {
-        display: none;
-      }
-
-      .hero {
-        padding: 60px 20px 70px;
-      }
-
-      .section {
-        padding: 60px 20px;
-      }
-
-      .section-alt {
-        padding: 60px 20px;
-      }
-
-      .steps {
-        grid-template-columns: 1fr;
-        gap: 32px;
-      }
-
-      .features-grid {
-        grid-template-columns: 1fr;
-        gap: 24px;
-      }
-
-      .bottom-cta {
-        padding: 60px 20px;
-      }
-
-      .book-callout {
-        padding: 32px 24px;
-      }
+      .site-header { padding: 14px 20px; }
+      .site-nav { gap: 16px; }
+      .site-nav a:not(.nav-cta):not(.nav-sign-in) { display: none; }
+      .hero { padding: 60px 20px 70px; }
+      .section { padding: 60px 20px; }
+      .section-alt { padding: 60px 20px; }
+      .steps { grid-template-columns: 1fr; gap: 32px; }
+      .features-grid { grid-template-columns: 1fr; gap: 24px; }
+      .bottom-cta { padding: 60px 20px; }
+      .book-callout { padding: 32px 24px; }
+      .trust-facts { gap: 32px; }
+      .trust-quote { font-size: 20px; }
     }
 
     @media (max-width: 480px) {
-      .site-logo {
-        font-size: 20px;
-      }
+      .site-logo { font-size: 20px; }
     }
   </style>
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Team Season",
+    "applicationCategory": "LifestyleApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Free youth sports season journal for families. Capture games, practices, and moments. Turn your season into a hardcover photo book.",
+    "url": "https://teamseason.app"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is Team Season free?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The journal app is free forever. You only pay if you want a printed hardcover book ($39 shipped)." }
+      },
+      {
+        "@type": "Question",
+        "name": "What sports does Team Season support?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Team Season works for any youth sport including soccer, basketball, baseball, hockey, lacrosse, football, volleyball, swimming, track, tennis, gymnastics, and wrestling." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I journal for more than one child?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Create a separate season for each child and sport. Each season gets its own book." }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
 
@@ -454,9 +534,8 @@
     <a href="/" class="site-logo">Team Season</a>
     <nav class="site-nav">
       <a href="#features">Features</a>
-      <a href="/blog">Blog</a>
       <a href="/app" class="nav-sign-in">Sign In</a>
-      <a href="/app" class="nav-cta">Get Started</a>
+      <a href="/app" class="nav-cta">Start Free</a>
     </nav>
   </header>
 
@@ -466,61 +545,94 @@
   <!-- Hero -->
   <section class="hero">
     <div class="hero-inner">
+      <div class="hero-badge">Free for families</div>
+      <h1>The Youth Sports Journal That Becomes a Book</h1>
       <p class="tagline">Long after the scores are forgotten, the moments remain.</p>
-      <h1>Every Season Tells a Story</h1>
-      <p class="lead">The season journal for youth sports families. Capture every game, every practice, every moment worth remembering. Then turn it into a real book.</p>
+      <p class="lead">Two minutes after each game. Write what happened, add a photo. At the end of the season, turn it into a hardcover photo book shipped to your door.</p>
       <div class="hero-ctas">
-        <a href="/app" class="btn-primary">Start Your Season Journal</a>
-        <a href="/app" class="btn-secondary">Sign In</a>
+        <a href="/app" class="btn-primary">Start Your Free Journal</a>
+        <a href="/app" class="hero-sign-in">Already have an account? Sign in</a>
       </div>
     </div>
   </section>
 
-  <!-- Sports Strip -->
-  <div class="sports-strip">
-    &#9917; &#127936; &#9918; &#127954; &#127945; &#127952; &#127944; &#127951;
-  </div>
-
   <!-- The Problem -->
   <section class="section">
-    <h2>Seasons Fade Fast</h2>
-    <p>You watched every game. You cheered every play. But by next season, the details start to blur. Who had the big moment against the crosstown rivals? What was the final record? When did your kid make that leap?</p>
+    <h2>Your Kid's Best Season Is Already Fading</h2>
+    <p>You were at every game. But by next season, you can't remember the score, the opponent, or what your kid said in the car on the way home.</p>
     <ul class="problem-list">
-      <li>Photos get buried in your camera roll, out of order and unlabeled</li>
-      <li>Stats and standings disappear when the league app resets</li>
-      <li>You meant to write it down, but the season ended before you got around to it</li>
-      <li>By next year, you can barely remember the coach's name</li>
+      <li>Photos buried in your camera roll, out of order, unlabeled</li>
+      <li>Stats gone when the league app resets for next season</li>
+      <li>You kept meaning to write it down &mdash; then the season ended</li>
+      <li>Your kid's best season, and you can barely piece it together</li>
     </ul>
   </section>
 
   <!-- The Solution -->
   <section class="section-alt">
     <div class="section-inner">
-      <h2>Your Family's Season Journal</h2>
-      <p>Team Season is a simple journal built for sports families. After each game or practice, open the app and write down what happened. Add a photo. That's it.</p>
-      <p>Over the course of a season, those quick entries become a complete story &mdash; the wins, the losses, the funny moments, the breakthroughs. Something your kid will actually want to look back on.</p>
-      <p>Works for any sport. Soccer, basketball, baseball, hockey, lacrosse, swimming, volleyball &mdash; if your kid plays it, Team Season tracks it.</p>
+      <h2>A Simple Sports Journal for the Whole Season</h2>
+      <p>After each game or practice, open Team Season and write down what happened. Add a photo. That's it.</p>
+      <p>By the end of the season, those quick entries become a complete story. The wins, the losses, the funny moments, the breakthroughs. Something your kid will actually want to look back on.</p>
+
+      <div class="sports-tags">
+        <span class="sport-tag">Soccer</span>
+        <span class="sport-tag">Basketball</span>
+        <span class="sport-tag">Baseball</span>
+        <span class="sport-tag">Hockey</span>
+        <span class="sport-tag">Lacrosse</span>
+        <span class="sport-tag">Football</span>
+        <span class="sport-tag">Volleyball</span>
+        <span class="sport-tag">Swimming</span>
+        <span class="sport-tag">Track</span>
+        <span class="sport-tag">Tennis</span>
+        <span class="sport-tag">Gymnastics</span>
+        <span class="sport-tag">Wrestling</span>
+      </div>
     </div>
   </section>
 
   <!-- How It Works -->
   <section class="section">
-    <h2>How It Works</h2>
+    <h2>How Team Season Works</h2>
     <div class="steps">
       <div class="step">
         <div class="step-number">01</div>
         <h3>Set Up Your Season</h3>
-        <p>Pick your sport, add your child's name, and name the season. Takes 30 seconds and you're ready to start journaling.</p>
+        <p>Pick your sport, add your child's name, name the season. Thirty seconds and you're journaling.</p>
       </div>
       <div class="step">
         <div class="step-number">02</div>
-        <h3>Journal After Each Game</h3>
-        <p>Write a quick entry after each game or practice. What happened? What stood out? Add a photo. Every entry becomes a page in the book.</p>
+        <h3>Write After Each Game</h3>
+        <p>Quick entry after each game or practice. What happened? What stood out? Add a photo. Two minutes, tops.</p>
       </div>
       <div class="step">
         <div class="step-number">03</div>
         <h3>Print the Book</h3>
-        <p>At the end of the season, order a hardcover photo book &mdash; a real, printed keepsake shipped to your door.</p>
+        <p>At the end of the season, order a hardcover photo book &mdash; a real keepsake shipped to your door.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust / Social Proof -->
+  <section class="trust-section">
+    <div class="trust-inner">
+      <p class="trust-quote">&ldquo;I wish I'd had this three seasons ago. My oldest is 12 now and I can barely remember her U8 season.&rdquo;</p>
+      <p class="trust-attr">&mdash; Soccer parent, Massachusetts</p>
+
+      <div class="trust-facts">
+        <div class="trust-fact">
+          <div class="trust-fact-value">Free</div>
+          <div class="trust-fact-label">The app, forever</div>
+        </div>
+        <div class="trust-fact">
+          <div class="trust-fact-value">12</div>
+          <div class="trust-fact-label">Sports supported</div>
+        </div>
+        <div class="trust-fact">
+          <div class="trust-fact-value">$39</div>
+          <div class="trust-fact-label">Hardcover book, shipped</div>
+        </div>
       </div>
     </div>
   </section>
@@ -528,7 +640,7 @@
   <!-- Features -->
   <section class="section-alt" id="features">
     <div class="section-inner">
-      <h2>Features</h2>
+      <h2>Built for Youth Sports Families</h2>
       <div class="features-grid">
         <div class="feature">
           <h3>Season Journal</h3>
@@ -536,19 +648,19 @@
         </div>
         <div class="feature">
           <h3>Any Sport</h3>
-          <p>Soccer, basketball, baseball, hockey, lacrosse, football, volleyball, swimming, track &mdash; pick your sport when you set up.</p>
+          <p>Soccer, basketball, baseball, hockey, lacrosse, football, volleyball, swimming &mdash; pick your sport when you set up.</p>
         </div>
         <div class="feature">
           <h3>Printed Hardcover Book</h3>
-          <p>Turn your journal into a 7.75" square hardcover photo book. Every entry becomes a page. Shipped to your door.</p>
-        </div>
-        <div class="feature">
-          <h3>Season Streaks</h3>
-          <p>Keep your journaling streak alive. The app tracks consecutive weeks and nudges you to capture the moment while it's fresh.</p>
+          <p>Turn your journal into a hardcover photo book. Every entry becomes a page. Preview it before you buy.</p>
         </div>
         <div class="feature">
           <h3>Multiple Seasons</h3>
           <p>Journal multiple sports and seasons. Switch between them easily. Each season gets its own book.</p>
+        </div>
+        <div class="feature">
+          <h3>Share Cards</h3>
+          <p>Create shareable game-day cards from your entries. Post them or text them to grandparents.</p>
         </div>
         <div class="feature">
           <h3>Works on Any Device</h3>
@@ -558,23 +670,35 @@
 
       <!-- Book Callout -->
       <div class="book-callout">
-        <div class="book-emoji">&#128214;</div>
-        <h3>A Real Book from a Real Season</h3>
-        <p>At the end of the season, your journal becomes a hardcover photo book &mdash; every game, every photo, every memory, printed and bound. Something your kid keeps forever.</p>
+        <h3>Turn It into a Hardcover Photo Book</h3>
+        <p>Every entry becomes a page. Every photo, every score, every memory. Printed, bound, and shipped to your door. Preview before you order.</p>
+        <div class="book-price">$39 &middot; free shipping</div>
       </div>
     </div>
+  </section>
+
+  <!-- Common Questions -->
+  <section class="section">
+    <h2>Common Questions</h2>
+    <ul class="problem-list">
+      <li><strong>Is it really free?</strong> The journal app is free forever. You only pay if you want a printed book ($39 shipped).</li>
+      <li><strong>What if I miss a few games?</strong> No pressure. Add entries whenever you want. Even 10 entries make a great book.</li>
+      <li><strong>Can I journal for more than one kid?</strong> Yes. Create a separate season for each child and sport.</li>
+      <li><strong>Is my data private?</strong> Your journal is yours. Nothing is shared unless you choose to share it.</li>
+    </ul>
   </section>
 
   <!-- Bottom CTA -->
   <section class="bottom-cta">
     <h2>Don't Let This Season Disappear</h2>
-    <p>It takes two minutes after each game. By the end of the season, you'll have something worth keeping.</p>
-    <a href="/app" class="btn-primary">Start Your Season Journal</a>
+    <p>It takes two minutes after each game. By the end of the season, you'll have a story worth keeping.</p>
+    <a href="/app" class="btn-primary">Start Your Free Journal</a>
+    <p class="cta-note">Free to use. No credit card required.</p>
   </section>
 
   <!-- Footer -->
   <footer class="site-footer">
-    <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/app">Open App</a> &nbsp;&middot;&nbsp; <a href="/blog">Blog</a></p>
+    <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/app">Open App</a></p>
   </footer>
 
 </body>
