@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#1B4332" />
-  <meta name="description" content="Team Season - Shareable season recap cards for youth sports. Long after the scores are forgotten, the moments remain." />
-  <title>Team Season - Shareable Season Recap Cards</title>
+  <meta name="description" content="Team Season - The season journal for youth sports families. Capture every game, practice, and moment. Turn it into a printed hardcover book." />
+  <title>Team Season - The Season Journal for Youth Sports Families</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -33,16 +33,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Signal Bar */
-    .signal-bar {
-      background: var(--green-deep);
-      color: rgba(255,255,255,0.7);
-      text-align: center;
-      padding: 8px 16px;
-      font-size: 13px;
-      letter-spacing: 0.3px;
-    }
-
     /* Header */
     .site-header {
       background: var(--bg);
@@ -66,7 +56,7 @@
     .site-nav {
       display: flex;
       align-items: center;
-      gap: 32px;
+      gap: 24px;
     }
 
     .site-nav a {
@@ -97,6 +87,11 @@
     .site-nav .nav-cta:hover {
       background: var(--green-light);
       color: white;
+    }
+
+    .site-nav .nav-sign-in {
+      color: var(--green);
+      font-weight: 500;
     }
 
     /* Gradient Stripe */
@@ -161,6 +156,42 @@
       transform: translateY(-1px);
     }
 
+    .hero-ctas {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-secondary {
+      display: inline-block;
+      color: rgba(255,255,255,0.8);
+      padding: 14px 24px;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      text-decoration: none;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.25);
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    /* Sports strip */
+    .sports-strip {
+      text-align: center;
+      padding: 20px 32px;
+      font-size: 28px;
+      letter-spacing: 12px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+    }
+
     /* Sections */
     .section {
       padding: 80px 32px;
@@ -171,6 +202,7 @@
     .section-alt {
       background: var(--white);
       max-width: none;
+      padding: 80px 32px;
     }
 
     .section-alt .section-inner {
@@ -289,6 +321,37 @@
       margin-bottom: 0;
     }
 
+    /* Book callout */
+    .book-callout {
+      background: linear-gradient(135deg, #1B433210, #2D6A4F10);
+      border: 1px solid #1B433220;
+      border-radius: 16px;
+      padding: 48px 40px;
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .book-callout .book-emoji {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .book-callout h3 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 12px;
+    }
+
+    .book-callout p {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
     /* Bottom CTA */
     .bottom-cta {
       background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 100%);
@@ -342,7 +405,7 @@
         gap: 16px;
       }
 
-      .site-nav a:not(.nav-cta) {
+      .site-nav a:not(.nav-cta):not(.nav-sign-in) {
         display: none;
       }
 
@@ -371,6 +434,10 @@
       .bottom-cta {
         padding: 60px 20px;
       }
+
+      .book-callout {
+        padding: 32px 24px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -382,18 +449,14 @@
 </head>
 <body>
 
-  <!-- Signal Bar -->
-  <div class="signal-bar">
-    Shareable season recap cards for youth sports
-  </div>
-
   <!-- Header -->
   <header class="site-header">
     <a href="/" class="site-logo">Team Season</a>
     <nav class="site-nav">
       <a href="#features">Features</a>
       <a href="/blog">Blog</a>
-      <a href="/app" class="nav-cta">Open App</a>
+      <a href="/app" class="nav-sign-in">Sign In</a>
+      <a href="/app" class="nav-cta">Get Started</a>
     </nav>
   </header>
 
@@ -405,29 +468,38 @@
     <div class="hero-inner">
       <p class="tagline">Long after the scores are forgotten, the moments remain.</p>
       <h1>Every Season Tells a Story</h1>
-      <p class="lead">Create beautiful, shareable recap cards that capture the highlights, the growth, and the memories from your child's season.</p>
-      <a href="/app" class="btn-primary">Start Your Season</a>
+      <p class="lead">The season journal for youth sports families. Capture every game, every practice, every moment worth remembering. Then turn it into a real book.</p>
+      <div class="hero-ctas">
+        <a href="/app" class="btn-primary">Start Your Season Journal</a>
+        <a href="/app" class="btn-secondary">Sign In</a>
+      </div>
     </div>
   </section>
+
+  <!-- Sports Strip -->
+  <div class="sports-strip">
+    &#9917; &#127936; &#9918; &#127954; &#127945; &#127952; &#127944; &#127951;
+  </div>
 
   <!-- The Problem -->
   <section class="section">
     <h2>Seasons Fade Fast</h2>
-    <p>You watched every game. You cheered every play. But by next season, the details start to blur. Who had the big moment against the crosstown rivals? What was the final record? When did your kid make that big jump?</p>
+    <p>You watched every game. You cheered every play. But by next season, the details start to blur. Who had the big moment against the crosstown rivals? What was the final record? When did your kid make that leap?</p>
     <ul class="problem-list">
       <li>Photos get buried in your camera roll, out of order and unlabeled</li>
       <li>Stats and standings disappear when the league app resets</li>
-      <li>End-of-season celebrations come and go without anything to hold onto</li>
-      <li>By the time you think to write it down, half the details are already gone</li>
+      <li>You meant to write it down, but the season ended before you got around to it</li>
+      <li>By next year, you can barely remember the coach's name</li>
     </ul>
   </section>
 
   <!-- The Solution -->
   <section class="section-alt">
-    <div class="section-inner" style="padding: 80px 0;">
-      <h2>One Card. One Season. All the Moments That Mattered.</h2>
-      <p>Team Season gives parents and players a simple way to build a season recap card - a single, shareable image that captures the story of the season. Add your photos, fill in the stats, write down the memories, and export a card you'll actually want to keep.</p>
-      <p>No accounts to manage. No subscriptions. Just a clean tool that helps you hold onto what matters before it slips away.</p>
+    <div class="section-inner">
+      <h2>Your Family's Season Journal</h2>
+      <p>Team Season is a simple journal built for sports families. After each game or practice, open the app and write down what happened. Add a photo. That's it.</p>
+      <p>Over the course of a season, those quick entries become a complete story &mdash; the wins, the losses, the funny moments, the breakthroughs. Something your kid will actually want to look back on.</p>
+      <p>Works for any sport. Soccer, basketball, baseball, hockey, lacrosse, swimming, volleyball &mdash; if your kid plays it, Team Season tracks it.</p>
     </div>
   </section>
 
@@ -437,51 +509,58 @@
     <div class="steps">
       <div class="step">
         <div class="step-number">01</div>
-        <h3>Add Your Details</h3>
-        <p>Player name, team, season, record, and the stats that tell the story. Fill in as much or as little as you want.</p>
+        <h3>Set Up Your Season</h3>
+        <p>Pick your sport, add your child's name, and name the season. Takes 30 seconds and you're ready to start journaling.</p>
       </div>
       <div class="step">
         <div class="step-number">02</div>
-        <h3>Add Your Photos</h3>
-        <p>Drop in your favorite photos from the season - game action, team shots, celebrations. The card arranges them for you.</p>
+        <h3>Journal After Each Game</h3>
+        <p>Write a quick entry after each game or practice. What happened? What stood out? Add a photo. Every entry becomes a page in the book.</p>
       </div>
       <div class="step">
         <div class="step-number">03</div>
-        <h3>Share It</h3>
-        <p>Export your card as an image and share it with family, post it to social media, or print it and pin it to the wall.</p>
+        <h3>Print the Book</h3>
+        <p>At the end of the season, order a hardcover photo book &mdash; a real, printed keepsake shipped to your door.</p>
       </div>
     </div>
   </section>
 
   <!-- Features -->
   <section class="section-alt" id="features">
-    <div class="section-inner" style="padding: 80px 0;">
+    <div class="section-inner">
       <h2>Features</h2>
       <div class="features-grid">
         <div class="feature">
-          <h3>Season Recap Cards</h3>
-          <p>Build a single card that captures the highlights of an entire season - stats, photos, memories, all in one place.</p>
+          <h3>Season Journal</h3>
+          <p>Quick entries for games, practices, tournaments, and off-field moments. Add photos, scores, and your own words.</p>
         </div>
         <div class="feature">
-          <h3>Photo Layout</h3>
-          <p>Add your best photos and the card arranges them into a clean layout. No design skills needed.</p>
+          <h3>Any Sport</h3>
+          <p>Soccer, basketball, baseball, hockey, lacrosse, football, volleyball, swimming, track &mdash; pick your sport when you set up.</p>
         </div>
         <div class="feature">
-          <h3>Stats and Records</h3>
-          <p>Record stats, highlights, wins, losses, and any custom details that matter to your player.</p>
+          <h3>Printed Hardcover Book</h3>
+          <p>Turn your journal into a 7.75" square hardcover photo book. Every entry becomes a page. Shipped to your door.</p>
         </div>
         <div class="feature">
-          <h3>Shareable Images</h3>
-          <p>Export your finished card as a high-quality image ready for social media, printing, or sending to grandparents.</p>
+          <h3>Season Streaks</h3>
+          <p>Keep your journaling streak alive. The app tracks consecutive weeks and nudges you to capture the moment while it's fresh.</p>
+        </div>
+        <div class="feature">
+          <h3>Multiple Seasons</h3>
+          <p>Journal multiple sports and seasons. Switch between them easily. Each season gets its own book.</p>
         </div>
         <div class="feature">
           <h3>Works on Any Device</h3>
-          <p>Build your card on your phone, tablet, or computer. Your progress saves automatically.</p>
+          <p>Use it on your phone at the field or your laptop at home. Install it as an app or use it in the browser.</p>
         </div>
-        <div class="feature">
-          <h3>No Account Required</h3>
-          <p>Get started immediately. No sign-up forms, no email verification, no passwords to remember.</p>
-        </div>
+      </div>
+
+      <!-- Book Callout -->
+      <div class="book-callout">
+        <div class="book-emoji">&#128214;</div>
+        <h3>A Real Book from a Real Season</h3>
+        <p>At the end of the season, your journal becomes a hardcover photo book &mdash; every game, every photo, every memory, printed and bound. Something your kid keeps forever.</p>
       </div>
     </div>
   </section>
@@ -489,8 +568,8 @@
   <!-- Bottom CTA -->
   <section class="bottom-cta">
     <h2>Don't Let This Season Disappear</h2>
-    <p>It takes five minutes to build a card your family will look back on for years.</p>
-    <a href="/app" class="btn-primary">Start Your Season</a>
+    <p>It takes two minutes after each game. By the end of the season, you'll have something worth keeping.</p>
+    <a href="/app" class="btn-primary">Start Your Season Journal</a>
   </section>
 
   <!-- Footer -->

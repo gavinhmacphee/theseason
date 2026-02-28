@@ -8,9 +8,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { STRIPE_SECRET_KEY } = process.env;
+  const STRIPE_SECRET_KEY = (process.env.STRIPE_SECRET_KEY || '').trim();
 
-  if (!STRIPE_SECRET_KEY || STRIPE_SECRET_KEY.startsWith('sk_test_...')) {
+  if (!STRIPE_SECRET_KEY || STRIPE_SECRET_KEY === 'sk_test_...') {
     return res.status(503).json({
       error: 'Backend not configured',
       message: 'Stripe is not set up yet. Use Download Proof for now.',
@@ -18,7 +18,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const stripe = new Stripe(STRIPE_SECRET_KEY);
+    const stripe = new Stripe(STRIPE_SECRET_KEY, {
+      apiVersion: '2024-06-20',
+    });
     const { bookDataUrl, shipping } = req.body;
 
     if (!bookDataUrl || !shipping) {

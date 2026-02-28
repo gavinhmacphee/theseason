@@ -983,6 +983,58 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
     { id: "moment", label: "Moment", emoji: "⭐" },
   ];
 
+  const prompts = {
+    game: [
+      "What moment made you proudest today?",
+      "What's something they did that surprised you?",
+      "How did they handle a tough moment?",
+      "What will you remember most about this game?",
+      "Did they try something new today?",
+    ],
+    practice: [
+      "What are they working on getting better at?",
+      "What was the energy like today?",
+      "Did they learn something new?",
+      "What did the coach focus on today?",
+    ],
+    tournament: [
+      "How did the team come together today?",
+      "What was the atmosphere like?",
+      "What was the highlight of the day?",
+      "How did they handle the pressure?",
+    ],
+    event: [
+      "What made this event special?",
+      "What will they remember about this?",
+    ],
+    sightseeing: [
+      "What did you discover?",
+      "What was the coolest thing you saw?",
+    ],
+    food: [
+      "What was the post-game meal?",
+      "What's the team's favorite spot?",
+    ],
+    moment: [
+      "Why does this moment matter?",
+      "What do you want to remember about this?",
+      "What made you stop and smile?",
+    ],
+  };
+
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [promptIdx, setPromptIdx] = useState(0);
+
+  const getPrompt = () => {
+    const pool = prompts[entryType] || prompts.moment;
+    return pool[promptIdx % pool.length];
+  };
+
+  const shufflePrompt = () => {
+    setPromptIdx((prev) => prev + 1);
+    setShowPrompt(true);
+  };
+
   const handlePhoto = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -1057,6 +1109,26 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
 
         {/* The Line */}
         <div style={{ marginBottom: 16 }}>
+          {showPrompt && (
+            <div style={{
+              background: `${composerPrimary}08`, border: `1px solid ${composerPrimary}15`,
+              borderRadius: 10, padding: "10px 14px", marginBottom: 8,
+              display: "flex", alignItems: "center", gap: 8,
+            }}>
+              <span style={{ fontSize: 16 }}>💡</span>
+              <span style={{ flex: 1, fontSize: 14, color: composerPrimary, fontStyle: "italic", lineHeight: 1.4 }}>
+                {getPrompt()}
+              </span>
+              <button onClick={shufflePrompt} style={{
+                background: "none", border: "none", cursor: "pointer",
+                fontSize: 14, color: theme.textMuted, padding: "2px 6px",
+              }} title="Another prompt">↻</button>
+              <button onClick={() => setShowPrompt(false)} style={{
+                background: "none", border: "none", cursor: "pointer",
+                fontSize: 14, color: theme.textMuted, padding: "2px 6px",
+              }}>×</button>
+            </div>
+          )}
           <textarea
             className="input"
             value={text}
@@ -1066,8 +1138,16 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
             rows={3}
             style={{ resize: "none", fontSize: 16, lineHeight: 1.5 }}
           />
-          <div style={{ textAlign: "right", fontSize: 11, color: theme.textLight, marginTop: 4 }}>
-            {text.length}/500
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
+            {!showPrompt ? (
+              <button onClick={shufflePrompt} style={{
+                background: "none", border: "none", cursor: "pointer",
+                fontSize: 12, color: theme.textMuted, padding: 0,
+              }}>
+                💡 Need inspiration?
+              </button>
+            ) : <span />}
+            <span style={{ fontSize: 11, color: theme.textLight }}>{text.length}/500</span>
           </div>
         </div>
 
@@ -1315,6 +1395,32 @@ function SeasonStats({ entries, brandColor }) {
   const practices = entries.filter((e) => e.entry_type === "practice").length;
   const photos = entries.filter((e) => e.photoPreview || e.photoData || e.photo_path).length;
 
+  // Streak: consecutive weeks (Sun-Sat) with at least one entry, counting back from the current week
+  const streak = (() => {
+    if (entries.length === 0) return 0;
+    const now = new Date();
+    const getWeekKey = (d) => {
+      const date = new Date(d);
+      const day = date.getDay();
+      const sun = new Date(date);
+      sun.setDate(sun.getDate() - day);
+      return `${sun.getFullYear()}-${sun.getMonth()}-${sun.getDate()}`;
+    };
+    const weeks = new Set(entries.map((e) => getWeekKey(e.entry_date)));
+    let count = 0;
+    const check = new Date(now);
+    // Start from current week, walk backwards
+    for (let i = 0; i < 52; i++) {
+      if (weeks.has(getWeekKey(check))) {
+        count++;
+        check.setDate(check.getDate() - 7);
+      } else {
+        break;
+      }
+    }
+    return count;
+  })();
+
   // Book page count from pagination algorithm
   const bookPages = entries.length > 0 ? paginateEntries(entries).length + 3 : 0; // +3 for title, summary, closing pages
   const bookMessage = bookPages === 0 ? null
@@ -1332,7 +1438,7 @@ function SeasonStats({ entries, brandColor }) {
         {[
           { label: "Entries", value: entries.length, color: brandColor || theme.primary },
           { label: "W-L-D", value: `${wins}-${losses}-${draws}`, color: theme.win },
-          { label: "Practices", value: practices, color: theme.practice },
+          { label: "Streak", value: streak > 0 ? `${streak}🔥` : "0", color: "#F59E0B" },
           { label: "Photos", value: photos, color: theme.accent },
           { label: "Book", value: `${bookPages} pg`, color: theme.tournament },
         ].map((stat) => (
@@ -5029,6 +5135,36 @@ export default function SportsJournalApp() {
     setShowSeasonSwitcher(false);
   };
 
+  const deleteSeason = (idx) => {
+    if (allSeasons.length <= 1) return; // Can't delete the only season
+    const s = allSeasons[idx];
+    if (!confirm(`Delete "${s.team?.name || "Team"} — ${s.season?.name || "Season"}"? This cannot be undone.`)) return;
+
+    setAllSeasons((prev) => {
+      const updated = prev.filter((_, i) => i !== idx);
+      // If deleting the active season, switch to the first remaining one
+      let newIdx = activeIdxRef.current;
+      if (idx === newIdx) {
+        newIdx = 0;
+      } else if (idx < newIdx) {
+        newIdx = newIdx - 1;
+      }
+      const target = updated[newIdx];
+      if (target) {
+        setRole(target.role);
+        setTeam(target.team);
+        setSeason(target.season);
+        setPlayers(target.players);
+        setEntries((target.entries || []).map((e) => ({ ...e, photoPreview: e.photoData || null })));
+      }
+      activeIdxRef.current = newIdx;
+      setActiveSeasonIdx(newIdx);
+      localStorage.setItem("teamSeasonAll", JSON.stringify({ seasons: updated, activeIdx: newIdx }));
+      return updated;
+    });
+    setShowSeasonSwitcher(false);
+  };
+
   const startNewSeason = () => {
     // Save current season first
     const idx = activeIdxRef.current;
@@ -5326,6 +5462,15 @@ export default function SportsJournalApp() {
                   boxShadow: "0 4px 16px rgba(0,0,0,0.1)", overflow: "hidden", zIndex: 50,
                   minWidth: 140,
                 }}>
+                  {allSeasons.length > 1 && (
+                    <button onClick={() => { setShowMenu(false); deleteSeason(activeSeasonIdx); }} style={{
+                      display: "block", width: "100%", padding: "10px 16px",
+                      background: "none", border: "none", cursor: "pointer",
+                      fontSize: 14, color: "#DC2626", textAlign: "left",
+                    }}>
+                      Delete Season
+                    </button>
+                  )}
                   <button onClick={handleSignOut} style={{
                     display: "block", width: "100%", padding: "10px 16px",
                     background: "none", border: "none", cursor: "pointer",

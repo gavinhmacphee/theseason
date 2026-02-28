@@ -11,9 +11,22 @@ export const config = {
   api: { bodyParser: false },
 };
 
-async function buffer(readable) {
+async function getRawBody(req) {
+  // Vercel may provide rawBody directly
+  if (req.rawBody) {
+    return typeof req.rawBody === 'string' ? Buffer.from(req.rawBody) : req.rawBody;
+  }
+  // If body is already parsed as string, use it
+  if (typeof req.body === 'string') {
+    return Buffer.from(req.body);
+  }
+  // If body is a Buffer already
+  if (Buffer.isBuffer(req.body)) {
+    return req.body;
+  }
+  // Fall back to reading the stream
   const chunks = [];
-  for await (const chunk of readable) {
+  for await (const chunk of req) {
     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
   }
   return Buffer.concat(chunks);
@@ -81,7 +94,7 @@ export default async function handler(req, res) {
   let event;
   try {
     const stripe = new Stripe(STRIPE_SECRET_KEY);
-    const buf = await buffer(req);
+    const buf = await getRawBody(req);
     const sig = req.headers['stripe-signature'];
 
     try {

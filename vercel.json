@@ -1,5 +1,4 @@
 {
-  "cleanUrls": true,
   "functions": {
     "api/generate-pdf.js": { "memory": 1024, "maxDuration": 60 },
     "api/checkout.js": { "maxDuration": 10 },
@@ -10,8 +9,9 @@
     "api/webhook-lulu.js": { "maxDuration": 10 },
     "api/order-status.js": { "maxDuration": 10 }
   },
-  "rewrites": [
-    { "source": "/app", "destination": "/index.html" },
-    { "source": "/", "destination": "/landing.html" }
+  "routes": [
+    { "src": "^/$", "dest": "/landing.html" },
+    { "src": "^/app$", "dest": "/app.html" },
+    { "handle": "filesystem" }
   ]
 }
