@@ -480,10 +480,265 @@
       .book-callout { padding: 32px 24px; }
       .trust-facts { gap: 32px; }
       .trust-quote { font-size: 20px; }
+      .showcase { padding: 40px 20px; }
+      .showcase-inner { gap: 32px; }
+      .showcase-inner.reverse { flex-direction: row; }
+      .phone-frame { width: 220px; }
+      .share-card { width: 240px; height: 240px; }
+      .book-img { width: 220px; }
     }
 
     @media (max-width: 480px) {
       .site-logo { font-size: 20px; }
+    }
+
+    /* Showcase sections (visual + copy side by side) */
+    .showcase {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 32px;
+    }
+
+    .showcase-inner {
+      display: flex;
+      align-items: flex-start;
+      gap: 48px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .showcase-inner.reverse {
+      flex-direction: row-reverse;
+    }
+
+    .showcase-copy {
+      flex: 1 1 260px;
+      min-width: 240px;
+      padding-top: 24px;
+    }
+
+    .showcase-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .showcase-copy h2 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .showcase-copy p {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 420px;
+      margin-bottom: 0;
+    }
+
+    .showcase-bullets {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0 0;
+    }
+
+    .showcase-bullets li {
+      font-size: 14px;
+      color: var(--text-muted);
+      padding: 4px 0 4px 14px;
+      position: relative;
+    }
+
+    .showcase-bullets li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 4px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+
+    /* Phone Mockup */
+    .phone-frame {
+      width: 260px;
+      background: #111;
+      border-radius: 28px;
+      padding: 8px;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.08);
+      flex-shrink: 0;
+    }
+
+    .phone-notch {
+      height: 28px;
+      background: #111;
+      border-radius: 20px 20px 0 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .phone-notch-pill {
+      width: 80px;
+      height: 6px;
+      background: #333;
+      border-radius: 3px;
+    }
+
+    .phone-screen {
+      background: var(--bg);
+      border-radius: 0 0 20px 20px;
+      padding: 16px 14px 20px;
+    }
+
+    .mock-card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .mock-card-game { border-left: 3px solid #2D6A4F; }
+    .mock-card-practice { border-left: 3px solid #6B7280; padding: 12px 14px; }
+
+    .mock-card img {
+      width: 100%;
+      height: 80px;
+      object-fit: cover;
+      object-position: center 30%;
+      display: block;
+    }
+
+    .mock-card-body { padding: 10px 14px 12px; }
+
+    .mock-badge {
+      display: inline-block;
+      font-size: 8px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-right: 6px;
+    }
+
+    .mock-badge-game { color: #2D6A4F; background: rgba(45,106,79,0.07); }
+    .mock-badge-practice { color: #6B7280; background: rgba(107,114,128,0.07); }
+
+    .mock-date { font-size: 8px; color: #9CA3AF; }
+    .mock-opponent { font-size: 11px; font-weight: 600; color: var(--text); margin: 6px 0 4px; }
+    .mock-score { font-family: monospace; font-size: 13px; font-weight: 700; color: #2D6A4F; margin-bottom: 6px; }
+    .mock-quote { font-family: 'Crimson Pro', Georgia, serif; font-style: italic; font-size: 10px; color: var(--text-muted); line-height: 1.4; }
+
+    /* Share Card Mockup */
+    .share-card {
+      width: 280px;
+      height: 280px;
+      background: linear-gradient(160deg, rgba(27,67,50,0.7) 0%, rgba(45,106,79,0.6) 60%, rgba(64,145,108,0.55) 100%), url('/images/share-bg.jpg') center/cover;
+      border-radius: 12px;
+      padding: 24px 22px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .share-card-team {
+      font-size: 9px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .share-card-headline {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-style: italic;
+      font-size: 28px;
+      color: white;
+      line-height: 1.0;
+      margin-bottom: 10px;
+    }
+
+    .share-card-bar {
+      width: 32px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      margin-bottom: 10px;
+    }
+
+    .share-card-quote {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-style: italic;
+      font-size: 10px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    .share-card-score {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .share-card-score-num {
+      font-family: monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 1px;
+    }
+
+    .share-card-score-vs {
+      font-size: 9px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .share-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .share-card-brand {
+      font-size: 7px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .share-card-url {
+      font-size: 7px;
+      color: rgba(255,255,255,0.15);
+    }
+
+    /* Book Image */
+    .book-img {
+      width: 260px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+      flex-shrink: 0;
     }
 
     /* Share Row */
@@ -612,27 +867,88 @@
     </ul>
   </section>
 
-  <!-- The Solution -->
-  <section class="section-alt">
-    <div class="section-inner">
-      <h2>Capture It as It Happens</h2>
-      <p>After each game or practice, take two minutes and write down what happened. Add a photo. That's it.</p>
-      <p>By the end of the season, those quick entries become a complete story. The wins, the losses, the funny moments, the breakthroughs. Something your whole family will want to look back on.</p>
-
-      <div class="sports-tags">
-        <span class="sport-tag">Soccer</span>
-        <span class="sport-tag">Basketball</span>
-        <span class="sport-tag">Baseball</span>
-        <span class="sport-tag">Hockey</span>
-        <span class="sport-tag">Lacrosse</span>
-        <span class="sport-tag">Football</span>
-        <span class="sport-tag">Volleyball</span>
-        <span class="sport-tag">Swimming</span>
-        <span class="sport-tag">Track</span>
-        <span class="sport-tag">Tennis</span>
-        <span class="sport-tag">Gymnastics</span>
-        <span class="sport-tag">Wrestling</span>
+  <!-- LOG: Journal Showcase -->
+  <section class="showcase">
+    <div class="showcase-inner">
+      <div class="showcase-copy">
+        <p class="showcase-label">Log</p>
+        <h2>Write It Down While It's Fresh</h2>
+        <p>After every game, practice, or moment worth remembering. Add the score, a photo, what you noticed. It takes two minutes and you'll be glad you did.</p>
+        <ul class="showcase-bullets">
+          <li>Games, practices, and off-field moments</li>
+          <li>Scores, photos, and your own words</li>
+          <li>The stuff you'd forget by next week</li>
+        </ul>
       </div>
+
+      <!-- Phone mockup -->
+      <div class="phone-frame">
+        <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+        <div class="phone-screen">
+          <!-- Game entry card -->
+          <div class="mock-card mock-card-game">
+            <img src="/images/phone-photo.jpg" alt="Youth soccer player walking off field at golden hour" />
+            <div class="mock-card-body">
+              <div><span class="mock-badge mock-badge-game">Game</span><span class="mock-date">Feb 8</span></div>
+              <div class="mock-opponent">vs Lightning</div>
+              <div class="mock-score">3 - 1 W</div>
+              <div class="mock-quote">&ldquo;Found the open lane and made the right play every time.&rdquo;</div>
+            </div>
+          </div>
+          <!-- Practice entry card -->
+          <div class="mock-card mock-card-practice">
+            <div><span class="mock-badge mock-badge-practice">Practice</span><span class="mock-date">Feb 6</span></div>
+            <div class="mock-quote" style="margin-top:6px">&ldquo;Finally nailed the crossover. Coach noticed.&rdquo;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHARE: Share Cards Showcase -->
+  <section class="showcase">
+    <div class="showcase-inner reverse">
+      <div class="showcase-copy">
+        <p class="showcase-label">Share</p>
+        <h2>Turn a Moment into a Post</h2>
+        <p>Any entry becomes a share card &mdash; sized for Instagram Stories or your feed. Your words, their photo, your team's colors. One tap.</p>
+        <ul class="showcase-bullets">
+          <li>Instagram Stories and feed sizes</li>
+          <li>Auto-styled with your team colors</li>
+          <li>Text grandparents or post to socials</li>
+        </ul>
+      </div>
+
+      <!-- Share card mockup -->
+      <div class="share-card">
+        <div class="share-card-team">Thunder</div>
+        <div class="share-card-headline">Two assists and the go-ahead goal</div>
+        <div class="share-card-bar"></div>
+        <div class="share-card-quote">&ldquo;Found the open lane and didn't even hesitate.&rdquo;</div>
+        <div class="share-card-score">
+          <span class="share-card-score-num">3 - 1</span>
+          <span class="share-card-score-vs">vs Lightning FC</span>
+        </div>
+        <div class="share-card-footer">
+          <span class="share-card-brand">Team Season</span>
+          <span class="share-card-url">teamseason.app</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REMEMBER: Book Showcase -->
+  <section class="showcase">
+    <div class="showcase-inner">
+      <div class="showcase-copy">
+        <p class="showcase-label">Remember</p>
+        <h2>A Real Book for the Shelf</h2>
+        <p>At the end of the season, turn the whole journal into a printed hardcover photo book. Every entry, every score, every photo &mdash; bound and in their hands. The kind of thing they keep.</p>
+        <p style="font-weight:600;color:var(--text);margin-top:16px">$39 per book</p>
+        <p style="font-size:13px;margin-top:4px">Designed automatically from your journal. You just order it.</p>
+      </div>
+
+      <img class="book-img" src="/images/book-mockup.jpg" alt="Team Season printed hardcover photo book" />
     </div>
   </section>
 
@@ -712,12 +1028,6 @@
         </div>
       </div>
 
-      <!-- Book Callout -->
-      <div class="book-callout">
-        <h3>Turn It into a Book They'll Keep Forever</h3>
-        <p>Every entry becomes a page. Every photo, every score, every memory. A real hardcover book, printed and shipped to your door. Preview it before you order.</p>
-        <div class="book-price">$39 &middot; free shipping</div>
-      </div>
     </div>
   </section>
 
