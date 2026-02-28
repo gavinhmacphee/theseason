@@ -486,39 +486,6 @@
       .site-logo { font-size: 20px; }
     }
 
-    /* Email Capture */
-    .email-section {
-      background: var(--white);
-      padding: 60px 32px;
-      text-align: center;
-    }
-
-    .email-inner {
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    .email-section h2 {
-      font-family: 'Crimson Pro', Georgia, serif;
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--green);
-      margin-bottom: 12px;
-    }
-
-    .email-section > .email-inner > p {
-      font-size: 15px;
-      color: var(--text-muted);
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-
-    .email-note {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 16px;
-    }
-
     /* Share Row */
     .share-row {
       margin-top: 32px;
@@ -765,16 +732,6 @@
     </ul>
   </section>
 
-  <!-- Email Capture -->
-  <section class="email-section">
-    <div class="email-inner">
-      <h2>Stay in the Loop</h2>
-      <p>Season journaling tips, new features, and the occasional nudge to write things down before you forget.</p>
-      <div id="hs-form"></div>
-      <p class="email-note">A few emails a season. No spam. Unsubscribe anytime.</p>
-    </div>
-  </section>
-
   <!-- Bottom CTA -->
   <section class="bottom-cta">
     <h2>This Season Only Happens Once</h2>
@@ -797,15 +754,7 @@
     <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/app">Open App</a> &nbsp;&middot;&nbsp; <a href="/season-recap">Season Recap Builder</a></p>
   </footer>
 
-  <!-- HubSpot Form -->
-  <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/embed/v2.js"></script>
   <script>
-    hbspt.forms.create({
-      portalId: "244645898",
-      formId: "a4833cc1-063f-44ca-bfb4-6ef87dc73be7",
-      target: "#hs-form"
-    });
-
     function copyLink(btn) {
       navigator.clipboard.writeText('https://teamseason.app').then(function() {
         btn.textContent = 'Copied!';
