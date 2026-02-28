@@ -585,34 +585,32 @@ function AuthScreen({ onAuth, onDemo, onSkipAuth }) {
       background: `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 50%, #40916C 100%)`,
     }}>
       <div className="slide-up" style={{ textAlign: "center", marginBottom: 40 }}>
-        <div style={{ fontSize: 56, marginBottom: 16 }}>🏆</div>
         <h1 style={{
-          fontFamily: fonts.display, fontSize: 38, fontWeight: 700,
-          color: "white", lineHeight: 1.1, marginBottom: 8,
+          fontFamily: "'Crimson Pro', Georgia, serif", fontSize: 32, fontWeight: 700,
+          color: "white", lineHeight: 1.1, marginBottom: 10, letterSpacing: 0.5,
         }}>
           Team Season
         </h1>
         <p style={{
-          fontFamily: fonts.display, fontSize: 17, color: "rgba(255,255,255,0.8)",
+          fontFamily: "'Crimson Pro', Georgia, serif", fontSize: 17, color: "rgba(255,255,255,0.6)",
           fontStyle: "italic", maxWidth: 300,
         }}>
-          Long after the scores are forgotten,<br />the moments remain.
+          Long after the scores are forgotten, the moments remain.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="fade-in" style={{
-        background: "white", borderRadius: 18, padding: 28,
+        background: "white", padding: 32,
         width: "100%", maxWidth: 360,
-        boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
       }}>
-        <h2 style={{ fontFamily: fonts.display, fontSize: 22, marginBottom: 20, textAlign: "center" }}>
+        <h2 style={{ fontFamily: "'Crimson Pro', Georgia, serif", fontSize: 22, fontWeight: 700, marginBottom: 20, textAlign: "center", color: theme.primary }}>
           {isSignUp ? "Create Account" : "Welcome Back"}
         </h2>
 
         {error && (
           <div style={{
             background: "#FEE2E2", color: "#991B1B", padding: "10px 14px",
-            borderRadius: 8, fontSize: 13, marginBottom: 16,
+            fontSize: 13, marginBottom: 16, borderLeft: "3px solid #991B1B",
           }}>{error}</div>
         )}
 
@@ -644,19 +642,19 @@ function AuthScreen({ onAuth, onDemo, onSkipAuth }) {
       </form>
 
       {DEMO && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 20, alignItems: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 24, alignItems: "center" }}>
           <button onClick={onSkipAuth}
             className="btn" style={{
-              background: "rgba(255,255,255,0.25)",
-              color: "white", backdropFilter: "blur(10px)",
+              background: "rgba(255,255,255,0.15)",
+              color: "white", border: "1px solid rgba(255,255,255,0.25)",
               width: 220,
             }}>
-            Start Your Season →
+            Start Your Season
           </button>
           <button onClick={onDemo}
             className="btn" style={{
-              background: "rgba(255,255,255,0.1)",
-              color: "rgba(255,255,255,0.7)", backdropFilter: "blur(10px)",
+              background: "transparent",
+              color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.15)",
               fontSize: 13, padding: "8px 20px",
             }}>
             Try Demo Mode
