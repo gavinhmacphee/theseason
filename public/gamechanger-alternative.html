@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1B4332" />
+  <meta name="description" content="Looking for an alternative to GameChanger? Team Season is a free youth sports journal that captures the moments behind the scores and turns your season into a hardcover photo book." />
+  <title>GameChanger Alternative for Youth Sports Families | Team Season</title>
+  <link rel="canonical" href="https://teamseason.app/gamechanger-alternative" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Team Season — A Different Kind of Youth Sports App" />
+  <meta property="og:description" content="GameChanger tracks the scores. Team Season captures the story. A free journal for youth sports families." />
+  <meta property="og:url" content="https://teamseason.app/gamechanger-alternative" />
+  <meta property="og:site_name" content="Team Season" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green: #1B4332;
+      --green-deep: #122d22;
+      --green-light: #2D6A4F;
+      --accent: #E07A5F;
+      --accent-light: #e8937c;
+      --bg: #FAFAF7;
+      --white: #ffffff;
+      --text: #1A1A1A;
+      --text-muted: #6B7280;
+      --border: #E8E8E4;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    .site-header {
+      background: var(--bg);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .site-logo {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .site-nav a {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .site-nav a:hover { color: var(--green); }
+
+    .site-nav .nav-cta {
+      background: var(--green);
+      color: white;
+      padding: 8px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .site-nav .nav-cta:hover { background: var(--green-light); color: white; }
+
+    .gradient-stripe {
+      height: 3px;
+      background: linear-gradient(90deg, var(--green-deep), var(--green), var(--green-light));
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 50%, #40916C 100%);
+      color: var(--white);
+      padding: 80px 32px 90px;
+      text-align: center;
+    }
+
+    .hero-inner {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.9);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 6px 16px;
+      margin-bottom: 28px;
+    }
+
+    .hero h1 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: clamp(36px, 6vw, 56px);
+      line-height: 1.1;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .hero .lead {
+      font-size: 17px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.8);
+      max-width: 560px;
+      margin: 0 auto 36px;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 16px 40px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-light);
+      transform: translateY(-1px);
+    }
+
+    /* Section */
+    .section {
+      padding: 80px 32px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .section-alt {
+      background: var(--white);
+      max-width: none;
+      padding: 80px 32px;
+    }
+
+    .section-alt .section-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .section h2, .section-alt h2 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 20px;
+    }
+
+    .section p, .section-alt p {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* Comparison Table */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 40px 0;
+    }
+
+    .compare-table th {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 14px 20px;
+      text-align: left;
+      border-bottom: 2px solid var(--green);
+      color: var(--green);
+    }
+
+    .compare-table td {
+      padding: 14px 20px;
+      font-size: 15px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: top;
+    }
+
+    .compare-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .compare-table .feature-name {
+      font-weight: 600;
+      color: var(--text);
+      min-width: 160px;
+    }
+
+    .check { color: var(--green); font-weight: 700; }
+    .dash { color: var(--text-muted); }
+
+    /* Quote */
+    .pullquote {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 24px;
+      font-style: italic;
+      color: var(--green);
+      line-height: 1.5;
+      text-align: center;
+      max-width: 650px;
+      margin: 40px auto;
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Bottom CTA */
+    .bottom-cta {
+      background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 100%);
+      color: var(--white);
+      text-align: center;
+      padding: 80px 32px;
+    }
+
+    .bottom-cta h2 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--white);
+    }
+
+    .bottom-cta p {
+      font-size: 17px;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 32px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .bottom-cta .cta-note {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 16px;
+    }
+
+    /* Footer */
+    .site-footer {
+      background: var(--green-deep);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 32px;
+      font-size: 13px;
+    }
+
+    .site-footer a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+    }
+
+    .site-footer a:hover { color: rgba(255,255,255,0.8); }
+
+    /* Use-case blocks */
+    .use-cases {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-top: 40px;
+    }
+
+    .use-case {
+      border-left: 3px solid var(--accent);
+      padding-left: 20px;
+    }
+
+    .use-case h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--green);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .use-case p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .site-header { padding: 14px 20px; }
+      .site-nav { gap: 16px; }
+      .hero { padding: 60px 20px 70px; }
+      .section { padding: 60px 20px; }
+      .section-alt { padding: 60px 20px; }
+      .compare-table { font-size: 14px; }
+      .compare-table th, .compare-table td { padding: 10px 12px; }
+      .use-cases { grid-template-columns: 1fr; }
+      .bottom-cta { padding: 60px 20px; }
+    }
+
+    @media (max-width: 480px) {
+      .site-logo { font-size: 20px; }
+      .compare-table { font-size: 13px; }
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "GameChanger Alternative for Youth Sports Families",
+    "description": "Compare Team Season and GameChanger. Both serve youth sports families, but in very different ways.",
+    "url": "https://teamseason.app/gamechanger-alternative"
+  }
+  </script>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="site-logo">Team Season</a>
+    <nav class="site-nav">
+      <a href="/">Home</a>
+      <a href="/app" class="nav-cta">Start Free</a>
+    </nav>
+  </header>
+
+  <div class="gradient-stripe"></div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-badge">Comparison</div>
+      <h1>GameChanger Tracks the Score. Team Season Captures the Story.</h1>
+      <p class="lead">Both apps serve youth sports families, but in very different ways. Here's how they compare and when you might want both.</p>
+    </div>
+  </section>
+
+  <!-- The Difference -->
+  <section class="section">
+    <h2>Two Apps, Two Different Jobs</h2>
+    <p>GameChanger is a live game management tool. It tracks scores, stats, and play-by-play in real time. Coaches love it for running games. Parents love it for following along when they can't be there.</p>
+    <p>Team Season is a season journal. It captures the moments behind the scores &mdash; the car rides home, the rainy games, the things your kid said that you don't want to forget. Then it turns those entries into a hardcover photo book.</p>
+    <p>They don't compete. They complement each other.</p>
+  </section>
+
+  <!-- Comparison Table -->
+  <section class="section-alt">
+    <div class="section-inner">
+      <h2>Side-by-Side Comparison</h2>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>GameChanger</th>
+            <th>Team Season</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="feature-name">Primary purpose</td>
+            <td>Live scoring & stats</td>
+            <td>Season journaling & memories</td>
+          </tr>
+          <tr>
+            <td class="feature-name">Who uses it</td>
+            <td>Coaches, scorekeepers</td>
+            <td>Parents, families</td>
+          </tr>
+          <tr>
+            <td class="feature-name">When you use it</td>
+            <td>During the game</td>
+            <td>After the game</td>
+          </tr>
+          <tr>
+            <td class="feature-name">What it captures</td>
+            <td>Stats, play-by-play, box scores</td>
+            <td>Stories, photos, moments, feelings</td>
+          </tr>
+          <tr>
+            <td class="feature-name">Photo support</td>
+            <td class="dash">Limited</td>
+            <td class="check">Full photo journal</td>
+          </tr>
+          <tr>
+            <td class="feature-name">Printed book</td>
+            <td class="dash">&mdash;</td>
+            <td class="check">Hardcover photo book ($39)</td>
+          </tr>
+          <tr>
+            <td class="feature-name">Share cards</td>
+            <td class="dash">&mdash;</td>
+            <td class="check">Game-day share cards</td>
+          </tr>
+          <tr>
+            <td class="feature-name">Price</td>
+            <td>Free (premium features extra)</td>
+            <td>Free (book optional)</td>
+          </tr>
+          <tr>
+            <td class="feature-name">Works for any sport</td>
+            <td class="check">Yes</td>
+            <td class="check">Yes</td>
+          </tr>
+          <tr>
+            <td class="feature-name">Best for</td>
+            <td>Tracking what happened</td>
+            <td>Remembering how it felt</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- The Real Difference -->
+  <section class="section">
+    <p class="pullquote">&ldquo;Five years from now, you won't remember the stats. You'll remember the look on your kid's face.&rdquo;</p>
+  </section>
+
+  <!-- When to Use Each -->
+  <section class="section-alt">
+    <div class="section-inner">
+      <h2>When to Use Each App</h2>
+      <div class="use-cases">
+        <div class="use-case">
+          <h3>Use GameChanger When</h3>
+          <p>You need live scoring, real-time stats, or play-by-play tracking. When the coach needs a scorebook and remote family members want to follow along live.</p>
+        </div>
+        <div class="use-case">
+          <h3>Use Team Season When</h3>
+          <p>You want to capture the personal moments &mdash; what your kid said in the car, the breakthrough at practice, the funny team dinner. The stuff that actually matters years later.</p>
+        </div>
+        <div class="use-case">
+          <h3>Use Both When</h3>
+          <p>You want the complete picture. GameChanger runs the game. Team Season remembers the season. At the end, turn your journal into a book your family keeps forever.</p>
+        </div>
+        <div class="use-case">
+          <h3>Skip GameChanger When</h3>
+          <p>Your league doesn't need live scoring, or you just want a simple way to remember the season without the complexity of stats and lineup management.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Families Choose Team Season -->
+  <section class="section">
+    <h2>Why Families Choose Team Season</h2>
+    <p>Most youth sports apps are built for coaches. Team Season is built for parents. It takes two minutes after each game to write down what happened, add a photo, and move on. No stats to track. No lineups to manage. Just a simple journal that becomes something your whole family will treasure.</p>
+    <p>At the end of the season, your entries become a hardcover photo book &mdash; every game, every practice, every moment. Printed and shipped to your door for $39.</p>
+    <p>The app is free forever. You only pay if you want the book.</p>
+  </section>
+
+  <!-- Bottom CTA -->
+  <section class="bottom-cta">
+    <h2>Start Your Free Season Journal</h2>
+    <p>Capture the moments that stats can't measure. Two minutes after each game. A book your family keeps forever.</p>
+    <a href="/app" class="btn-primary">Start Free</a>
+    <p class="cta-note">Free to use. No credit card required.</p>
+  </section>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/app">Open App</a></p>
+  </footer>
+
+</body>
+</html>

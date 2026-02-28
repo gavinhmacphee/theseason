@@ -12,6 +12,8 @@
   "routes": [
     { "src": "^/$", "dest": "/landing.html" },
     { "src": "^/app$", "dest": "/app.html" },
+    { "src": "^/gamechanger-alternative$", "dest": "/gamechanger-alternative.html" },
+    { "src": "^/season-recap$", "dest": "/season-recap.html" },
     { "handle": "filesystem" }
   ]
 }

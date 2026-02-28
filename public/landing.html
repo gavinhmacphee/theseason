@@ -485,6 +485,83 @@
     @media (max-width: 480px) {
       .site-logo { font-size: 20px; }
     }
+
+    /* Email Capture */
+    .email-section {
+      background: var(--white);
+      padding: 60px 32px;
+      text-align: center;
+    }
+
+    .email-inner {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .email-section h2 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 12px;
+    }
+
+    .email-section > .email-inner > p {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .email-note {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 16px;
+    }
+
+    /* Share Row */
+    .share-row {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .share-label {
+      font-size: 14px !important;
+      color: rgba(255,255,255,0.6) !important;
+      margin-bottom: 12px !important;
+    }
+
+    .share-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .share-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: transparent;
+      color: rgba(255,255,255,0.8);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+      display: inline-block;
+    }
+
+    .share-btn:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .share-copied {
+      background: rgba(255,255,255,0.15);
+      color: white;
+    }
   </style>
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -688,18 +765,58 @@
     </ul>
   </section>
 
+  <!-- Email Capture -->
+  <section class="email-section">
+    <div class="email-inner">
+      <h2>Stay in the Loop</h2>
+      <p>Season journaling tips, new features, and the occasional nudge to write things down before you forget.</p>
+      <div id="hs-form"></div>
+      <p class="email-note">A few emails a season. No spam. Unsubscribe anytime.</p>
+    </div>
+  </section>
+
   <!-- Bottom CTA -->
   <section class="bottom-cta">
     <h2>This Season Only Happens Once</h2>
     <p>Two minutes after each game. By the end of the season, you'll have a story your family keeps forever.</p>
     <a href="/app" class="btn-primary">Start Your Free Journal</a>
     <p class="cta-note">Free to use. No credit card required.</p>
+
+    <div class="share-row">
+      <p class="share-label">Know a sports family who'd love this?</p>
+      <div class="share-buttons">
+        <button class="share-btn" onclick="copyLink(this)">Copy Link</button>
+        <a class="share-btn" href="sms:?&body=Check%20out%20Team%20Season%20%E2%80%94%20a%20free%20journal%20for%20youth%20sports%20families.%20https%3A%2F%2Fteamseason.app">Text a Friend</a>
+        <a class="share-btn" href="mailto:?subject=Team%20Season%20%E2%80%94%20Youth%20Sports%20Journal&body=Check%20out%20Team%20Season%20%E2%80%94%20a%20free%20journal%20for%20youth%20sports%20families%20that%20turns%20your%20season%20into%20a%20hardcover%20book.%0A%0Ahttps%3A%2F%2Fteamseason.app">Email It</a>
+      </div>
+    </div>
   </section>
 
   <!-- Footer -->
   <footer class="site-footer">
-    <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/app">Open App</a></p>
+    <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/app">Open App</a> &nbsp;&middot;&nbsp; <a href="/season-recap">Season Recap Builder</a></p>
   </footer>
+
+  <!-- HubSpot Form -->
+  <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/embed/v2.js"></script>
+  <script>
+    hbspt.forms.create({
+      portalId: "244645898",
+      formId: "a4833cc1-063f-44ca-bfb4-6ef87dc73be7",
+      target: "#hs-form"
+    });
+
+    function copyLink(btn) {
+      navigator.clipboard.writeText('https://teamseason.app').then(function() {
+        btn.textContent = 'Copied!';
+        btn.classList.add('share-copied');
+        setTimeout(function() {
+          btn.textContent = 'Copy Link';
+          btn.classList.remove('share-copied');
+        }, 2000);
+      });
+    }
+  </script>
 
 </body>
 </html>

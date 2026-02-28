@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1B4332" />
+  <meta name="description" content="Free Season Recap Builder for youth sports. Answer a few questions about your kid's season and get a shareable recap you can save, print, or send to family." />
+  <title>Free Youth Sports Season Recap Builder | Team Season</title>
+  <link rel="canonical" href="https://teamseason.app/season-recap" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Season Recap Builder — Free Tool from Team Season" />
+  <meta property="og:description" content="Answer a few questions about your kid's season and get a shareable recap. Free, no signup required." />
+  <meta property="og:url" content="https://teamseason.app/season-recap" />
+  <meta property="og:site_name" content="Team Season" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green: #1B4332;
+      --green-deep: #122d22;
+      --green-light: #2D6A4F;
+      --accent: #E07A5F;
+      --accent-light: #e8937c;
+      --bg: #FAFAF7;
+      --white: #ffffff;
+      --text: #1A1A1A;
+      --text-muted: #6B7280;
+      --border: #E8E8E4;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    .site-header {
+      background: var(--bg);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .site-logo {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .site-nav a {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .site-nav a:hover { color: var(--green); }
+
+    .site-nav .nav-cta {
+      background: var(--green);
+      color: white;
+      padding: 8px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .site-nav .nav-cta:hover { background: var(--green-light); color: white; }
+
+    .gradient-stripe {
+      height: 3px;
+      background: linear-gradient(90deg, var(--green-deep), var(--green), var(--green-light));
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 50%, #40916C 100%);
+      color: var(--white);
+      padding: 60px 32px 70px;
+      text-align: center;
+    }
+
+    .hero-inner {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.9);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 6px 16px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: clamp(32px, 5vw, 48px);
+      line-height: 1.15;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .hero .lead {
+      font-size: 16px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.8);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* Tool Container */
+    .tool-section {
+      padding: 60px 32px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .form-group {
+      margin-bottom: 28px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group .hint {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--green);
+    }
+
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .btn-generate {
+      display: block;
+      width: 100%;
+      background: var(--accent);
+      color: white;
+      padding: 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-generate:hover {
+      background: var(--accent-light);
+    }
+
+    /* Result */
+    .result-container {
+      display: none;
+      margin-top: 48px;
+      padding-top: 48px;
+      border-top: 2px solid var(--green);
+    }
+
+    .result-container.visible {
+      display: block;
+    }
+
+    .result-label {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--green);
+      margin-bottom: 20px;
+    }
+
+    .recap-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 40px;
+    }
+
+    .recap-header {
+      text-align: center;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .recap-title {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 4px;
+    }
+
+    .recap-subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+
+    .recap-section {
+      margin-bottom: 24px;
+    }
+
+    .recap-section h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+
+    .recap-section p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+
+    .recap-footer {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-action:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .btn-action.primary {
+      background: var(--green);
+      border-color: var(--green);
+      color: white;
+    }
+
+    .btn-action.primary:hover {
+      background: var(--green-light);
+    }
+
+    /* Upsell */
+    .upsell {
+      background: linear-gradient(135deg, #1B433210, #2D6A4F10);
+      border: 1px solid #1B433220;
+      padding: 32px;
+      text-align: center;
+      margin-top: 48px;
+    }
+
+    .upsell h3 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 10px;
+    }
+
+    .upsell p {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
+    .upsell .btn-action.primary {
+      display: inline-block;
+    }
+
+    /* Footer */
+    .site-footer {
+      background: var(--green-deep);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 32px;
+      font-size: 13px;
+    }
+
+    .site-footer a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+    }
+
+    .site-footer a:hover { color: rgba(255,255,255,0.8); }
+
+    @media (max-width: 768px) {
+      .site-header { padding: 14px 20px; }
+      .hero { padding: 48px 20px 56px; }
+      .tool-section { padding: 40px 20px; }
+      .form-row { grid-template-columns: 1fr; }
+      .recap-card { padding: 24px; }
+    }
+
+    @media (max-width: 480px) {
+      .site-logo { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="site-logo">Team Season</a>
+    <nav class="site-nav">
+      <a href="/">Home</a>
+      <a href="/app" class="nav-cta">Start Free Journal</a>
+    </nav>
+  </header>
+
+  <div class="gradient-stripe"></div>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-badge">Free Tool</div>
+      <h1>Season Recap Builder</h1>
+      <p class="lead">Answer a few questions about your kid's season and get a recap you can save, share, or read at the end-of-season party.</p>
+    </div>
+  </section>
+
+  <section class="tool-section">
+    <form id="recap-form" onsubmit="generateRecap(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="playerName">Player's First Name</label>
+          <input type="text" id="playerName" placeholder="e.g. Marco" required />
+        </div>
+        <div class="form-group">
+          <label for="sport">Sport</label>
+          <select id="sport" required>
+            <option value="">Select...</option>
+            <option value="soccer">Soccer</option>
+            <option value="basketball">Basketball</option>
+            <option value="baseball">Baseball</option>
+            <option value="softball">Softball</option>
+            <option value="hockey">Hockey</option>
+            <option value="lacrosse">Lacrosse</option>
+            <option value="football">Football</option>
+            <option value="volleyball">Volleyball</option>
+            <option value="swimming">Swimming</option>
+            <option value="track">Track & Field</option>
+            <option value="tennis">Tennis</option>
+            <option value="gymnastics">Gymnastics</option>
+            <option value="wrestling">Wrestling</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="teamName">Team Name</label>
+          <input type="text" id="teamName" placeholder="e.g. Lightning FC" required />
+        </div>
+        <div class="form-group">
+          <label for="seasonName">Season</label>
+          <input type="text" id="seasonName" placeholder="e.g. Spring 2026" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="record">Season Record</label>
+        <p class="hint">Wins, losses, draws/ties (optional)</p>
+        <input type="text" id="record" placeholder="e.g. 8-3-2" />
+      </div>
+
+      <div class="form-group">
+        <label for="highlight">Biggest highlight</label>
+        <p class="hint">The game, play, or moment that defined the season</p>
+        <textarea id="highlight" placeholder="e.g. His goal-line clearance in the state cup quarterfinal that saved the season." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="growth">How they grew</label>
+        <p class="hint">What changed from the first game to the last?</p>
+        <textarea id="growth" placeholder="e.g. Started the season nervous about playing up an age group. By the end, he was the one calming down his teammates before big games."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="funnyMoment">Funniest moment</label>
+        <p class="hint">The story that'll get retold at team dinners for years</p>
+        <textarea id="funnyMoment" placeholder="e.g. The goalkeeper session where everyone took turns in net and the whole team was dying laughing."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="teamMoment">Best team moment</label>
+        <p class="hint">A moment when the team was more than just a team</p>
+        <textarea id="teamMoment" placeholder="e.g. The pizza dinner after the rainy road win. Everyone soaked and grinning."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="parentMemory">Your favorite memory</label>
+        <p class="hint">The moment you'll remember ten years from now</p>
+        <textarea id="parentMemory" placeholder="e.g. The car ride home after the Dynamo game when he said this was his best season ever."></textarea>
+      </div>
+
+      <button type="submit" class="btn-generate">Build My Season Recap</button>
+    </form>
+
+    <!-- Result -->
+    <div class="result-container" id="result">
+      <div class="result-label">Your Season Recap</div>
+      <div class="recap-card" id="recap-card">
+        <div class="recap-header">
+          <div class="recap-title" id="r-title"></div>
+          <div class="recap-subtitle" id="r-subtitle"></div>
+        </div>
+        <div id="r-body"></div>
+        <div class="recap-footer">Made with Team Season &middot; teamseason.app</div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn-action" onclick="copyRecap()">Copy as Text</button>
+        <button class="btn-action" onclick="window.print()">Print</button>
+        <a class="btn-action primary" href="/app">Start a Full Season Journal &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Upsell -->
+    <div class="upsell">
+      <h3>Want to Capture the Whole Season?</h3>
+      <p>This recap is a snapshot. A full Team Season journal captures every game, every practice, every moment &mdash; then turns it into a hardcover photo book.</p>
+      <a href="/app" class="btn-action primary">Start Your Free Journal</a>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/app">Open App</a></p>
+  </footer>
+
+  <script>
+    function esc(str) {
+      var d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function generateRecap(e) {
+      e.preventDefault();
+
+      var name = document.getElementById('playerName').value.trim();
+      var sport = document.getElementById('sport').value;
+      var team = document.getElementById('teamName').value.trim();
+      var season = document.getElementById('seasonName').value.trim();
+      var record = document.getElementById('record').value.trim();
+      var highlight = document.getElementById('highlight').value.trim();
+      var growth = document.getElementById('growth').value.trim();
+      var funny = document.getElementById('funnyMoment').value.trim();
+      var teamMoment = document.getElementById('teamMoment').value.trim();
+      var parentMemory = document.getElementById('parentMemory').value.trim();
+
+      var sportName = sport.charAt(0).toUpperCase() + sport.slice(1);
+
+      // Build title
+      document.getElementById('r-title').textContent = name + "'s " + season;
+      document.getElementById('r-subtitle').textContent = team + " \u2022 " + sportName + (record ? " \u2022 " + record : "");
+
+      // Build body
+      var html = '';
+
+      if (highlight) {
+        html += '<div class="recap-section"><h3>Season Highlight</h3><p>' + esc(highlight) + '</p></div>';
+      }
+
+      if (growth) {
+        html += '<div class="recap-section"><h3>How ' + esc(name) + ' Grew</h3><p>' + esc(growth) + '</p></div>';
+      }
+
+      if (funny) {
+        html += '<div class="recap-section"><h3>Funniest Moment</h3><p>' + esc(funny) + '</p></div>';
+      }
+
+      if (teamMoment) {
+        html += '<div class="recap-section"><h3>Best Team Moment</h3><p>' + esc(teamMoment) + '</p></div>';
+      }
+
+      if (parentMemory) {
+        html += '<div class="recap-section"><h3>A Parent\'s Favorite Memory</h3><p>' + esc(parentMemory) + '</p></div>';
+      }
+
+      document.getElementById('r-body').innerHTML = html;
+
+      // Show result
+      var result = document.getElementById('result');
+      result.classList.add('visible');
+      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function copyRecap() {
+      var card = document.getElementById('recap-card');
+      var title = document.getElementById('r-title').textContent;
+      var subtitle = document.getElementById('r-subtitle').textContent;
+
+      var sections = card.querySelectorAll('.recap-section');
+      var text = title + '\n' + subtitle + '\n\n';
+
+      sections.forEach(function(sec) {
+        var h = sec.querySelector('h3').textContent;
+        var p = sec.querySelector('p').textContent;
+        text += h.toUpperCase() + '\n' + p + '\n\n';
+      });
+
+      text += '---\nMade with Team Season \u2022 teamseason.app';
+
+      navigator.clipboard.writeText(text).then(function() {
+        var btn = document.querySelector('.result-actions .btn-action');
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy as Text'; }, 2000);
+      });
+    }
+  </script>
+
+</body>
+</html>
