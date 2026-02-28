@@ -4834,7 +4834,7 @@ export default function SportsJournalApp() {
     }
 
     if (DEMO) {
-      setScreen("landing");
+      setScreen("auth");
       return;
     }
 
@@ -4870,7 +4870,7 @@ export default function SportsJournalApp() {
         setScreen("onboarding");
       })();
     } else {
-      setScreen("landing");
+      setScreen("auth");
     }
   }, []);
 
