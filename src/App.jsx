@@ -4864,8 +4864,9 @@ export default function SportsJournalApp() {
         } catch (e) {
           console.warn("Cloud load failed:", e);
         }
-        // No cloud data either — go to onboarding
-        setScreen("onboarding");
+        // No cloud data either — go straight to setup
+        setRole("parent");
+        setScreen("setup");
       })();
     } else {
       setScreen("auth");
@@ -5029,8 +5030,9 @@ export default function SportsJournalApp() {
       console.warn("Cloud restore on login failed:", e);
     }
 
-    // No existing data found — new user, go to onboarding
-    setScreen("onboarding");
+    // No existing data found — new user, go straight to setup
+    setRole("parent");
+    setScreen("setup");
   };
 
   const handleDemo = () => {
@@ -5063,9 +5065,10 @@ export default function SportsJournalApp() {
       const { data } = await supabase.rpc("claim_connection", { p_token: joinToken });
       if (data?.error) {
         console.warn("Claim failed:", data.error);
-        // Fall back to regular onboarding
+        // Fall back to regular setup
         setJoinToken(null);
-        setScreen("onboarding");
+        setRole("parent");
+        setScreen("setup");
         return;
       }
 
@@ -5102,7 +5105,8 @@ export default function SportsJournalApp() {
     } catch (e) {
       console.warn("Join flow error:", e);
       setJoinToken(null);
-      setScreen("onboarding");
+      setRole("parent");
+      setScreen("setup");
     }
   };
 
@@ -5398,7 +5402,7 @@ export default function SportsJournalApp() {
         </div>
       )}
       {screen === "landing" && <LandingPage onDemo={handleDemo} onStart={() => setScreen("auth")} />}
-      {screen === "auth" && <AuthScreen onAuth={handleAuth} onDemo={handleDemo} onSkipAuth={() => setScreen("onboarding")} />}
+      {screen === "auth" && <AuthScreen onAuth={handleAuth} onDemo={handleDemo} onSkipAuth={() => { setRole("parent"); setScreen("setup"); }} />}
       {screen === "join" && joinToken && (
         <JoinScreen
           token={joinToken}
