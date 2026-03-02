@@ -114,6 +114,39 @@ export default async function handler(req, res) {
     }
 
     await browser.close();
+
+    // Step 8: Test Lulu sandbox auth
+    const luluBase = process.env.LULU_API_BASE || '(not set)';
+    const luluAuthUrl = process.env.LULU_AUTH_URL;
+    const luluKey = process.env.LULU_CLIENT_KEY;
+    const luluSecret = process.env.LULU_CLIENT_SECRET;
+    log('lulu_config', 'info', `base=${luluBase}, key=${luluKey ? luluKey.slice(0, 8) + '...' : '(not set)'}`);
+
+    if (luluAuthUrl && luluKey && luluSecret) {
+      try {
+        const authRes = await fetch(luluAuthUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            grant_type: 'client_credentials',
+            client_id: luluKey,
+            client_secret: luluSecret,
+          }),
+        });
+        if (authRes.ok) {
+          const authData = await authRes.json();
+          log('lulu_auth', 'ok', `token=${authData.access_token?.slice(0, 20)}...`);
+        } else {
+          const errText = await authRes.text();
+          log('lulu_auth', 'fail', `${authRes.status}: ${errText}`);
+        }
+      } catch (err) {
+        log('lulu_auth', 'fail', err.message);
+      }
+    } else {
+      log('lulu_auth', 'skip', 'Lulu env vars not configured');
+    }
+
     log('done', 'ok', 'Pipeline test complete');
 
   } catch (err) {
