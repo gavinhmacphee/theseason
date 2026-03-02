@@ -5502,27 +5502,37 @@ export default function SportsJournalApp() {
 
   // Persist to localStorage (skip demo, skip mid-setup)
   useEffect(() => {
-    if (isDemo) return;
-    if (screen === "home" && team && season) {
-      const data = { role, team, season, players, entries };
-      localStorage.setItem("teamSeason", JSON.stringify(data));
+    try {
+      if (isDemo) return;
+      if (screen === "home" && team && season) {
+        // Strip photoData before persisting to avoid localStorage quota issues
+        const safeEntries = entries.map(({ photoData, ...e }) => ({ ...e, photoPreview: null }));
+        const data = { role, team, season, players, entries: safeEntries };
+        localStorage.setItem("teamSeason", JSON.stringify(data));
 
-      // Also persist to allSeasons array using ref for current index
-      const idx = activeIdxRef.current;
-      setAllSeasons((prev) => {
-        const updated = [...prev];
-        if (updated.length === 0) {
-          updated.push(data);
-        } else if (idx < updated.length) {
-          updated[idx] = data;
-        }
-        localStorage.setItem("teamSeasonAll", JSON.stringify({ seasons: updated, activeIdx: idx }));
-        return updated;
-      });
-    }
-    if (screen === "admin" && org) {
-      const data = { role: "admin", org, orgTeams };
-      localStorage.setItem("teamSeasonAdmin", JSON.stringify(data));
+        // Also persist to allSeasons array using ref for current index
+        const idx = activeIdxRef.current;
+        setAllSeasons((prev) => {
+          const updated = [...prev];
+          if (updated.length === 0) {
+            updated.push(data);
+          } else if (idx < updated.length) {
+            updated[idx] = data;
+          }
+          try {
+            localStorage.setItem("teamSeasonAll", JSON.stringify({ seasons: updated, activeIdx: idx }));
+          } catch (e) {
+            console.warn("localStorage quota exceeded (allSeasons):", e);
+          }
+          return updated;
+        });
+      }
+      if (screen === "admin" && org) {
+        const data = { role: "admin", org, orgTeams };
+        localStorage.setItem("teamSeasonAdmin", JSON.stringify(data));
+      }
+    } catch (e) {
+      console.warn("localStorage persist failed:", e);
     }
   }, [role, team, season, players, entries, org, orgTeams, screen, isDemo]);
 
@@ -6024,24 +6034,30 @@ export default function SportsJournalApp() {
   };
 
   const handleSaveEntry = async (entryData) => {
-    let photoData = null;
-    if (entryData.photo) {
-      photoData = await resizeImage(entryData.photo, 800);
+    try {
+      let photoData = null;
+      if (entryData.photo) {
+        photoData = await resizeImage(entryData.photo, 800);
+      }
+      const { photo, ...rest } = entryData;
+      const newEntry = {
+        ...rest,
+        id: generateId(),
+        entry_date: new Date().toISOString().split("T")[0],
+        season_id: season?.id,
+        photoData,
+        photoPreview: photoData,
+        created_at: new Date().toISOString(),
+      };
+      setEntries((prev) => [newEntry, ...prev]);
+      setShowComposer(false);
+      setShareEntry(newEntry);
+      setShowSharePrompt(true);
+    } catch (e) {
+      console.error("Entry save failed:", e);
+      setShowComposer(false);
+      return;
     }
-    const { photo, ...rest } = entryData;
-    const newEntry = {
-      ...rest,
-      id: generateId(),
-      entry_date: new Date().toISOString().split("T")[0],
-      season_id: season?.id,
-      photoData,
-      photoPreview: photoData,
-      created_at: new Date().toISOString(),
-    };
-    setEntries((prev) => [newEntry, ...prev]);
-    setShowComposer(false);
-    setShareEntry(newEntry);
-    setShowSharePrompt(true);
 
     // Sync to cloud (fire and forget)
     if (!DEMO && user && season?.id) {
