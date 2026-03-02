@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core';
 import { put } from '@vercel/blob';
+import { waitUntil } from '@vercel/functions';
 import { createPrintOrder } from './lib/lulu.js';
 
 export const config = {
@@ -108,16 +109,16 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: err.message });
   }
 
-  // Acknowledge receipt immediately
-  res.status(200).json({ received: true });
-
+  // Acknowledge receipt immediately, but keep the function alive for fulfillment
   if (event.type === 'checkout.session.completed') {
-    try {
-      await fulfillOrder(event.data.object);
-    } catch (err) {
-      console.error('Fulfillment error:', err);
-    }
+    waitUntil(
+      fulfillOrder(event.data.object).catch((err) => {
+        console.error('Fulfillment error:', err);
+      })
+    );
   }
+
+  return res.status(200).json({ received: true });
 }
 
 async function fulfillOrder(session) {
