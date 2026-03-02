@@ -133,9 +133,6 @@ create policy "Org members can read players" on public.players for select using 
 create policy "Org admins can insert players" on public.players for insert with check (
   exists (select 1 from public.teams t where t.id = team_id and public.is_org_admin(t.org_id))
 );
-create policy "Connected parents can read their player" on public.players for select using (
-  exists (select 1 from public.player_connections pc where pc.player_id = id and pc.user_id = auth.uid())
-);
 
 create table public.player_connections (
   id uuid primary key default gen_random_uuid(),
@@ -160,6 +157,11 @@ create policy "Org admins can insert connections" on public.player_connections f
 );
 create policy "Connected users can read own connection" on public.player_connections for select using (auth.uid() = user_id);
 
+-- Now that player_connections exists, add the policy on players that references it
+create policy "Connected parents can read their player" on public.players for select using (
+  exists (select 1 from public.player_connections pc where pc.player_id = id and pc.user_id = auth.uid())
+);
+
 create table public.seasons (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null,
@@ -178,7 +180,7 @@ create table public.entries (
   user_id uuid references auth.users(id) on delete cascade not null,
   season_id uuid references public.seasons(id) on delete cascade not null,
   player_id uuid references public.players(id) on delete set null,
-  entry_type text not null default 'game' check (entry_type in ('game', 'practice', 'event', 'sightseeing', 'food')),
+  entry_type text not null default 'game' check (entry_type in ('game', 'practice', 'event', 'sightseeing', 'food', 'tournament', 'moment')),
   entry_date date not null default current_date,
   text text,
   opponent text,

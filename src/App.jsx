@@ -173,18 +173,18 @@ function slugify(text) {
 
 // --- SPORTS ---
 const SPORTS = [
-  { name: "Soccer", emoji: "⚽" },
-  { name: "Basketball", emoji: "🏀" },
-  { name: "Baseball", emoji: "⚾" },
-  { name: "Softball", emoji: "🥎" },
-  { name: "Hockey", emoji: "🏒" },
-  { name: "Lacrosse", emoji: "🥍" },
-  { name: "Football", emoji: "🏈" },
-  { name: "Volleyball", emoji: "🏐" },
-  { name: "Swimming", emoji: "🏊" },
-  { name: "Track & Field", emoji: "🏃" },
-  { name: "Tennis", emoji: "🎾" },
-  { name: "Other", emoji: "🏅" },
+  { name: "Soccer", emoji: "⚽", event: "game", eventDay: "Game Day" },
+  { name: "Basketball", emoji: "🏀", event: "game", eventDay: "Game Day" },
+  { name: "Baseball", emoji: "⚾", event: "game", eventDay: "Game Day" },
+  { name: "Softball", emoji: "🥎", event: "game", eventDay: "Game Day" },
+  { name: "Hockey", emoji: "🏒", event: "game", eventDay: "Game Day" },
+  { name: "Lacrosse", emoji: "🥍", event: "game", eventDay: "Game Day" },
+  { name: "Football", emoji: "🏈", event: "game", eventDay: "Game Day" },
+  { name: "Volleyball", emoji: "🏐", event: "match", eventDay: "Match Day" },
+  { name: "Swimming", emoji: "🏊", event: "meet", eventDay: "Meet Day" },
+  { name: "Track & Field", emoji: "🏃", event: "meet", eventDay: "Meet Day" },
+  { name: "Tennis", emoji: "🎾", event: "match", eventDay: "Match Day" },
+  { name: "Other", emoji: "🏅", event: "game", eventDay: "Game Day" },
 ];
 
 // --- IMAGE RESIZE HELPER ---
@@ -555,7 +555,7 @@ function AppShell({ children, title, titleIcon, subtitle, subtitleIcon, onBack, 
 }
 
 // --- AUTH SCREEN ---
-function AuthScreen({ onAuth, onDemo, onSkipAuth }) {
+function AuthScreen({ onAuth, onDemo, onSkipAuth, onBack }) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -583,7 +583,13 @@ function AuthScreen({ onAuth, onDemo, onSkipAuth }) {
       minHeight: "100vh", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center", padding: 24,
       background: `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 50%, #40916C 100%)`,
+      position: "relative",
     }}>
+      {onBack && <button onClick={onBack} style={{
+        position: "absolute", top: 16, left: 16, background: "rgba(255,255,255,0.15)",
+        border: "none", color: "white", fontFamily: "'DM Sans', sans-serif",
+        fontSize: 14, padding: "8px 16px", cursor: "pointer",
+      }}>{"\u2190 Back"}</button>}
       <div className="slide-up" style={{ textAlign: "center", marginBottom: 40 }}>
         <h1 style={{
           fontFamily: "'Crimson Pro', Georgia, serif", fontSize: 32, fontWeight: 700,
@@ -665,46 +671,663 @@ function AuthScreen({ onAuth, onDemo, onSkipAuth }) {
   );
 }
 
-// --- ONBOARDING: ROLE SELECTION ---
-function OnboardingScreen({ onComplete }) {
-  const options = [
-    { role: "parent", emoji: "📸", title: "My child's season", desc: "Capture your kid's games, practices, and milestones" },
-    { role: "player", emoji: "🏅", title: "My own season", desc: "Document your own games and development" },
-  ];
+// --- VALUE-FIRST ONBOARDING ---
+const ONBOARD_SEASONS = ["This is their first", "2-3 seasons", "4-6 seasons", "7+ seasons"];
+const ONBOARD_MIRROR = {
+  "This is their first": { count: "first", msg: "This is the beginning of the story." },
+  "2-3 seasons": { count: "a few", msg: "How many of those could you describe game by game?" },
+  "4-6 seasons": { count: "several", msg: "How much of that do you actually remember?" },
+  "7+ seasons": { count: "many", msg: "Most of those memories are already gone." },
+};
+const ONBOARD_COLORS = [
+  { key: "forest", hex: "#1B4332" },
+  { key: "navy", hex: "#1B3A5C" },
+  { key: "royal", hex: "#1D4ED8" },
+  { key: "red", hex: "#B91C1C" },
+  { key: "purple", hex: "#5B21B6" },
+  { key: "orange", hex: "#C2410C" },
+];
 
+// Fade-in animation (must be at module level, not inside a component)
+function OnboardFade({ children, delay = 0, style: s = {} }) {
+  const [vis, setVis] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setVis(true), delay);
+    return () => clearTimeout(t);
+  }, [delay]);
   return (
     <div style={{
-      minHeight: "100vh", display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center", padding: 24,
+      opacity: vis ? 1 : 0, transform: vis ? "translateY(0)" : "translateY(16px)",
+      transition: "opacity 0.5s ease, transform 0.5s ease", ...s,
     }}>
-      <div className="slide-up" style={{ textAlign: "center", maxWidth: 400, width: "100%" }}>
-        <h1 style={{ fontFamily: fonts.display, fontSize: 28, fontWeight: 700, color: theme.primary, marginBottom: 8 }}>
-          What are you tracking?
-        </h1>
-        <p style={{ fontSize: 15, color: theme.textMuted, marginBottom: 32 }}>
-          One tap and you're in
-        </p>
+      {children}
+    </div>
+  );
+}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {options.map((o) => (
-            <button key={o.role} onClick={() => onComplete(o.role)}
-              className="card" style={{
-                cursor: "pointer", textAlign: "left",
-                display: "flex", alignItems: "center", gap: 16,
-                border: `2px solid ${theme.border}`,
-                transition: "all 0.2s",
-              }}>
-              <span style={{ fontSize: 32 }}>{o.emoji}</span>
-              <div>
-                <div style={{ fontWeight: 600, fontSize: 16 }}>{o.title}</div>
-                <div style={{ fontSize: 13, color: theme.textMuted, marginTop: 2 }}>{o.desc}</div>
-              </div>
-            </button>
-          ))}
+function OnboardProgressBar({ current, total = 6 }) {
+  return (
+    <div style={{ width: "100%", height: 2, background: "rgba(0,0,0,0.1)", marginBottom: 32 }}>
+      <div style={{
+        height: "100%", background: "#1a1a1a",
+        width: `${((current + 1) / total) * 100}%`,
+        transition: "width 0.4s ease",
+      }} />
+    </div>
+  );
+}
+
+function OnboardShareCard({ data }) {
+  const c = data.teamColor || "#1B4332";
+  return (
+    <div style={{
+      width: 320, overflow: "hidden", background: "#0a0a0a",
+      fontFamily: "'DM Sans', sans-serif",
+      boxShadow: "0 20px 50px rgba(0,0,0,0.35)",
+    }}>
+      {data.photo ? (
+        <div style={{ width: "100%", height: 180, overflow: "hidden", position: "relative" }}>
+          <img src={data.photo} alt="" style={{
+            width: "100%", height: "100%", objectFit: "cover", display: "block",
+          }} />
+          <div style={{
+            position: "absolute", bottom: 0, left: 0, right: 0, height: 60,
+            background: "linear-gradient(transparent, #0a0a0a)",
+          }} />
+        </div>
+      ) : (
+        <div style={{ height: 4, background: `linear-gradient(90deg, ${c}, ${c}88)` }} />
+      )}
+      <div style={{ padding: data.photo ? "12px 24px 20px" : "28px 24px 20px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 18 }}>{data.sportIcon}</span>
+            <span style={{
+              fontSize: 11, fontWeight: 700, letterSpacing: 1.5,
+              textTransform: "uppercase", color: c,
+            }}>
+              {data.teamName || "Team Season"}
+            </span>
+          </div>
+          <span style={{ fontSize: 11, color: "#666" }}>{data.sportEventDay || "Game Day"}</span>
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{
+            fontSize: 28, fontWeight: 800, color: "#fafafa",
+            lineHeight: 1.1, letterSpacing: -0.5,
+          }}>
+            {data.childName}'s Moment
+          </div>
+        </div>
+        <div style={{
+          background: "#141414", padding: "16px 18px",
+          marginBottom: 20, borderLeft: `3px solid ${c}`,
+        }}>
+          <p style={{
+            fontSize: 15, color: "#d4d4d4", lineHeight: 1.55,
+            margin: 0, fontStyle: "italic",
+          }}>
+            "{data.memory}"
+          </p>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+          <div style={{
+            padding: "4px 10px", background: c + "20",
+            fontSize: 11, fontWeight: 600, color: c,
+          }}>
+            Spring 2026
+          </div>
+          <span style={{ fontSize: 11, color: "#555" }}>·</span>
+          <span style={{ fontSize: 11, color: "#555" }}>{data.sport}</span>
+        </div>
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          paddingTop: 14, borderTop: "1px solid #1a1a1a",
+        }}>
+          <span style={{ fontSize: 10, color: "#444", fontWeight: 600, letterSpacing: 0.5 }}>TEAM SEASON</span>
+          <span style={{ fontSize: 10, color: "#444" }}>teamseason.app</span>
         </div>
       </div>
     </div>
   );
+}
+
+function ValueOnboarding({ onComplete, onSignIn }) {
+  const [step, setStep] = useState(0);
+  const [transitioning, setTransitioning] = useState(false);
+  const [data, setData] = useState({
+    sport: "", sportIcon: "", sportEvent: "game", sportEventDay: "Game Day",
+    childName: "", seasonsPlayed: "",
+    teamName: "", teamColor: "#1B4332", memory: "", photo: null,
+  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const memoryRef = useRef(null);
+  const photoRef = useRef(null);
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setData((d) => ({ ...d, photo: ev.target.result }));
+    reader.readAsDataURL(file);
+  };
+
+  const goNext = () => {
+    setTransitioning(true);
+    setTimeout(() => { setStep((s) => s + 1); setTransitioning(false); }, 300);
+  };
+  const goBack = () => {
+    setTransitioning(true);
+    setTimeout(() => { setStep((s) => Math.max(0, s - 1)); setTransitioning(false); }, 300);
+  };
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError("");
+    try {
+      const result = await supabase.auth.signUp(email, password);
+      if (result.error) throw new Error(result.error_description || result.msg || "Signup failed");
+      onComplete(result.user, data);
+    } catch (err) {
+      setAuthError(err.message);
+    }
+    setAuthLoading(false);
+  };
+
+  // Background shifts as you progress: warm cream → cool gray → dark reveal
+  const stepBgs = [
+    "linear-gradient(180deg, #FDFBF7 0%, #F5F0E8 100%)",  // 0: warm cream
+    "linear-gradient(180deg, #FAF8F4 0%, #F0EDE6 100%)",  // 1: still warm
+    "linear-gradient(180deg, #F6F5F2 0%, #ECEAE5 100%)",  // 2: cooling
+    "linear-gradient(180deg, #F2F1EF 0%, #E5E3DF 100%)",  // 3: neutral
+    "linear-gradient(180deg, #EEEDEB 0%, #DDDBD7 100%)",  // 4: mirror — cooler
+    "linear-gradient(180deg, #E8E7E5 0%, #D5D3CF 100%)",  // 5: getting serious
+    "linear-gradient(180deg, #E0DFDD 0%, #CCCAC6 100%)",  // 6: write memory — weighted
+    "#111",                                                 // 7: dark payoff
+  ];
+  const container = {
+    minHeight: "100vh", fontFamily: "'DM Sans', sans-serif",
+    display: "flex", flexDirection: "column",
+    alignItems: "center", justifyContent: "center", padding: "40px 20px",
+    background: stepBgs[step] || "#FAFAF7",
+    transition: "background 0.5s ease",
+  };
+  const card = {
+    width: "100%", maxWidth: 440,
+    opacity: transitioning ? 0 : 1,
+    transform: transitioning ? "translateY(12px)" : "translateY(0)",
+    transition: "opacity 0.3s ease, transform 0.3s ease",
+  };
+  const label = {
+    fontSize: 13, fontWeight: 600, color: "#a3a3a3",
+    textTransform: "uppercase", letterSpacing: 1.2,
+    marginBottom: 12, textAlign: "center",
+  };
+  const heading = {
+    fontSize: 26, fontWeight: 800, color: "#1a1a1a",
+    textAlign: "center", lineHeight: 1.25,
+    marginBottom: 8, letterSpacing: -0.3,
+  };
+  const sub = {
+    fontSize: 15, color: "#737373", textAlign: "center",
+    lineHeight: 1.5, marginBottom: 32,
+  };
+  const solidBtn = (active = true) => ({
+    width: "100%", padding: "16px 24px", border: "none",
+    background: active ? "#1a1a1a" : "#e5e5e5",
+    color: active ? "#fafafa" : "#a3a3a3",
+    fontSize: 15, fontWeight: 700, cursor: active ? "pointer" : "default",
+    transition: "all 0.2s ease", fontFamily: "'DM Sans', sans-serif",
+    letterSpacing: 0.2,
+  });
+  const backArrow = step > 0 ? (
+    <button onClick={goBack} style={{
+      position: "absolute", top: 20, left: 20, background: "none",
+      border: "none", fontSize: 14, color: "#a3a3a3", cursor: "pointer",
+      fontFamily: "'DM Sans', sans-serif", fontWeight: 600,
+    }}>
+      ← Back
+    </button>
+  ) : null;
+
+  const Fade = OnboardFade;
+
+  // STEP 0: Welcome
+  if (step === 0) {
+    return (
+      <div style={container}>
+        <div style={card}>
+          <Fade>
+            <div style={{ textAlign: "center", marginBottom: 32 }}>
+              <div style={{
+                fontFamily: "'Crimson Pro', Georgia, serif",
+                fontSize: 32, fontWeight: 700, color: theme.primary,
+                marginBottom: 6,
+              }}>Team Season</div>
+              <div style={{
+                fontFamily: "'Crimson Pro', Georgia, serif",
+                fontSize: 16, fontStyle: "italic", color: "#999",
+              }}>Long after the scores are forgotten, the moments remain.</div>
+            </div>
+          </Fade>
+          <Fade delay={150}>
+            <h1 style={{ ...heading, fontSize: 28 }}>Let's capture this season</h1>
+          </Fade>
+          <Fade delay={300}>
+            <p style={sub}>
+              Four quick questions. Then we'll show you something worth keeping.
+            </p>
+          </Fade>
+          <Fade delay={500}>
+            <button style={solidBtn()} onClick={goNext}>Let's go →</button>
+          </Fade>
+          <Fade delay={600}>
+            <p style={{ textAlign: "center", fontSize: 12, color: "#b0b0b0", marginTop: 16 }}>
+              Takes about two minutes. No sign-up needed yet.
+            </p>
+          </Fade>
+          <Fade delay={700}>
+            <p style={{ textAlign: "center", marginTop: 24 }}>
+              <span onClick={onSignIn} style={{
+                fontSize: 14, color: theme.primary, fontWeight: 600,
+                cursor: "pointer", textDecoration: "underline",
+              }}>
+                Already have an account? Sign in
+              </span>
+            </p>
+          </Fade>
+        </div>
+      </div>
+    );
+  }
+
+  // STEP 1: Sport
+  if (step === 1) {
+    return (
+      <div style={container}>
+        {backArrow}
+        <div style={card}>
+          <OnboardProgressBar current={0} />
+          <Fade>
+            <p style={label}>First things first</p>
+            <h2 style={heading}>What sport does your kid play?</h2>
+            <p style={sub}>Pick the main one. You can add more later.</p>
+          </Fade>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            {SPORTS.filter(s => s.name !== "Other").map((s, i) => (
+              <Fade key={s.name} delay={100 + i * 50}>
+                <button
+                  onClick={() => {
+                    setData((d) => ({ ...d, sport: s.name, sportIcon: s.emoji, sportEvent: s.event || "game", sportEventDay: s.eventDay || "Game Day" }));
+                    setTimeout(goNext, 200);
+                  }}
+                  style={{
+                    width: "100%", padding: 16, cursor: "pointer",
+                    border: data.sport === s.name ? "2px solid #1a1a1a" : "2px solid #e5e5e5",
+                    background: data.sport === s.name ? "rgba(245,245,244,0.9)" : "rgba(255,255,255,0.85)",
+                    fontSize: 15, fontWeight: 600,
+                    fontFamily: "'DM Sans', sans-serif",
+                    display: "flex", alignItems: "center", gap: 10,
+                    transition: "all 0.15s ease", color: "#1a1a1a",
+                  }}
+                >
+                  <span style={{ fontSize: 22 }}>{s.emoji}</span>
+                  {s.name}
+                </button>
+              </Fade>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // STEP 2: Child's name
+  if (step === 2) {
+    return (
+      <div style={container}>
+        {backArrow}
+        <div style={card}>
+          <OnboardProgressBar current={1} />
+          <Fade>
+            <p style={label}>{data.sportIcon} {data.sport}</p>
+            <h2 style={heading}>What's your kid's name?</h2>
+            <p style={sub}>First name is perfect.</p>
+          </Fade>
+          <Fade delay={200}>
+            <input autoFocus type="text" placeholder="e.g. Freya"
+              value={data.childName}
+              onChange={(e) => setData((d) => ({ ...d, childName: e.target.value }))}
+              onKeyDown={(e) => e.key === "Enter" && data.childName.trim() && goNext()}
+              style={{
+                width: "100%", padding: "18px 20px",
+                border: "2px solid #e5e5e5", fontSize: 18,
+                fontFamily: "'DM Sans', sans-serif", outline: "none",
+                marginBottom: 20, textAlign: "center",
+                fontWeight: 600, color: "#1a1a1a", boxSizing: "border-box",
+              }}
+            />
+            <button style={solidBtn(data.childName.trim().length > 0)}
+              onClick={() => data.childName.trim() && goNext()}>
+              Continue →
+            </button>
+          </Fade>
+        </div>
+      </div>
+    );
+  }
+
+  // STEP 3: Seasons played
+  if (step === 3) {
+    return (
+      <div style={container}>
+        {backArrow}
+        <div style={card}>
+          <OnboardProgressBar current={2} />
+          <Fade>
+            <p style={label}>{data.childName}'s {data.sport.toLowerCase()} journey</p>
+            <h2 style={heading}>How many seasons has {data.childName} played?</h2>
+            <p style={sub}>Roughly. Don't overthink it.</p>
+          </Fade>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {ONBOARD_SEASONS.map((opt, i) => (
+              <Fade key={opt} delay={150 + i * 80}>
+                <button
+                  onClick={() => {
+                    setData((d) => ({ ...d, seasonsPlayed: opt }));
+                    setTimeout(goNext, 250);
+                  }}
+                  style={{
+                    width: "100%", padding: "18px 20px",
+                    border: data.seasonsPlayed === opt ? "2px solid #1a1a1a" : "2px solid #e5e5e5",
+                    background: data.seasonsPlayed === opt ? "rgba(245,245,244,0.9)" : "rgba(255,255,255,0.8)",
+                    fontSize: 15, fontWeight: 600, cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif", textAlign: "left",
+                    transition: "all 0.15s ease", color: "#1a1a1a",
+                  }}
+                >
+                  {opt}
+                </button>
+              </Fade>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // STEP 4: Mirror moment
+  if (step === 4) {
+    const mirror = ONBOARD_MIRROR[data.seasonsPlayed] || ONBOARD_MIRROR["2-3 seasons"];
+    const isFirst = data.seasonsPlayed === "This is their first";
+    return (
+      <div style={container}>
+        {backArrow}
+        <div style={card}>
+          <OnboardProgressBar current={3} />
+          <Fade>
+            <div style={{
+              background: "rgba(255,255,255,0.7)", padding: "36px 28px",
+              textAlign: "center", border: "1px solid rgba(0,0,0,0.08)",
+              marginBottom: 28, backdropFilter: "blur(8px)",
+            }}>
+              <span style={{ fontSize: 40, display: "block", marginBottom: 16 }}>{data.sportIcon}</span>
+              <h2 style={{ ...heading, marginBottom: 12 }}>
+                {isFirst
+                  ? `${data.childName}'s first ${data.sport.toLowerCase()} season`
+                  : `${data.childName} has played ${mirror.count} seasons of ${data.sport.toLowerCase()}`}
+              </h2>
+              <p style={{ fontSize: 17, color: "#525252", lineHeight: 1.5, margin: 0, fontWeight: 500 }}>
+                {isFirst
+                  ? "Every first is worth remembering. Let's make sure you do."
+                  : mirror.msg}
+              </p>
+            </div>
+          </Fade>
+          <Fade delay={600}>
+            <p style={{ textAlign: "center", fontSize: 15, color: "#737373", marginBottom: 24, lineHeight: 1.5 }}>
+              {isFirst ? "Let's start capturing it — right now." : "This season, let's change that."}
+            </p>
+            <button style={solidBtn()} onClick={goNext}>
+              {isFirst ? "Let's do it →" : "Let's start remembering →"}
+            </button>
+          </Fade>
+        </div>
+      </div>
+    );
+  }
+
+  // STEP 5: Team name + color
+  if (step === 5) {
+    return (
+      <div style={container}>
+        {backArrow}
+        <div style={card}>
+          <OnboardProgressBar current={4} />
+          <Fade>
+            <p style={label}>Almost there</p>
+            <h2 style={heading}>What's the team name?</h2>
+            <p style={sub}>This goes on {data.childName}'s share cards.</p>
+          </Fade>
+          <Fade delay={200}>
+            <input autoFocus type="text" placeholder="e.g. Thunder FC"
+              value={data.teamName}
+              onChange={(e) => setData((d) => ({ ...d, teamName: e.target.value }))}
+              onKeyDown={(e) => e.key === "Enter" && data.teamName.trim() && goNext()}
+              style={{
+                width: "100%", padding: "18px 20px",
+                border: "2px solid #e5e5e5", fontSize: 18,
+                fontFamily: "'DM Sans', sans-serif", outline: "none",
+                marginBottom: 20, textAlign: "center",
+                fontWeight: 600, color: "#1a1a1a", boxSizing: "border-box",
+              }}
+            />
+          </Fade>
+          <Fade delay={300}>
+            <p style={{ ...label, marginBottom: 10, marginTop: 4 }}>Pick a team color</p>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 28 }}>
+              {ONBOARD_COLORS.map((c) => (
+                <button key={c.key} onClick={() => setData((d) => ({ ...d, teamColor: c.hex }))}
+                  style={{
+                    width: 40, height: 40, borderRadius: "50%",
+                    background: c.hex, cursor: "pointer",
+                    border: data.teamColor === c.hex ? "3px solid #1a1a1a" : "3px solid transparent",
+                    transition: "all 0.15s ease",
+                    outline: data.teamColor === c.hex ? "2px solid #fff" : "none",
+                    outlineOffset: -5,
+                  }}
+                />
+              ))}
+            </div>
+          </Fade>
+          <Fade delay={400}>
+            <button style={solidBtn(data.teamName.trim().length > 0)}
+              onClick={() => data.teamName.trim() && goNext()}>
+              Continue →
+            </button>
+          </Fade>
+        </div>
+      </div>
+    );
+  }
+
+  // STEP 6: Write a memory
+  if (step === 6) {
+    return (
+      <div style={container}>
+        {backArrow}
+        <div style={card}>
+          <OnboardProgressBar current={5} />
+          <Fade>
+            <p style={label}>Try it right now</p>
+            <h2 style={heading}>Think about {data.childName}'s last {data.sportEvent}</h2>
+            <p style={sub}>
+              What's one thing you remember? A moment, something they said in the car after.
+            </p>
+          </Fade>
+          <Fade delay={200}>
+            <textarea ref={memoryRef} autoFocus
+              placeholder={data.sportEvent === "meet"
+                ? `"Dropped two seconds off her best time and didn't even realize..."`
+                : data.sportEvent === "match"
+                ? `"That second set was all heart..."`
+                : `"Found the open lane and didn't even hesitate..."`}
+              value={data.memory}
+              onChange={(e) => setData((d) => ({ ...d, memory: e.target.value }))}
+              rows={4}
+              style={{
+                width: "100%", padding: "18px 20px",
+                border: "2px solid #e5e5e5", fontSize: 16,
+                fontFamily: "'DM Sans', sans-serif", outline: "none",
+                marginBottom: 12, resize: "none", lineHeight: 1.5,
+                color: "#1a1a1a", boxSizing: "border-box",
+              }}
+            />
+            <input ref={photoRef} type="file" accept="image/*"
+              onChange={handlePhotoUpload} style={{ display: "none" }} />
+            {data.photo ? (
+              <div style={{
+                marginBottom: 20, position: "relative",
+                border: "2px solid #e5e5e5", overflow: "hidden",
+              }}>
+                <img src={data.photo} alt="" style={{
+                  width: "100%", height: 140, objectFit: "cover", display: "block",
+                }} />
+                <button onClick={() => setData((d) => ({ ...d, photo: null }))}
+                  style={{
+                    position: "absolute", top: 8, right: 8,
+                    background: "rgba(0,0,0,0.6)", color: "#fff",
+                    border: "none", padding: "4px 10px", fontSize: 12,
+                    fontWeight: 600, cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}>
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => photoRef.current?.click()}
+                style={{
+                  width: "100%", padding: "12px 16px", marginBottom: 20,
+                  border: "2px dashed #d4d4d4", background: "transparent",
+                  color: "#a3a3a3", fontSize: 14, fontWeight: 600,
+                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                }}>
+                <span style={{ fontSize: 16 }}>+</span> Add a photo (optional)
+              </button>
+            )}
+            <button style={solidBtn(data.memory.trim().length > 0)}
+              onClick={() => data.memory.trim() && goNext()}>
+              See your share card →
+            </button>
+          </Fade>
+        </div>
+      </div>
+    );
+  }
+
+  // STEP 7: Payoff — share card + signup
+  if (step === 7) {
+    return (
+      <div style={container}>
+        <div style={{ ...card, maxWidth: 480 }}>
+          <Fade>
+            <p style={{
+              textAlign: "center", fontSize: 13, fontWeight: 600, color: "#555",
+              textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8,
+            }}>
+              Here's {data.childName}'s first card
+            </p>
+            <h2 style={{
+              ...heading, color: "#fafafa", marginBottom: 32, fontSize: 22,
+            }}>
+              One entry. Imagine a whole season of these.
+            </h2>
+          </Fade>
+
+          <Fade delay={400}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 36 }}>
+              <OnboardShareCard data={data} />
+            </div>
+          </Fade>
+
+          <Fade delay={900}>
+            <div style={{
+              background: "#1a1a1a", padding: 24,
+              marginBottom: 20, border: "1px solid #262626",
+            }}>
+              <p style={{
+                fontSize: 15, color: "#d4d4d4", lineHeight: 1.6,
+                margin: "0 0 20px 0", textAlign: "center",
+              }}>
+                Create a free account to keep this card, share it, and start building {data.childName}'s season journal.
+              </p>
+
+              <form onSubmit={handleSignUp}>
+                {authError && (
+                  <div style={{
+                    background: "rgba(185,28,28,0.15)", color: "#fca5a5",
+                    padding: "10px 14px", fontSize: 13, marginBottom: 16,
+                    borderLeft: "3px solid #B91C1C",
+                  }}>{authError}</div>
+                )}
+                <input type="email" placeholder="Email" value={email}
+                  onChange={(e) => setEmail(e.target.value)} required
+                  style={{
+                    width: "100%", padding: "14px 16px", border: "1px solid #333",
+                    background: "#0a0a0a", color: "#fafafa", fontSize: 15,
+                    fontFamily: "'DM Sans', sans-serif", outline: "none",
+                    marginBottom: 10, boxSizing: "border-box",
+                  }}
+                />
+                <input type="password" placeholder="Password (6+ characters)" value={password}
+                  onChange={(e) => setPassword(e.target.value)} required minLength={6}
+                  style={{
+                    width: "100%", padding: "14px 16px", border: "1px solid #333",
+                    background: "#0a0a0a", color: "#fafafa", fontSize: 15,
+                    fontFamily: "'DM Sans', sans-serif", outline: "none",
+                    marginBottom: 16, boxSizing: "border-box",
+                  }}
+                />
+                <button type="submit" disabled={authLoading}
+                  style={{
+                    width: "100%", padding: "16px 24px", border: "none",
+                    background: data.teamColor || "#1B4332",
+                    color: "#fafafa", fontSize: 16, fontWeight: 700,
+                    cursor: authLoading ? "default" : "pointer",
+                    fontFamily: "'DM Sans', sans-serif",
+                    opacity: authLoading ? 0.7 : 1,
+                  }}>
+                  {authLoading ? "Creating account..." : "Create my free account →"}
+                </button>
+              </form>
+
+              <p style={{ fontSize: 12, color: "#555", marginTop: 12, textAlign: "center" }}>
+                Free forever. No credit card. Book is $39 + shipping.
+              </p>
+            </div>
+          </Fade>
+
+          <Fade delay={1200}>
+            <p style={{ textAlign: "center" }}>
+              <span onClick={onSignIn} style={{
+                fontSize: 13, color: "#555", cursor: "pointer",
+                textDecoration: "underline",
+              }}>
+                Already have an account? Sign in
+              </span>
+            </p>
+          </Fade>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
 
 // --- TEAM SETUP ---
@@ -3512,7 +4135,7 @@ function LandingPage({ onDemo, onStart }) {
               fontWeight: 600,
               marginTop: 16,
             }}>
-              $39 per book
+              $39 per book + shipping
             </p>
             <p style={{
               fontFamily: fonts.body,
@@ -3613,7 +4236,7 @@ function LandingPage({ onDemo, onStart }) {
           maxWidth: 460,
           margin: "0 auto 32px",
         }}>
-          Logging, sharing, and building your journal costs nothing. When you're ready to turn it into a book, it's $39 per copy - shipped to your door.
+          Logging, sharing, and building your journal costs nothing. When you're ready to turn it into a book, it's $39 per copy plus shipping.
         </p>
         <div style={{
           display: "flex",
@@ -3686,7 +4309,7 @@ function LandingPage({ onDemo, onStart }) {
               marginBottom: 16,
             }}>$39</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {["7.75\" square hardcover", "Auto-designed from your journal", "Every entry, photo, and score", "Shipped to your door", "Order anytime"].map((f) => (
+              {["7.75\" square hardcover", "Auto-designed from your journal", "Every entry, photo, and score", "Shipping calculated at checkout", "Order anytime"].map((f) => (
                 <span key={f} style={{
                   fontFamily: fonts.body,
                   fontSize: 13,
@@ -4704,7 +5327,7 @@ function JoinScreen({ token, onComplete, onBack }) {
 export default function SportsJournalApp() {
   const [authed, setAuthed] = useState(false);
   const [user, setUser] = useState(null);
-  const [screen, setScreen] = useState("loading"); // loading, landing, auth, onboarding, setup, home
+  const [screen, setScreen] = useState("loading"); // loading, onboard, auth, setup, home
   const [role, setRole] = useState(null);
   const [isDemo, setIsDemo] = useState(false);
 
@@ -4832,7 +5455,7 @@ export default function SportsJournalApp() {
     }
 
     if (DEMO) {
-      setScreen("auth");
+      setScreen("onboard");
       return;
     }
 
@@ -4869,7 +5492,7 @@ export default function SportsJournalApp() {
         setScreen("setup");
       })();
     } else {
-      setScreen("auth");
+      setScreen("onboard");
     }
   }, []);
 
@@ -5053,6 +5676,93 @@ export default function SportsJournalApp() {
   const handleOnboarding = (selectedRole) => {
     setRole(selectedRole);
     setScreen(selectedRole === "admin" ? "org-setup" : "setup");
+  };
+
+  // Value-first onboarding: user signed up after writing their first memory
+  const handleOnboardComplete = async (authUser, onboardData) => {
+    setUser(authUser);
+    setAuthed(true);
+    setRole("parent");
+
+    const teamId = generateId();
+    const seasonId = generateId();
+    const playerId = generateId();
+    const entryId = generateId();
+
+    const sportObj = SPORTS.find((s) => s.name === onboardData.sport);
+    const teamData = {
+      id: teamId,
+      name: onboardData.teamName || "My Team",
+      sport: onboardData.sport || "Sports",
+      emoji: sportObj?.emoji || onboardData.sportIcon || "🏅",
+      color: onboardData.teamColor || "#1B4332",
+      logo: null,
+      orgType: "club",
+    };
+    const seasonData = {
+      id: seasonId,
+      name: `${onboardData.sport || "Sports"} ${new Date().getFullYear()}`,
+    };
+    const playerData = {
+      id: playerId,
+      name: onboardData.childName || "Player",
+      is_my_child: true,
+    };
+    const entryData = {
+      id: entryId,
+      entry_type: "game",
+      text: onboardData.memory || "",
+      entry_date: new Date().toISOString().split("T")[0],
+      season_id: seasonId,
+      created_at: new Date().toISOString(),
+      photoData: null,
+      photoPreview: null,
+    };
+
+    setTeam(teamData);
+    setSeason(seasonData);
+    setPlayers([playerData]);
+    setEntries(onboardData.memory ? [entryData] : []);
+    setScreen("home");
+
+    // Add to allSeasons
+    const newSeasonData = {
+      role: "parent", team: teamData, season: seasonData,
+      players: [playerData], entries: onboardData.memory ? [entryData] : [],
+    };
+    setAllSeasons([newSeasonData]);
+    setActiveSeasonIdx(0);
+    activeIdxRef.current = 0;
+
+    // Sync to cloud
+    if (!DEMO && authUser) {
+      (async () => {
+        try {
+          await supabase.from("teams").insert({
+            id: teamId, user_id: authUser.id,
+            name: teamData.name, sport: teamData.sport,
+            emoji: teamData.emoji, color: teamData.color,
+          });
+          await supabase.from("seasons").insert({
+            id: seasonId, user_id: authUser.id,
+            team_id: teamId, name: seasonData.name,
+          });
+          await supabase.from("players").insert({
+            id: playerId, team_id: teamId,
+            name: playerData.name,
+          });
+          if (onboardData.memory) {
+            await supabase.from("entries").insert({
+              id: entryId, user_id: authUser.id, season_id: seasonId,
+              entry_date: entryData.entry_date, entry_type: "game",
+              text: entryData.text,
+            });
+          }
+        } catch (e) {
+          console.warn("Cloud sync (onboard) failed:", e);
+        }
+      })();
+    }
   };
 
   // Join flow: parent authenticated from JoinScreen
@@ -5364,7 +6074,7 @@ export default function SportsJournalApp() {
     setAuthed(false);
     setUser(null);
     setIsDemo(false);
-    setScreen("landing");
+    setScreen("auth");
     setTeam(null);
     setSeason(null);
     setPlayers([]);
@@ -5401,16 +6111,21 @@ export default function SportsJournalApp() {
           <span style={{ fontSize: 14 }}>Loading your journal...</span>
         </div>
       )}
-      {screen === "landing" && <LandingPage onDemo={handleDemo} onStart={() => setScreen("auth")} />}
-      {screen === "auth" && <AuthScreen onAuth={handleAuth} onDemo={handleDemo} onSkipAuth={() => { setRole("parent"); setScreen("setup"); }} />}
+      {screen === "landing" && <LandingPage onDemo={handleDemo} onStart={() => setScreen("onboard")} />}
+      {screen === "onboard" && (
+        <ValueOnboarding
+          onComplete={handleOnboardComplete}
+          onSignIn={() => setScreen("auth")}
+        />
+      )}
+      {screen === "auth" && <AuthScreen onAuth={handleAuth} onDemo={handleDemo} onSkipAuth={() => { setRole("parent"); setScreen("setup"); }} onBack={() => setScreen("onboard")} />}
       {screen === "join" && joinToken && (
         <JoinScreen
           token={joinToken}
           onComplete={handleJoinAuth}
-          onBack={() => { setJoinToken(null); setScreen("landing"); }}
+          onBack={() => { setJoinToken(null); setScreen("onboard"); }}
         />
       )}
-      {screen === "onboarding" && <OnboardingScreen onComplete={handleOnboarding} />}
       {screen === "setup" && <TeamSetupScreen role={role} onComplete={handleSetup} />}
       {screen === "org-setup" && <OrgSetupScreen onComplete={handleOrgSetup} />}
       {screen === "admin" && org && (
