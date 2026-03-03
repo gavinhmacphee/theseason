@@ -1,55 +1,62 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
-import './index.css'
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
-    super(props)
-    this.state = { hasError: false, error: null }
+    super(props);
+    this.state = { hasError: false, error: null };
   }
 
   static getDerivedStateFromError(error) {
-    return { hasError: true, error }
+    return { hasError: true, error };
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary caught:', error, errorInfo)
+    console.error('ErrorBoundary caught:', error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-surface font-[family-name:var(--font-body)]">
-          <h1 className="font-[family-name:var(--font-display)] text-[28px] font-bold text-brand mb-3">
+        <div style={{
+          minHeight: '100vh', display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', padding: 32,
+          background: '#FAFAF7', fontFamily: "'DM Sans', sans-serif",
+        }}>
+          <h1 style={{
+            fontFamily: "'Crimson Pro', Georgia, serif", fontSize: 28,
+            fontWeight: 700, color: '#1B4332', marginBottom: 12,
+          }}>
             Something went wrong
           </h1>
-          <p className="text-[15px] text-muted max-w-[340px] text-center leading-relaxed mb-2">
+          <p style={{
+            fontSize: 15, color: '#666', maxWidth: 340,
+            textAlign: 'center', lineHeight: 1.5, marginBottom: 8,
+          }}>
             The app hit an unexpected error. Your data is safe — tap below to reload.
           </p>
-          <p className="text-xs text-light max-w-[340px] text-center mb-6 break-words">
+          <p style={{
+            fontSize: 12, color: '#999', maxWidth: 340,
+            textAlign: 'center', marginBottom: 24, wordBreak: 'break-word',
+          }}>
             {this.state.error?.message || 'Unknown error'}
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="text-base font-semibold text-white bg-brand border-none px-9 py-3.5 cursor-pointer"
+            style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: 16,
+              fontWeight: 600, color: 'white', background: '#1B4332',
+              border: 'none', padding: '14px 36px', cursor: 'pointer',
+            }}
           >
             Reload App
           </button>
         </div>
-      )
+      );
     }
-    return this.props.children
+    return this.props.children;
   }
-}
-
-// Register service worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch((err) => {
-      console.warn('SW registration failed:', err)
-    })
-  })
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -57,5 +64,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ErrorBoundary>
       <App />
     </ErrorBoundary>
-  </React.StrictMode>
+  </React.StrictMode>,
 )
