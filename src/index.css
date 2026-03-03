@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand colors */
+  --color-brand: #1B4332;
+  --color-brand-light: #2D6A4F;
+  --color-accent: #E07A5F;
+  --color-accent-light: #F2CC8F;
+
+  /* Surfaces */
+  --color-surface: #FAFAF7;
+  --color-card: #FFFFFF;
+  --color-border: #E8E8E4;
+  --color-border-light: #F0F0EC;
+
+  /* Text */
+  --color-ink: #1A1A1A;
+  --color-muted: #6B7280;
+  --color-light: #9CA3AF;
+
+  /* Entry types */
+  --color-win: #2D6A4F;
+  --color-loss: #C1121F;
+  --color-draw: #6B7280;
+  --color-practice: #457B9D;
+  --color-tournament: #E07A5F;
+  --color-moment: #9B5DE5;
+
+  /* Fonts */
+  --font-display: "Crimson Pro", Georgia, serif;
+  --font-body: "DM Sans", -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* Base */
+body {
+  font-family: var(--font-body);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+input, textarea, select, button {
+  font-family: var(--font-body);
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-in { animation: fade-in 0.4s ease-out both; }
+.animate-slide-up { animation: slide-up 0.5s ease-out both; }
