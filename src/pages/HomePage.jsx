@@ -142,6 +142,7 @@ export default function HomePage() {
     <div style={{ '--brand': brandColor }}>
       <AppShell
         title={team?.name || 'Team Season'}
+        emoji={team?.emoji}
         subtitle={seasonPicker}
         actions={
           <div className="relative" ref={menuRef}>
@@ -169,10 +170,10 @@ export default function HomePage() {
       >
         <EntryFeed />
 
-        {/* FAB */}
+        {/* FAB — sticky so it stays within the 480px content area */}
         <button
           onClick={() => setShowComposer(true)}
-          className="fixed bottom-6 right-6 w-14 h-14 text-white text-2xl font-bold shadow-lg cursor-pointer border-none z-30 flex items-center justify-center hover:opacity-90 transition-opacity"
+          className="sticky bottom-6 float-right w-14 h-14 text-white text-2xl font-bold shadow-lg cursor-pointer border-none z-30 flex items-center justify-center hover:opacity-90 transition-opacity"
           style={{ background: brandColor }}
         >
           +
