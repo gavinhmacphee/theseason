@@ -82,7 +82,7 @@ export default function HomePage() {
   }
 
   const brandColor = team?.color || '#1B4332'
-  const childName = players.find((p) => p.is_my_child)?.name || team?.name || 'Team Season'
+  const childName = players.find((p) => p.is_my_child)?.name || players[0]?.name || 'Team Season'
 
   const seasonPicker = (
     <div className="relative flex items-center gap-1.5" ref={seasonRef}>
