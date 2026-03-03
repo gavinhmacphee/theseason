@@ -198,27 +198,22 @@ function base64ToBlob(dataUrl) {
 }
 
 // --- IMAGE RESIZE HELPER ---
+// Uses createImageBitmap for reliable EXIF orientation handling
 function resizeImage(file, maxSize) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let w = img.width, h = img.height;
-        if (w > h) {
-          if (w > maxSize) { h = h * maxSize / w; w = maxSize; }
-        } else {
-          if (h > maxSize) { w = w * maxSize / h; h = maxSize; }
-        }
-        canvas.width = w;
-        canvas.height = h;
-        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL("image/jpeg", 0.85));
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+  return new Promise(async (resolve) => {
+    const bitmap = await createImageBitmap(file);
+    const canvas = document.createElement("canvas");
+    let w = bitmap.width, h = bitmap.height;
+    if (w > h) {
+      if (w > maxSize) { h = h * maxSize / w; w = maxSize; }
+    } else {
+      if (h > maxSize) { w = w * maxSize / h; h = maxSize; }
+    }
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, w, h);
+    bitmap.close();
+    resolve(canvas.toDataURL("image/jpeg", 0.85));
   });
 }
 
@@ -817,12 +812,11 @@ function ValueOnboarding({ onComplete, onSignIn }) {
   const memoryRef = useRef(null);
   const photoRef = useRef(null);
 
-  const handlePhotoUpload = (e) => {
+  const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setData((d) => ({ ...d, photo: ev.target.result }));
-    reader.readAsDataURL(file);
+    const dataUrl = await resizeImage(file, 800);
+    setData((d) => ({ ...d, photo: dataUrl }));
   };
 
   const goNext = () => {
@@ -5412,24 +5406,32 @@ export default function SportsJournalApp() {
     // const adminSaved = localStorage.getItem("teamSeasonAdmin");
     // if (adminSaved) { ... }
 
+    // Strip base64 photoData from entries that have a cloud URL (saves localStorage space)
+    const cleanEntryPhotos = (entries) => (entries || []).map((e) => {
+      if (e.photo_url && e.photoData) {
+        const { photoData, ...rest } = e;
+        return { ...rest, photoPreview: e.photo_url };
+      }
+      return { ...e, photoPreview: e.photoData || e.photo_url || null };
+    });
+
     // Restore multi-season data
     const allSaved = localStorage.getItem("teamSeasonAll");
     if (allSaved) {
       try {
         const { seasons, activeIdx } = JSON.parse(allSaved);
         if (seasons && seasons.length > 0) {
-          setAllSeasons(seasons);
-          const idx = Math.min(activeIdx || 0, seasons.length - 1);
+          // Clean photo data from all seasons on load
+          const cleanedSeasons = seasons.map((s) => ({ ...s, entries: cleanEntryPhotos(s.entries) }));
+          setAllSeasons(cleanedSeasons);
+          const idx = Math.min(activeIdx || 0, cleanedSeasons.length - 1);
           setActiveSeasonIdx(idx);
-          const data = seasons[idx];
+          const data = cleanedSeasons[idx];
           setRole(data.role);
           setTeam(data.team);
           setSeason(data.season);
           setPlayers(data.players);
-          setEntries(data.entries.map((e) => ({
-            ...e,
-            photoPreview: e.photoData || e.photo_url || null,
-          })));
+          setEntries(data.entries);
           setScreen("home");
           if (!DEMO && supabase.auth.restore()) {
             setUser(supabase.auth.user);
@@ -5449,12 +5451,10 @@ export default function SportsJournalApp() {
         setTeam(data.team);
         setSeason(data.season);
         setPlayers(data.players);
-        setEntries(data.entries.map((e) => ({
-          ...e,
-          photoPreview: e.photoData || e.photo_url || null,
-        })));
-        // Migrate to allSeasons
-        setAllSeasons([data]);
+        const cleanedEntries = cleanEntryPhotos(data.entries);
+        setEntries(cleanedEntries);
+        // Migrate to allSeasons with cleaned entries
+        setAllSeasons([{ ...data, entries: cleanedEntries }]);
         setActiveSeasonIdx(0);
         setScreen("home");
         if (!DEMO && supabase.auth.restore()) {
@@ -5779,7 +5779,7 @@ export default function SportsJournalApp() {
           });
           await supabase.from("players").insert({
             id: playerId, team_id: teamId,
-            name: playerData.name,
+            name: playerData.name, is_my_child: true,
           });
           if (onboardData.memory) {
             await supabase.from("entries").insert({
@@ -6053,13 +6053,14 @@ export default function SportsJournalApp() {
   };
 
   const handleSaveEntry = async (entryData) => {
+    let newEntry;
     try {
       let photoData = null;
       if (entryData.photo) {
         photoData = await resizeImage(entryData.photo, 800);
       }
       const { photo, ...rest } = entryData;
-      const newEntry = {
+      newEntry = {
         ...rest,
         id: generateId(),
         entry_date: new Date().toISOString().split("T")[0],
@@ -6111,6 +6112,12 @@ export default function SportsJournalApp() {
             consent_shared: newEntry.consent_shared || false,
             photo_url: photoPath,
           });
+          // Replace base64 photoData with cloud URL to free localStorage space
+          if (photoPath) {
+            setEntries((prev) => prev.map((e) =>
+              e.id === newEntry.id ? { ...e, photo_url: photoPath, photoPreview: photoPath, photoData: null } : e
+            ));
+          }
         } catch (e) {
           console.warn("Cloud sync (entry) failed:", e);
         }
