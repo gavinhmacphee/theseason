@@ -10,7 +10,7 @@ import EntryComposer from '../components/journal/EntryComposer'
 
 export default function HomePage() {
   const { signOut } = useAuth()
-  const { team, players } = useTeam()
+  const { team } = useTeam()
   const { seasons, activeSeason, switchSeason, createSeason } = useSeasons()
   const { entries } = useEntries()
   const { showToast } = useToast()
@@ -82,12 +82,9 @@ export default function HomePage() {
   }
 
   const brandColor = team?.color || '#1B4332'
-  const childName = players.find((p) => p.is_my_child)?.name || players[0]?.name || 'Team Season'
 
   const seasonPicker = (
-    <div className="relative flex items-center gap-1.5" ref={seasonRef}>
-      <span className="text-[13px] text-muted">{team?.name}</span>
-      <span className="text-[13px] text-light">/</span>
+    <div className="relative" ref={seasonRef}>
       <button
         onClick={() => setShowSeasonPicker(!showSeasonPicker)}
         className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0 text-[13px] text-muted hover:text-ink transition-colors"
@@ -144,8 +141,7 @@ export default function HomePage() {
   return (
     <div style={{ '--brand': brandColor }}>
       <AppShell
-        title={childName}
-        emoji={team?.emoji}
+        title={team?.name || 'Team Season'}
         subtitle={seasonPicker}
         actions={
           <div className="relative" ref={menuRef}>
@@ -173,10 +169,10 @@ export default function HomePage() {
       >
         <EntryFeed />
 
-        {/* FAB — sticky so it stays within the 480px content area */}
+        {/* FAB */}
         <button
           onClick={() => setShowComposer(true)}
-          className="sticky bottom-6 float-right w-14 h-14 text-white text-2xl font-bold shadow-lg cursor-pointer border-none z-30 flex items-center justify-center hover:opacity-90 transition-opacity"
+          className="sticky bottom-6 ml-auto w-14 h-14 text-white text-2xl font-bold shadow-lg cursor-pointer border-none z-30 flex items-center justify-center hover:opacity-90 transition-opacity"
           style={{ background: brandColor }}
         >
           +
