@@ -99,7 +99,7 @@ export default function TeamSetupScreen() {
         </div>
 
         <h2 className="font-[family-name:var(--font-display)] text-[26px] font-extrabold text-ink leading-tight mb-8">
-          Set up your team
+          Set up your child
         </h2>
 
         <Input
