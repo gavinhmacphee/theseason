@@ -3,11 +3,13 @@ import { ENTRY_TYPE_LABELS, ENTRY_TYPE_COLORS } from '../../lib/constants'
 import { formatDate } from '../../lib/utils'
 import { useEntries } from '../../hooks/useEntries'
 import { useToast } from '../../hooks/useToast'
+import ShareModal from './ShareModal'
 
 export default function EntryCard({ entry }) {
   const { deleteEntry } = useEntries()
   const { showToast } = useToast()
   const [showMenu, setShowMenu] = useState(false)
+  const [showShare, setShowShare] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
   const typeColor = ENTRY_TYPE_COLORS[entry.entry_type] || 'var(--color-brand)'
@@ -51,6 +53,12 @@ export default function EntryCard({ entry }) {
           </button>
           {showMenu && (
             <div className="absolute right-0 top-full mt-1 bg-card border border-border shadow-lg z-10 min-w-[120px]">
+              <button
+                onClick={() => { setShowShare(true); setShowMenu(false) }}
+                className="w-full text-left px-4 py-2.5 text-[13px] text-muted hover:bg-surface cursor-pointer border-none bg-transparent"
+              >
+                Share
+              </button>
               <button
                 onClick={handleDelete}
                 className="w-full text-left px-4 py-2.5 text-[13px] text-loss hover:bg-surface cursor-pointer border-none bg-transparent"
@@ -101,6 +109,8 @@ export default function EntryCard({ entry }) {
       {entry.venue && (
         <p className="text-[12px] text-light mt-2">{entry.venue}</p>
       )}
+
+      <ShareModal entry={entry} open={showShare} onClose={() => setShowShare(false)} />
     </div>
   )
 }

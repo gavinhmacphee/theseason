@@ -188,7 +188,7 @@ create table public.entries (
   score_home integer,
   score_away integer,
   result text check (result in ('win', 'loss', 'draw', null)),
-  photo_path text,
+  photo_url text,
   consent_shared boolean default false,
   approved boolean default null,
   created_at timestamptz default now() not null,
@@ -324,7 +324,7 @@ begin
   into v_result
   from (
     select e.id, e.entry_date, e.entry_type, e.text, e.opponent, e.venue,
-      e.score_home, e.score_away, e.result, e.photo_path, e.approved, e.created_at,
+      e.score_home, e.score_away, e.result, e.photo_url, e.approved, e.created_at,
       p2.name as player_name, p2.number as player_number,
       t.name as team_name, t.age_group as team_age_group,
       pr.display_name as author_name
