@@ -111,12 +111,16 @@ create table public.teams (
   emoji text default '⚽',
   color text default '#1B4332',
   age_group text,
+  created_by uuid references auth.users(id),
   created_at timestamptz default now() not null
 );
 alter table public.teams enable row level security;
 create policy "Org members can read teams" on public.teams for select using (public.is_org_member(org_id));
+create policy "Team creators can read own teams" on public.teams for select using (auth.uid() = created_by);
 create policy "Org admins can insert teams" on public.teams for insert with check (public.is_org_admin(org_id));
+create policy "Users can create teams" on public.teams for insert with check (auth.uid() = created_by);
 create policy "Org admins can update teams" on public.teams for update using (public.is_org_admin(org_id));
+create policy "Team creators can update own teams" on public.teams for update using (auth.uid() = created_by);
 create policy "Org admins can delete teams" on public.teams for delete using (public.is_org_admin(org_id));
 
 create table public.players (
@@ -124,6 +128,7 @@ create table public.players (
   team_id uuid references public.teams(id) on delete cascade not null,
   name text not null,
   number text,
+  is_my_child boolean default false,
   created_at timestamptz default now() not null
 );
 alter table public.players enable row level security;
@@ -132,6 +137,12 @@ create policy "Org members can read players" on public.players for select using 
 );
 create policy "Org admins can insert players" on public.players for insert with check (
   exists (select 1 from public.teams t where t.id = team_id and public.is_org_admin(t.org_id))
+);
+create policy "Team creators can read players" on public.players for select using (
+  exists (select 1 from public.teams t where t.id = team_id and t.created_by = auth.uid())
+);
+create policy "Team creators can insert players" on public.players for insert with check (
+  exists (select 1 from public.teams t where t.id = team_id and t.created_by = auth.uid())
 );
 
 create table public.player_connections (
