@@ -850,7 +850,7 @@ function ValueOnboarding({ onComplete, onSignIn }) {
 
   // Background shifts as you progress: warm cream → cool gray → dark reveal
   const stepBgs = [
-    "linear-gradient(180deg, #FDFBF7 0%, #F5F0E8 100%)",  // 0: warm cream
+    `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 50%, #40916C 100%)`,  // 0: green (matches landing page)
     "linear-gradient(180deg, #FAF8F4 0%, #F0EDE6 100%)",  // 1: still warm
     "linear-gradient(180deg, #F6F5F2 0%, #ECEAE5 100%)",  // 2: cooling
     "linear-gradient(180deg, #F2F1EF 0%, #E5E3DF 100%)",  // 3: neutral
@@ -906,7 +906,7 @@ function ValueOnboarding({ onComplete, onSignIn }) {
 
   const Fade = OnboardFade;
 
-  // STEP 0: Welcome
+  // STEP 0: Welcome (green — matches landing page hero)
   if (step === 0) {
     return (
       <div style={container}>
@@ -915,35 +915,38 @@ function ValueOnboarding({ onComplete, onSignIn }) {
             <div style={{ textAlign: "center", marginBottom: 32 }}>
               <div style={{
                 fontFamily: "'Crimson Pro', Georgia, serif",
-                fontSize: 32, fontWeight: 700, color: theme.primary,
+                fontSize: 32, fontWeight: 700, color: "white",
                 marginBottom: 6,
               }}>Team Season</div>
               <div style={{
                 fontFamily: "'Crimson Pro', Georgia, serif",
-                fontSize: 16, fontStyle: "italic", color: "#999",
+                fontSize: 16, fontStyle: "italic", color: "rgba(255,255,255,0.6)",
               }}>Long after the scores are forgotten, the moments remain.</div>
             </div>
           </Fade>
           <Fade delay={150}>
-            <h1 style={{ ...heading, fontSize: 28 }}>Let's capture this season</h1>
+            <h1 style={{ ...heading, fontSize: 28, color: "white" }}>Let's capture this season</h1>
           </Fade>
           <Fade delay={300}>
-            <p style={sub}>
+            <p style={{ ...sub, color: "rgba(255,255,255,0.7)" }}>
               Four quick questions. Then we'll show you something worth keeping.
             </p>
           </Fade>
           <Fade delay={500}>
-            <button style={solidBtn()} onClick={goNext}>Let's go →</button>
+            <button style={{
+              ...solidBtn(),
+              background: "white", color: theme.primary,
+            }} onClick={goNext}>Let's go →</button>
           </Fade>
           <Fade delay={600}>
-            <p style={{ textAlign: "center", fontSize: 12, color: "#b0b0b0", marginTop: 16 }}>
+            <p style={{ textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.45)", marginTop: 16 }}>
               Takes about two minutes. No sign-up needed yet.
             </p>
           </Fade>
           <Fade delay={700}>
             <p style={{ textAlign: "center", marginTop: 24 }}>
               <span onClick={onSignIn} style={{
-                fontSize: 14, color: theme.primary, fontWeight: 600,
+                fontSize: 14, color: "rgba(255,255,255,0.8)", fontWeight: 600,
                 cursor: "pointer", textDecoration: "underline",
               }}>
                 Already have an account? Sign in
@@ -6153,8 +6156,9 @@ export default function SportsJournalApp() {
       {screen === "loading" && (
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "center",
-          minHeight: "100dvh", fontFamily: fonts.body, color: theme.textLight,
+          minHeight: "100dvh", fontFamily: fonts.body, color: "rgba(255,255,255,0.7)",
           flexDirection: "column", gap: 12,
+          background: `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 50%, #40916C 100%)`,
         }}>
           <div style={{ fontSize: 32 }}>🏆</div>
           <span style={{ fontSize: 14 }}>Loading your journal...</span>
