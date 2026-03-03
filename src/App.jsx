@@ -187,6 +187,16 @@ const SPORTS = [
   { name: "Other", emoji: "🏅", event: "game", eventDay: "Game Day" },
 ];
 
+// --- BASE64 TO BLOB HELPER ---
+function base64ToBlob(dataUrl) {
+  const [header, data] = dataUrl.split(",");
+  const mime = header.match(/:(.*?);/)[1];
+  const bytes = atob(data);
+  const arr = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
 // --- IMAGE RESIZE HELPER ---
 function resizeImage(file, maxSize) {
   return new Promise((resolve) => {
@@ -2279,7 +2289,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
 
               {photo && (
                 <img src={photo} alt="" style={{
-                  width: "100%", maxHeight: 280, objectFit: "cover", objectPosition: "top",
+                  width: "100%", maxHeight: 280, objectFit: "contain", objectPosition: "top",
                   borderRadius: 3, marginBottom: 10, display: "block",
                 }} />
               )}
@@ -5415,7 +5425,7 @@ export default function SportsJournalApp() {
           setPlayers(data.players);
           setEntries(data.entries.map((e) => ({
             ...e,
-            photoPreview: e.photoData || null,
+            photoPreview: e.photoData || e.photo_path || null,
           })));
           setScreen("home");
           if (!DEMO && supabase.auth.restore()) {
@@ -5438,7 +5448,7 @@ export default function SportsJournalApp() {
         setPlayers(data.players);
         setEntries(data.entries.map((e) => ({
           ...e,
-          photoPreview: e.photoData || null,
+          photoPreview: e.photoData || e.photo_path || null,
         })));
         // Migrate to allSeasons
         setAllSeasons([data]);
@@ -5479,7 +5489,7 @@ export default function SportsJournalApp() {
               setTeam({ id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club" });
               setSeason({ id: cloudSeason.id, name: cloudSeason.name, startDate: cloudSeason.start_date, endDate: cloudSeason.end_date });
               setPlayers((cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child })));
-              setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: null })));
+              setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: e.photo_path || null })));
               setScreen("home");
               return;
             }
@@ -5643,7 +5653,7 @@ export default function SportsJournalApp() {
           setTeam({ id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club", orgId: cloudTeam.org_id || null });
           setSeason({ id: cloudSeason.id, name: cloudSeason.name, startDate: cloudSeason.start_date, endDate: cloudSeason.end_date });
           setPlayers((cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child })));
-          setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: null })));
+          setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: e.photo_path || null })));
           setScreen("home");
           return;
         }
@@ -5661,7 +5671,7 @@ export default function SportsJournalApp() {
           setTeam({ id: jt.id, name: jt.name, sport: jt.sport, emoji: jt.emoji, color: jt.color || "#1B4332", logo: null, orgType: "club", orgId: jt.org_id || null });
           setSeason({ id: js.id, name: js.name, startDate: js.start_date, endDate: js.end_date });
           setPlayers((cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child })));
-          setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: null })));
+          setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: e.photo_path || null })));
           setScreen("home");
           return;
         }
@@ -5854,7 +5864,7 @@ export default function SportsJournalApp() {
         setTeam(s.team);
         setSeason(s.season);
         setPlayers(s.players);
-        setEntries((s.entries || []).map((e) => ({ ...e, photoPreview: e.photoData || null })));
+        setEntries((s.entries || []).map((e) => ({ ...e, photoPreview: e.photoData || e.photo_path || null })));
       }
       return updated;
     });
@@ -5884,7 +5894,7 @@ export default function SportsJournalApp() {
         setTeam(target.team);
         setSeason(target.season);
         setPlayers(target.players);
-        setEntries((target.entries || []).map((e) => ({ ...e, photoPreview: e.photoData || null })));
+        setEntries((target.entries || []).map((e) => ({ ...e, photoPreview: e.photoData || e.photo_path || null })));
       }
       activeIdxRef.current = newIdx;
       setActiveSeasonIdx(newIdx);
@@ -6070,6 +6080,22 @@ export default function SportsJournalApp() {
     if (!DEMO && user && season?.id) {
       (async () => {
         try {
+          let photoPath = null;
+          if (newEntry.photoData) {
+            try {
+              const blob = base64ToBlob(newEntry.photoData);
+              const filePath = `${user.id}/${newEntry.id}.jpg`;
+              const { error: uploadError } = await supabase.storage.from("entry-photos").upload(filePath, blob);
+              if (!uploadError) {
+                const { data: { publicUrl } } = supabase.storage.from("entry-photos").getPublicUrl(filePath);
+                photoPath = publicUrl;
+              } else {
+                console.warn("Photo upload error:", uploadError);
+              }
+            } catch (uploadErr) {
+              console.warn("Photo upload failed:", uploadErr);
+            }
+          }
           await supabase.from("entries").insert({
             id: newEntry.id, user_id: user.id, season_id: season.id,
             entry_date: newEntry.entry_date,
@@ -6081,6 +6107,7 @@ export default function SportsJournalApp() {
             score_away: newEntry.score_away != null ? newEntry.score_away : null,
             result: newEntry.result || null,
             consent_shared: newEntry.consent_shared || false,
+            photo_path: photoPath,
           });
         } catch (e) {
           console.warn("Cloud sync (entry) failed:", e);
