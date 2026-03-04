@@ -5478,11 +5478,12 @@ export default function SportsJournalApp() {
 
     // Strip base64 photoData from entries that have a cloud URL (saves localStorage space)
     const cleanEntryPhotos = (entries) => (entries || []).map((e) => {
-      if (e.photo_url && e.photoData) {
+      const cloudUrl = e.photo_url || e.photo_path;
+      if (cloudUrl && e.photoData) {
         const { photoData, ...rest } = e;
-        return { ...rest, photoPreview: e.photo_url };
+        return { ...rest, photoPreview: cloudUrl };
       }
-      return { ...e, photoPreview: e.photoData || e.photo_url || null };
+      return { ...e, photoPreview: e.photoData || cloudUrl || null };
     });
 
     // Restore multi-season data
@@ -5562,7 +5563,7 @@ export default function SportsJournalApp() {
               setTeam({ id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club" });
               setSeason({ id: cloudSeason.id, name: cloudSeason.name, startDate: cloudSeason.start_date, endDate: cloudSeason.end_date });
               setPlayers((cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child })));
-              setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: e.photo_url || null })));
+              setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: e.photo_url || e.photo_path || null })));
               setScreen("home");
               return;
             }
@@ -5739,7 +5740,7 @@ export default function SportsJournalApp() {
           setTeam({ id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club", orgId: cloudTeam.org_id || null });
           setSeason({ id: cloudSeason.id, name: cloudSeason.name, startDate: cloudSeason.start_date, endDate: cloudSeason.end_date });
           setPlayers((cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child })));
-          setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: e.photo_url || null })));
+          setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: e.photo_url || e.photo_path || null })));
           setScreen("home");
           return;
         }
@@ -5758,7 +5759,7 @@ export default function SportsJournalApp() {
           setTeam({ id: jt.id, name: jt.name, sport: jt.sport, emoji: jt.emoji, color: jt.color || "#1B4332", logo: null, orgType: "club", orgId: jt.org_id || null });
           setSeason({ id: js.id, name: js.name, startDate: js.start_date, endDate: js.end_date });
           setPlayers((cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child })));
-          setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: e.photo_url || null })));
+          setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: e.photo_url || e.photo_path || null })));
           setScreen("home");
           return;
         }
@@ -6273,8 +6274,9 @@ export default function SportsJournalApp() {
             score_away: newEntry.score_away != null ? newEntry.score_away : null,
             result: newEntry.result || null,
             consent_shared: newEntry.consent_shared || false,
-            photo_url: photoPath,
           };
+          // DB may have photo_path (old) or photo_url (new) — only include if we have a value
+          if (photoPath) entryPayload.photo_url = photoPath;
           const { data: insertData, error: entryErr } = await supabase.from("entries").insert(entryPayload);
           if (entryErr) {
             syncDebug.push(`INSERT FAILED: ${JSON.stringify(entryErr)}`);
