@@ -6175,8 +6175,8 @@ export default function SportsJournalApp() {
       return;
     }
 
-    // Sync to cloud (fire and forget)
-    if (!DEMO && user && season?.id) {
+    // Sync to cloud
+    if (!DEMO && user && season?.id && supabase.auth.token) {
       (async () => {
         try {
           let photoPath = null;
@@ -6195,7 +6195,7 @@ export default function SportsJournalApp() {
               console.warn("Photo upload failed:", uploadErr);
             }
           }
-          await supabase.from("entries").insert({
+          const { error: entryErr } = await supabase.from("entries").insert({
             id: newEntry.id, user_id: user.id, season_id: season.id,
             entry_date: newEntry.entry_date,
             entry_type: newEntry.entry_type || "game",
@@ -6208,16 +6208,26 @@ export default function SportsJournalApp() {
             consent_shared: newEntry.consent_shared || false,
             photo_url: photoPath,
           });
-          // Replace base64 photoData with cloud URL to free localStorage space
-          if (photoPath) {
-            setEntries((prev) => prev.map((e) =>
-              e.id === newEntry.id ? { ...e, photo_url: photoPath, photoPreview: photoPath, photoData: null } : e
-            ));
+          if (entryErr) {
+            console.warn("Entry insert failed:", entryErr);
+            setDebugInfo && setDebugInfo(`Entry sync FAILED: ${JSON.stringify(entryErr)}`);
+          } else {
+            console.log("Entry synced to cloud OK");
+            // Replace base64 photoData with cloud URL to free localStorage space
+            if (photoPath) {
+              setEntries((prev) => prev.map((e) =>
+                e.id === newEntry.id ? { ...e, photo_url: photoPath, photoPreview: photoPath, photoData: null } : e
+              ));
+            }
           }
         } catch (e) {
           console.warn("Cloud sync (entry) failed:", e);
+          setDebugInfo && setDebugInfo(`Entry sync CATCH: ${e.message}`);
         }
       })();
+    } else if (!DEMO && user && season?.id) {
+      console.warn("Entry cloud sync skipped — no auth token");
+      setDebugInfo && setDebugInfo("Entry sync skipped: no auth token");
     }
   };
 
@@ -6298,7 +6308,8 @@ export default function SportsJournalApp() {
         />
       )}
 
-      {screen === "home" && team && season && (
+      {screen === "home" && team && season && (<>
+        {debugInfo && <div style={{ background: "#FEF3C7", color: "#92400E", padding: "8px 16px", fontSize: 11, fontFamily: "monospace", wordBreak: "break-all", position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999 }} onClick={() => setDebugInfo(null)}>DEBUG: {debugInfo} (tap to dismiss)</div>}
         <AppShell
           accentColor={brandPrimary}
           title={team.name}
@@ -6554,7 +6565,7 @@ export default function SportsJournalApp() {
             />
           )}
         </AppShell>
-      )}
+      </>)}
 
       {/* Share prompt toast */}
       {showSharePrompt && shareEntry && (
