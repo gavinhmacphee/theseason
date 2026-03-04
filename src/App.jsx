@@ -14,7 +14,16 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "YOUR_SUPABA
 const supabase = {
   auth: {
     token: null,
+    refreshToken_: null,
     user: null,
+    _saveSession(data) {
+      this.token = data.access_token;
+      this.refreshToken_ = data.refresh_token;
+      this.user = data.user;
+      localStorage.setItem("sb_token", data.access_token);
+      if (data.refresh_token) localStorage.setItem("sb_refresh_token", data.refresh_token);
+      localStorage.setItem("sb_user", JSON.stringify(data.user));
+    },
     async signUp(email, password, metadata = {}) {
       const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
         method: "POST",
@@ -22,12 +31,7 @@ const supabase = {
         body: JSON.stringify({ email, password, data: metadata }),
       });
       const data = await res.json();
-      if (data.access_token) {
-        this.token = data.access_token;
-        this.user = data.user;
-        localStorage.setItem("sb_token", data.access_token);
-        localStorage.setItem("sb_user", JSON.stringify(data.user));
-      }
+      if (data.access_token) this._saveSession(data);
       return data;
     },
     async signIn(email, password) {
@@ -37,25 +41,41 @@ const supabase = {
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-      if (data.access_token) {
-        this.token = data.access_token;
-        this.user = data.user;
-        localStorage.setItem("sb_token", data.access_token);
-        localStorage.setItem("sb_user", JSON.stringify(data.user));
-      }
+      if (data.access_token) this._saveSession(data);
       return data;
     },
     signOut() {
       this.token = null;
+      this.refreshToken_ = null;
       this.user = null;
       localStorage.removeItem("sb_token");
+      localStorage.removeItem("sb_refresh_token");
       localStorage.removeItem("sb_user");
     },
     restore() {
       this.token = localStorage.getItem("sb_token");
+      this.refreshToken_ = localStorage.getItem("sb_refresh_token");
       const u = localStorage.getItem("sb_user");
       if (u) this.user = JSON.parse(u);
       return !!this.token;
+    },
+    async refreshSession() {
+      if (!this.refreshToken_) return false;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
+          body: JSON.stringify({ refresh_token: this.refreshToken_ }),
+        });
+        const data = await res.json();
+        if (data.access_token) {
+          this._saveSession(data);
+          return true;
+        }
+      } catch (e) {
+        console.warn("Token refresh failed:", e);
+      }
+      return false;
     },
   },
   from(table) {
@@ -113,9 +133,19 @@ const supabase = {
         return builder;
       },
       async then(resolve) {
+        // Always use the CURRENT token at request time (not stale captured value)
+        headers.Authorization = `Bearer ${supabase.auth.token}`;
         const q = queryParams.length ? "?" + queryParams.join("&") : "";
         try {
-          const res = await fetch(url + q, { method, headers, body });
+          let res = await fetch(url + q, { method, headers, body });
+          // Auto-retry on 401 (expired token) with a refreshed session
+          if (res.status === 401 && supabase.auth.refreshToken_) {
+            const refreshed = await supabase.auth.refreshSession();
+            if (refreshed) {
+              headers.Authorization = `Bearer ${supabase.auth.token}`;
+              res = await fetch(url + q, { method, headers, body });
+            }
+          }
           if (res.ok) {
             const data = await res.json();
             resolve({ data, error: null });
@@ -132,7 +162,7 @@ const supabase = {
     return builder;
   },
   async rpc(functionName, params = {}) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${functionName}`, {
+    let res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${functionName}`, {
       method: "POST",
       headers: {
         apikey: SUPABASE_ANON_KEY,
@@ -141,6 +171,20 @@ const supabase = {
       },
       body: JSON.stringify(params),
     });
+    if (res.status === 401 && supabase.auth.refreshToken_) {
+      const refreshed = await supabase.auth.refreshSession();
+      if (refreshed) {
+        res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${functionName}`, {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${supabase.auth.token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(params),
+        });
+      }
+    }
     const data = await res.json();
     return { data, error: res.ok ? null : data };
   },
@@ -148,7 +192,7 @@ const supabase = {
     from(bucket) {
       return {
         async upload(path, file) {
-          const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`, {
+          let res = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`, {
             method: "POST",
             headers: {
               apikey: SUPABASE_ANON_KEY,
@@ -156,6 +200,19 @@ const supabase = {
             },
             body: file,
           });
+          if (res.status === 401 && supabase.auth.refreshToken_) {
+            const refreshed = await supabase.auth.refreshSession();
+            if (refreshed) {
+              res = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`, {
+                method: "POST",
+                headers: {
+                  apikey: SUPABASE_ANON_KEY,
+                  Authorization: `Bearer ${supabase.auth.token}`,
+                },
+                body: file,
+              });
+            }
+          }
           return { error: res.ok ? null : await res.json() };
         },
         getPublicUrl(path) {
@@ -5676,6 +5733,8 @@ export default function SportsJournalApp() {
           const { data: cloudPlayers } = await supabase.from("players").select("*").eq("team_id", cloudTeam.id);
           const { data: cloudEntries } = await supabase.from("entries").select("*").eq("season_id", cloudSeason.id).order("entry_date", { ascending: false });
           debug.push(`players: ${cloudPlayers?.length || 0}, entries: ${cloudEntries?.length || 0}`);
+          debug.push("→ home (cloud)");
+          setDebugInfo(debug.join(" | "));
           setRole("parent");
           setTeam({ id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club", orgId: cloudTeam.org_id || null });
           setSeason({ id: cloudSeason.id, name: cloudSeason.name, startDate: cloudSeason.start_date, endDate: cloudSeason.end_date });
@@ -6184,6 +6243,7 @@ export default function SportsJournalApp() {
     // Sync to cloud
     if (!DEMO && user && season?.id && supabase.auth.token) {
       (async () => {
+        const syncDebug = [`uid:${user.id?.slice(0,8)}`, `sid:${season.id?.slice(0,8)}`, `tok:${supabase.auth.token?.slice(0,20)}`];
         try {
           let photoPath = null;
           if (newEntry.photoData) {
@@ -6194,14 +6254,15 @@ export default function SportsJournalApp() {
               if (!uploadError) {
                 const { data: { publicUrl } } = supabase.storage.from("entry-photos").getPublicUrl(filePath);
                 photoPath = publicUrl;
+                syncDebug.push("photo:OK");
               } else {
-                console.warn("Photo upload error:", uploadError);
+                syncDebug.push(`photo:ERR ${JSON.stringify(uploadError).slice(0,80)}`);
               }
             } catch (uploadErr) {
-              console.warn("Photo upload failed:", uploadErr);
+              syncDebug.push(`photo:CATCH ${uploadErr.message}`);
             }
           }
-          const { error: entryErr } = await supabase.from("entries").insert({
+          const entryPayload = {
             id: newEntry.id, user_id: user.id, season_id: season.id,
             entry_date: newEntry.entry_date,
             entry_type: newEntry.entry_type || "game",
@@ -6213,12 +6274,14 @@ export default function SportsJournalApp() {
             result: newEntry.result || null,
             consent_shared: newEntry.consent_shared || false,
             photo_url: photoPath,
-          });
+          };
+          const { data: insertData, error: entryErr } = await supabase.from("entries").insert(entryPayload);
           if (entryErr) {
-            console.warn("Entry insert failed:", entryErr);
-            setDebugInfo && setDebugInfo(`Entry sync FAILED: ${JSON.stringify(entryErr)}`);
+            syncDebug.push(`INSERT FAILED: ${JSON.stringify(entryErr)}`);
+            setDebugInfo && setDebugInfo(`SYNC FAIL: ${syncDebug.join(" | ")}`);
           } else {
-            console.log("Entry synced to cloud OK");
+            syncDebug.push("INSERT OK");
+            setDebugInfo && setDebugInfo(`SYNC OK: ${syncDebug.join(" | ")}`);
             // Replace base64 photoData with cloud URL to free localStorage space
             if (photoPath) {
               setEntries((prev) => prev.map((e) =>
@@ -6227,13 +6290,16 @@ export default function SportsJournalApp() {
             }
           }
         } catch (e) {
-          console.warn("Cloud sync (entry) failed:", e);
-          setDebugInfo && setDebugInfo(`Entry sync CATCH: ${e.message}`);
+          syncDebug.push(`CATCH: ${e.message}`);
+          setDebugInfo && setDebugInfo(`SYNC CATCH: ${syncDebug.join(" | ")}`);
         }
       })();
-    } else if (!DEMO && user && season?.id) {
-      console.warn("Entry cloud sync skipped — no auth token");
-      setDebugInfo && setDebugInfo("Entry sync skipped: no auth token");
+    } else if (!DEMO) {
+      const missing = [];
+      if (!user) missing.push("no user");
+      if (!season?.id) missing.push("no season");
+      if (!supabase.auth.token) missing.push("no token");
+      setDebugInfo && setDebugInfo(`Entry sync SKIPPED: ${missing.join(", ")}`);
     }
   };
 
@@ -6315,7 +6381,7 @@ export default function SportsJournalApp() {
       )}
 
       {screen === "home" && team && season && (<>
-        {debugInfo && <div style={{ background: "#FEF3C7", color: "#92400E", padding: "8px 16px", fontSize: 11, fontFamily: "monospace", wordBreak: "break-all", position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999 }} onClick={() => setDebugInfo(null)}>DEBUG: {debugInfo} (tap to dismiss)</div>}
+        {debugInfo && <div style={{ background: debugInfo.includes("SYNC OK") ? "#D1FAE5" : "#FEE2E2", color: debugInfo.includes("SYNC OK") ? "#065F46" : "#991B1B", padding: "8px 16px", fontSize: 11, fontFamily: "monospace", wordBreak: "break-all", position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999 }} onClick={() => setDebugInfo(null)}>{debugInfo} (tap to dismiss)</div>}
         <AppShell
           accentColor={brandPrimary}
           title={team.name}
