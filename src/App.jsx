@@ -116,10 +116,16 @@ const supabase = {
         const q = queryParams.length ? "?" + queryParams.join("&") : "";
         try {
           const res = await fetch(url + q, { method, headers, body });
-          const data = res.ok ? await res.json() : [];
-          resolve({ data, error: res.ok ? null : data });
+          if (res.ok) {
+            const data = await res.json();
+            resolve({ data, error: null });
+          } else {
+            let errBody;
+            try { errBody = await res.json(); } catch { errBody = { status: res.status, statusText: res.statusText }; }
+            resolve({ data: [], error: errBody });
+          }
         } catch (e) {
-          resolve({ data: [], error: e });
+          resolve({ data: [], error: { message: e.message } });
         }
       },
     };
