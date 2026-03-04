@@ -80,6 +80,13 @@ const supabase = {
         body = JSON.stringify(data);
         return builder;
       },
+      upsert(data, { onConflict } = {}) {
+        method = "POST";
+        body = JSON.stringify(data);
+        headers["Prefer"] = "return=representation,resolution=merge-duplicates";
+        if (onConflict) queryParams.push(`on_conflict=${onConflict}`);
+        return builder;
+      },
       update(data) {
         method = "PATCH";
         body = JSON.stringify(data);
@@ -5683,7 +5690,66 @@ export default function SportsJournalApp() {
       console.warn("Cloud restore on login failed:", e);
     }
 
-    // No existing data found — new user, go straight to setup
+    // No cloud data — check localStorage before giving up
+    const allSaved = localStorage.getItem("teamSeasonAll");
+    const singleSaved = localStorage.getItem("teamSeason");
+    const localData = allSaved ? (() => {
+      try { const { seasons, activeIdx } = JSON.parse(allSaved); return seasons?.[activeIdx || 0]; } catch { return null; }
+    })() : singleSaved ? (() => {
+      try { return JSON.parse(singleSaved); } catch { return null; }
+    })() : null;
+
+    if (localData?.team && localData?.season) {
+      // Restore from localStorage and re-sync to cloud
+      setRole(localData.role || "parent");
+      setTeam(localData.team);
+      setSeason(localData.season);
+      setPlayers(localData.players || []);
+      setEntries((localData.entries || []).map((e) => ({
+        ...e, photoPreview: e.photo_url || e.photoData || null,
+      })));
+      if (allSaved) {
+        try {
+          const { seasons } = JSON.parse(allSaved);
+          setAllSeasons(seasons);
+        } catch {}
+      } else {
+        setAllSeasons([localData]);
+      }
+      setActiveSeasonIdx(0);
+      setScreen("home");
+
+      // Re-attempt cloud sync for the team/season/players
+      (async () => {
+        try {
+          const uid = authUser.id;
+          const t = localData.team;
+          const s = localData.season;
+          // Try inserting — will no-op if RLS blocks duplicates or they already exist
+          await supabase.from("teams").upsert({
+            id: t.id, created_by: uid,
+            name: t.name, sport: t.sport || "Sports",
+            emoji: t.emoji || "🏅", color: t.color || "#1B4332",
+          }, { onConflict: "id" });
+          await supabase.from("seasons").upsert({
+            id: s.id, user_id: uid,
+            team_id: t.id, name: s.name,
+          }, { onConflict: "id" });
+          for (const p of (localData.players || [])) {
+            await supabase.from("players").upsert({
+              id: p.id, team_id: t.id,
+              name: p.name, is_my_child: p.is_my_child || false,
+            }, { onConflict: "id" });
+          }
+          console.log("Re-synced localStorage data to cloud");
+        } catch (e) {
+          console.warn("Re-sync to cloud failed:", e);
+        }
+      })();
+      return;
+    }
+
+    // Truly no data anywhere — new user, go to setup
     setRole("parent");
     setScreen("setup");
   };
@@ -5766,32 +5832,41 @@ export default function SportsJournalApp() {
 
     // Sync to cloud
     if (!DEMO && authUser) {
-      (async () => {
-        try {
-          await supabase.from("teams").insert({
-            id: teamId, created_by: authUser.id,
-            name: teamData.name, sport: teamData.sport,
-            emoji: teamData.emoji, color: teamData.color,
-          });
-          await supabase.from("seasons").insert({
-            id: seasonId, user_id: authUser.id,
-            team_id: teamId, name: seasonData.name,
-          });
-          await supabase.from("players").insert({
-            id: playerId, team_id: teamId,
-            name: playerData.name, is_my_child: true,
-          });
-          if (onboardData.memory) {
-            await supabase.from("entries").insert({
-              id: entryId, user_id: authUser.id, season_id: seasonId,
-              entry_date: entryData.entry_date, entry_type: "game",
-              text: entryData.text,
+      if (!supabase.auth.token) {
+        console.warn("Cloud sync skipped — no auth token (email confirmation may be pending)");
+      } else {
+        (async () => {
+          try {
+            const { error: teamErr } = await supabase.from("teams").insert({
+              id: teamId, created_by: authUser.id,
+              name: teamData.name, sport: teamData.sport,
+              emoji: teamData.emoji, color: teamData.color,
             });
+            if (teamErr) console.warn("Team insert failed:", teamErr);
+            const { error: seasonErr } = await supabase.from("seasons").insert({
+              id: seasonId, user_id: authUser.id,
+              team_id: teamId, name: seasonData.name,
+            });
+            if (seasonErr) console.warn("Season insert failed:", seasonErr);
+            const { error: playerErr } = await supabase.from("players").insert({
+              id: playerId, team_id: teamId,
+              name: playerData.name, is_my_child: true,
+            });
+            if (playerErr) console.warn("Player insert failed:", playerErr);
+            if (onboardData.memory) {
+              const { error: entryErr } = await supabase.from("entries").insert({
+                id: entryId, user_id: authUser.id, season_id: seasonId,
+                entry_date: entryData.entry_date, entry_type: "game",
+                text: entryData.text,
+              });
+              if (entryErr) console.warn("Entry insert failed:", entryErr);
+            }
+            console.log("Cloud sync (onboard) complete");
+          } catch (e) {
+            console.warn("Cloud sync (onboard) failed:", e);
           }
-        } catch (e) {
-          console.warn("Cloud sync (onboard) failed:", e);
-        }
-      })();
+        })();
+      }
     }
   };
 
@@ -5955,28 +6030,34 @@ export default function SportsJournalApp() {
     });
 
     // Sync to cloud (fire and forget)
-    if (!DEMO && user) {
+    if (!DEMO && user && supabase.auth.token) {
       (async () => {
         try {
-          await supabase.from("teams").insert({
+          const { error: teamErr } = await supabase.from("teams").upsert({
             id: teamData.id, created_by: user.id,
             name: teamData.name, sport: teamData.sport || "Sports",
             emoji: teamData.emoji || "🏅", color: teamData.color || "#1B4332",
-          });
-          await supabase.from("seasons").insert({
+          }, { onConflict: "id" });
+          if (teamErr) console.warn("Team upsert failed:", teamErr);
+          const { error: seasonErr } = await supabase.from("seasons").upsert({
             id: seasonData.id, user_id: user.id,
             team_id: teamData.id, name: seasonData.name,
-          });
+          }, { onConflict: "id" });
+          if (seasonErr) console.warn("Season upsert failed:", seasonErr);
           for (const p of playersList) {
-            await supabase.from("players").insert({
+            const { error: playerErr } = await supabase.from("players").upsert({
               id: p.id, team_id: teamData.id,
               name: p.name, is_my_child: p.is_my_child || false,
-            });
+            }, { onConflict: "id" });
+            if (playerErr) console.warn("Player upsert failed:", playerErr);
           }
+          console.log("Cloud sync (setup) complete");
         } catch (e) {
           console.warn("Cloud sync (setup) failed:", e);
         }
       })();
+    } else if (!DEMO && user) {
+      console.warn("Cloud sync (setup) skipped — no auth token");
     }
   };
 
