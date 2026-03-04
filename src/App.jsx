@@ -5605,17 +5605,24 @@ export default function SportsJournalApp() {
     };
   }, [showMenu]);
 
+  // Debug state (temporary — remove after fixing cloud restore)
+  const [debugInfo, setDebugInfo] = useState(null);
+
   const handleAuth = async (authUser) => {
     setUser(authUser);
     setAuthed(true);
     setScreen("loading");
+    const debug = [];
 
     // Try loading existing data from Supabase before sending to onboarding
     try {
       const uid = authUser.id;
+      debug.push(`uid: ${uid?.slice(0, 8)}...`);
+      debug.push(`token: ${supabase.auth.token ? "yes" : "NO"}`);
 
       // Check if user is an org admin
-      const { data: memberships } = await supabase.from("org_members").select("org_id,role").eq("user_id", uid);
+      const { data: memberships, error: memErr } = await supabase.from("org_members").select("org_id,role").eq("user_id", uid);
+      debug.push(`org_members: ${memberships?.length || 0}${memErr ? " ERR:" + JSON.stringify(memErr) : ""}`);
       const adminMembership = memberships?.find((m) => m.role === "admin");
 
       if (adminMembership) {
@@ -5651,14 +5658,18 @@ export default function SportsJournalApp() {
       }
 
       // Check if user has a team (parent flow - self-created)
-      const { data: teams } = await supabase.from("teams").select("*").eq("created_by", uid).limit(1);
+      const { data: teams, error: teamErr } = await supabase.from("teams").select("*").eq("created_by", uid).limit(1);
+      debug.push(`teams: ${teams?.length || 0}${teamErr ? " ERR:" + JSON.stringify(teamErr) : ""}`);
       if (teams?.length > 0) {
         const cloudTeam = teams[0];
-        const { data: seasons } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid).limit(1);
+        debug.push(`team: ${cloudTeam.name}`);
+        const { data: seasons, error: seasonErr } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid).limit(1);
+        debug.push(`seasons: ${seasons?.length || 0}${seasonErr ? " ERR:" + JSON.stringify(seasonErr) : ""}`);
         const cloudSeason = seasons?.[0];
         if (cloudSeason) {
           const { data: cloudPlayers } = await supabase.from("players").select("*").eq("team_id", cloudTeam.id);
           const { data: cloudEntries } = await supabase.from("entries").select("*").eq("season_id", cloudSeason.id).order("entry_date", { ascending: false });
+          debug.push(`players: ${cloudPlayers?.length || 0}, entries: ${cloudEntries?.length || 0}`);
           setRole("parent");
           setTeam({ id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club", orgId: cloudTeam.org_id || null });
           setSeason({ id: cloudSeason.id, name: cloudSeason.name, startDate: cloudSeason.start_date, endDate: cloudSeason.end_date });
@@ -5670,7 +5681,8 @@ export default function SportsJournalApp() {
       }
 
       // Check if user has a season via join flow (team owned by admin, season owned by parent)
-      const { data: joinSeasons } = await supabase.from("seasons").select("*, teams(*)").eq("user_id", uid).limit(1);
+      const { data: joinSeasons, error: joinErr } = await supabase.from("seasons").select("*, teams(*)").eq("user_id", uid).limit(1);
+      debug.push(`joinSeasons: ${joinSeasons?.length || 0}${joinErr ? " ERR:" + JSON.stringify(joinErr) : ""}`);
       if (joinSeasons?.length > 0) {
         const js = joinSeasons[0];
         const jt = js.teams;
@@ -5686,9 +5698,12 @@ export default function SportsJournalApp() {
           return;
         }
       }
+      debug.push("No cloud data found");
     } catch (e) {
+      debug.push(`CATCH: ${e.message}`);
       console.warn("Cloud restore on login failed:", e);
     }
+    setDebugInfo(debug.join(" | "));
 
     // No cloud data — check localStorage before giving up
     const allSaved = localStorage.getItem("teamSeasonAll");
@@ -6267,7 +6282,10 @@ export default function SportsJournalApp() {
           onBack={() => { setJoinToken(null); setScreen("onboard"); }}
         />
       )}
-      {screen === "setup" && <TeamSetupScreen role={role} onComplete={handleSetup} />}
+      {screen === "setup" && <>
+        {debugInfo && <div style={{ background: "#FEF3C7", color: "#92400E", padding: "12px 16px", fontSize: 12, fontFamily: "monospace", wordBreak: "break-all" }}>DEBUG: {debugInfo}</div>}
+        <TeamSetupScreen role={role} onComplete={handleSetup} />
+      </>}
       {screen === "org-setup" && <OrgSetupScreen onComplete={handleOrgSetup} />}
       {screen === "admin" && org && (
         <AdminDashboard
