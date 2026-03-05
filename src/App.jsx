@@ -749,8 +749,15 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
     transition: "all 0.2s ease", fontFamily: "'DM Sans', sans-serif",
     letterSpacing: 0.2,
   });
+  const handleBack = () => {
+    if (step <= initialStep) {
+      window.location.href = "/";
+    } else {
+      goBack();
+    }
+  };
   const backArrow = step > 0 ? (
-    <button onClick={goBack} style={{
+    <button onClick={handleBack} style={{
       position: "absolute", top: 20, left: 20, background: "none",
       border: "none", fontSize: 14, color: "#a3a3a3", cursor: "pointer",
       fontFamily: "'DM Sans', sans-serif", fontWeight: 600,
