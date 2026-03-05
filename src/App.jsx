@@ -5390,7 +5390,7 @@ export default function SportsJournalApp() {
       return;
     }
 
-    // No localStorage data — try cloud restore
+    // No localStorage data — try cloud restore (all teams + all seasons)
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -5401,19 +5401,35 @@ export default function SportsJournalApp() {
       setAuthed(true);
       try {
         const uid = session.user.id;
-        const { data: teams } = await supabase.from("teams").select("*").eq("created_by", uid).limit(1);
+        const { data: teams } = await supabase.from("teams").select("*").eq("created_by", uid);
         if (teams && teams.length > 0) {
-          const cloudTeam = teams[0];
-          const { data: seasons } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid).limit(1);
-          const cloudSeason = seasons?.[0];
-          if (cloudSeason) {
+          // Build allSeasons from every team + season pair
+          const restoredSeasons = [];
+          for (const cloudTeam of teams) {
+            const { data: seasons } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid);
             const { data: cloudPlayers } = await supabase.from("players").select("*").eq("team_id", cloudTeam.id);
-            const { data: cloudEntries } = await supabase.from("entries").select("*").eq("season_id", cloudSeason.id).order("entry_date", { ascending: false });
-            setRole("parent");
-            setTeam({ id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club" });
-            setSeason({ id: cloudSeason.id, name: cloudSeason.name, startDate: cloudSeason.start_date, endDate: cloudSeason.end_date });
-            setPlayers((cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child })));
-            setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: e.photo_url || e.photo_path || null })));
+            const teamObj = { id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club" };
+            const playersArr = (cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child }));
+            for (const cloudSeason of (seasons || [])) {
+              const { data: cloudEntries } = await supabase.from("entries").select("*").eq("season_id", cloudSeason.id).order("entry_date", { ascending: false });
+              restoredSeasons.push({
+                role: "parent",
+                team: teamObj,
+                season: { id: cloudSeason.id, name: cloudSeason.name, startDate: cloudSeason.start_date, endDate: cloudSeason.end_date },
+                players: playersArr,
+                entries: (cloudEntries || []).map((e) => ({ ...e, photoPreview: e.photo_url || e.photo_path || null })),
+              });
+            }
+          }
+          if (restoredSeasons.length > 0) {
+            setAllSeasons(restoredSeasons);
+            setActiveSeasonIdx(0);
+            const first = restoredSeasons[0];
+            setRole(first.role);
+            setTeam(first.team);
+            setSeason(first.season);
+            setPlayers(first.players);
+            setEntries(first.entries);
             setScreen("home");
             return;
           }
