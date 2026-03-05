@@ -2,6 +2,7 @@
   "functions": {
     "api/generate-pdf.js": { "memory": 1024, "maxDuration": 60 },
     "api/test-fulfillment.js": { "memory": 1024, "maxDuration": 60 },
+    "api/test-order.js": { "memory": 1024, "maxDuration": 120 },
     "api/checkout.js": { "maxDuration": 10 },
     "api/webhook-stripe.js": { "memory": 1024, "maxDuration": 60 },
     "api/store-book-data.js": { "maxDuration": 10 },

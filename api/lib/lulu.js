@@ -57,7 +57,15 @@ async function luluRequest(method, path, body) {
   if (body) opts.body = JSON.stringify(body);
 
   const res = await fetch(`${LULU_API_BASE}${path}`, opts);
-  const data = await res.json();
+  const text = await res.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    const err = new Error(`Lulu API returned non-JSON (${res.status}): ${text.slice(0, 200)}`);
+    err.status = res.status;
+    throw err;
+  }
 
   if (!res.ok) {
     const err = new Error(`Lulu API error (${res.status}): ${JSON.stringify(data)}`);
@@ -76,10 +84,11 @@ const PHOTO_BOOK_POD_PACKAGE_ID = process.env.LULU_POD_PACKAGE_ID || '0750X0750F
 // You MUST verify this ID against Lulu's catalog - run getShippingEstimate to test
 
 export async function createPrintOrder({ pdfUrl, coverPdfUrl, shippingAddress, externalId }) {
-  // Lulu order structure per their API docs
+  // Lulu order structure — shipping_level at top level, phone_number required
   const order = {
     contact_email: shippingAddress.email,
     external_id: externalId,
+    shipping_level: 'MAIL',
     line_items: [
       {
         external_id: externalId,
@@ -89,7 +98,6 @@ export async function createPrintOrder({ pdfUrl, coverPdfUrl, shippingAddress, e
           pod_package_id: PHOTO_BOOK_POD_PACKAGE_ID,
         },
         quantity: 1,
-        shipping_level: 'MAIL',
         title: `${shippingAddress.teamName || 'Team'} Season Book`,
       },
     ],
@@ -100,19 +108,19 @@ export async function createPrintOrder({ pdfUrl, coverPdfUrl, shippingAddress, e
       state_code: shippingAddress.state,
       postcode: shippingAddress.zip,
       country_code: 'US',
-      phone_number: shippingAddress.phone || '',
+      phone_number: shippingAddress.phone || '0000000000',
     },
   };
 
-  return luluRequest('POST', '/v1/print-jobs/', order);
+  return luluRequest('POST', '/print-jobs/', order);
 }
 
 export async function getOrderStatus(orderId) {
-  return luluRequest('GET', `/v1/print-jobs/${orderId}/`);
+  return luluRequest('GET', `/print-jobs/${orderId}/`);
 }
 
 export async function getShippingEstimate({ pageCount, quantity = 1, state, zip, country = 'US' }) {
-  return luluRequest('POST', '/v1/print-job-cost-calculations/', {
+  return luluRequest('POST', '/print-job-cost-calculations/', {
     line_items: [
       {
         page_count: pageCount,
@@ -130,5 +138,5 @@ export async function getShippingEstimate({ pageCount, quantity = 1, state, zip,
 }
 
 export async function cancelOrder(orderId) {
-  return luluRequest('DELETE', `/v1/print-jobs/${orderId}/`);
+  return luluRequest('DELETE', `/print-jobs/${orderId}/`);
 }

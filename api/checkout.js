@@ -67,6 +67,7 @@ export default async function handler(req, res) {
         shipping_city: shipping.city || '',
         shipping_state: shipping.state || '',
         shipping_zip: shipping.zip || '',
+        shipping_phone: shipping.phone || '',
       },
       customer_email: shipping.email,
       success_url: `${baseUrl}/app?order=success&session_id={CHECKOUT_SESSION_ID}`,

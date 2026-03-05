@@ -184,6 +184,7 @@ async function fulfillOrder(session) {
         city: meta.shipping_city || '',
         state: meta.shipping_state || '',
         zip: meta.shipping_zip || '',
+        phone: meta.shipping_phone || '0000000000',
         teamName: bookData.team?.name || 'Team',
       };
 
