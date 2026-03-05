@@ -4,21 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#1B4332" />
-  <meta name="description" content="Free youth sports journal app for families. Capture every game, practice, and season moment. Turn your entries into a $39 hardcover photo book. Plus shipping." />
+  <meta name="description" content="Free season journal for youth sports families. Capture every game, practice, and moment worth remembering." />
   <title>Youth Sports Season Journal &amp; Photo Book | Team Season</title>
   <link rel="canonical" href="https://teamseason.app/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Team Season — The Season Journal for Youth Sports Families" />
-  <meta property="og:description" content="A free journal for youth sports families. Capture the season, then turn it into a hardcover photo book." />
+  <meta property="og:description" content="Free season journal for youth sports families. Capture every game, practice, and moment worth remembering." />
   <meta property="og:url" content="https://teamseason.app/" />
   <meta property="og:site_name" content="Team Season" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Team Season — Youth Sports Season Journal" />
-  <meta name="twitter:description" content="A free journal for youth sports families. Capture the season, then turn it into a hardcover photo book." />
+  <meta name="twitter:description" content="Free season journal for youth sports families. Capture every game, practice, and moment worth remembering." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -187,312 +187,7 @@
 
     .hero-sign-in:hover { color: white; }
 
-    /* Sections */
-    .section {
-      padding: 80px 32px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .section-alt {
-      background: var(--white);
-      max-width: none;
-      padding: 80px 32px;
-    }
-
-    .section-alt .section-inner {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .section h2, .section-alt h2 {
-      font-family: 'Crimson Pro', Georgia, serif;
-      font-size: 32px;
-      font-weight: 700;
-      color: var(--green);
-      margin-bottom: 20px;
-    }
-
-    .section p, .section-alt p {
-      font-size: 16px;
-      line-height: 1.7;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-    }
-
-    /* Problem Section */
-    .problem-list {
-      list-style: none;
-      padding: 0;
-      margin: 24px 0 0;
-    }
-
-    .problem-list li {
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 16px;
-      color: var(--text);
-      padding-left: 20px;
-      position: relative;
-    }
-
-    .problem-list li::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 6px;
-      height: 6px;
-      background: var(--accent);
-      border-radius: 50%;
-    }
-
-    /* Steps */
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 40px;
-      margin-top: 40px;
-    }
-
-    .step { text-align: left; }
-
-    .step-number {
-      font-family: 'Crimson Pro', Georgia, serif;
-      font-size: 48px;
-      font-weight: 700;
-      color: var(--green);
-      line-height: 1;
-      margin-bottom: 12px;
-      opacity: 0.25;
-    }
-
-    .step h3 {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      color: var(--green);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-    }
-
-    .step p {
-      font-size: 15px;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-
-    /* Sports Tags */
-    .sports-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-top: 32px;
-    }
-
-    .sport-tag {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--green);
-      background: #1B433210;
-      border: 1px solid #1B433218;
-      padding: 6px 14px;
-      letter-spacing: 0.3px;
-    }
-
-    /* Social proof / trust */
-    .trust-section {
-      background: var(--bg);
-      padding: 60px 32px;
-      text-align: center;
-    }
-
-    .trust-inner {
-      max-width: 700px;
-      margin: 0 auto;
-    }
-
-    .trust-quote {
-      font-family: 'Crimson Pro', Georgia, serif;
-      font-size: 24px;
-      font-style: italic;
-      color: var(--green);
-      line-height: 1.5;
-      margin-bottom: 12px;
-    }
-
-    .trust-attr {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-bottom: 40px;
-    }
-
-    .trust-facts {
-      display: flex;
-      justify-content: center;
-      gap: 48px;
-      flex-wrap: wrap;
-    }
-
-    .trust-fact {
-      text-align: center;
-    }
-
-    .trust-fact-value {
-      font-family: 'Crimson Pro', Georgia, serif;
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--green);
-      line-height: 1.2;
-    }
-
-    .trust-fact-label {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    /* Features Grid */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 32px;
-      margin-top: 40px;
-    }
-
-    .feature {
-      border-left: 3px solid var(--accent);
-      padding-left: 20px;
-    }
-
-    .feature h3 {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      color: var(--green);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-    }
-
-    .feature p {
-      font-size: 15px;
-      color: var(--text-muted);
-      line-height: 1.6;
-      margin-bottom: 0;
-    }
-
-    /* Book callout */
-    .book-callout {
-      background: linear-gradient(135deg, #1B433210, #2D6A4F10);
-      border: 1px solid #1B433220;
-      padding: 48px 40px;
-      text-align: center;
-      margin-top: 40px;
-    }
-
-    .book-callout h3 {
-      font-family: 'Crimson Pro', Georgia, serif;
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--green);
-      margin-bottom: 12px;
-    }
-
-    .book-callout p {
-      font-size: 16px;
-      color: var(--text-muted);
-      max-width: 500px;
-      margin: 0 auto;
-      line-height: 1.7;
-    }
-
-    .book-price {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--green);
-      margin-top: 16px;
-      display: inline-block;
-    }
-
-    /* Bottom CTA */
-    .bottom-cta {
-      background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 100%);
-      color: var(--white);
-      text-align: center;
-      padding: 80px 32px;
-    }
-
-    .bottom-cta h2 {
-      font-family: 'Crimson Pro', Georgia, serif;
-      font-size: 36px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      color: var(--white);
-    }
-
-    .bottom-cta p {
-      font-size: 17px;
-      color: rgba(255,255,255,0.75);
-      margin-bottom: 32px;
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .bottom-cta .cta-note {
-      font-size: 13px;
-      color: rgba(255,255,255,0.45);
-      margin-top: 16px;
-    }
-
-    /* Footer */
-    .site-footer {
-      background: var(--green-deep);
-      color: rgba(255,255,255,0.5);
-      text-align: center;
-      padding: 32px;
-      font-size: 13px;
-    }
-
-    .site-footer a {
-      color: rgba(255,255,255,0.5);
-      text-decoration: none;
-    }
-
-    .site-footer a:hover { color: rgba(255,255,255,0.8); }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .site-header { padding: 14px 20px; }
-      .site-nav { gap: 16px; }
-      .site-nav a:not(.nav-cta):not(.nav-sign-in) { display: none; }
-      .hero { padding: 60px 20px 70px; }
-      .section { padding: 60px 20px; }
-      .section-alt { padding: 60px 20px; }
-      .steps { grid-template-columns: 1fr; gap: 32px; }
-      .features-grid { grid-template-columns: 1fr; gap: 24px; }
-      .bottom-cta { padding: 60px 20px; }
-      .book-callout { padding: 32px 24px; }
-      .trust-facts { gap: 32px; }
-      .trust-quote { font-size: 20px; }
-      .showcase { padding: 40px 20px; }
-      .showcase-inner { gap: 32px; }
-      .showcase-inner.reverse { flex-direction: row; }
-      .phone-frame { width: 220px; }
-      .share-card { width: 240px; height: 240px; }
-      .book-img { width: 220px; }
-    }
-
-    @media (max-width: 480px) {
-      .site-logo { font-size: 20px; }
-    }
-
-    /* Showcase sections (visual + copy side by side) */
+    /* Showcase sections */
     .showcase {
       max-width: 760px;
       margin: 0 auto;
@@ -541,31 +236,6 @@
       line-height: 1.6;
       max-width: 420px;
       margin-bottom: 0;
-    }
-
-    .showcase-bullets {
-      list-style: none;
-      padding: 0;
-      margin: 20px 0 0;
-    }
-
-    .showcase-bullets li {
-      font-size: 14px;
-      color: var(--text-muted);
-      padding: 4px 0 4px 14px;
-      position: relative;
-    }
-
-    .showcase-bullets li::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 4px;
-      height: 4px;
-      background: var(--green);
-      border-radius: 50%;
     }
 
     /* Phone Mockup */
@@ -741,48 +411,69 @@
       flex-shrink: 0;
     }
 
-    /* Share Row */
-    .share-row {
-      margin-top: 32px;
-      padding-top: 24px;
-      border-top: 1px solid rgba(255,255,255,0.15);
+    /* Bottom CTA */
+    .bottom-cta {
+      background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 100%);
+      color: var(--white);
+      text-align: center;
+      padding: 80px 32px;
     }
 
-    .share-label {
-      font-size: 14px !important;
-      color: rgba(255,255,255,0.6) !important;
-      margin-bottom: 12px !important;
+    .bottom-cta h2 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--white);
     }
 
-    .share-buttons {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
+    .bottom-cta p {
+      font-size: 17px;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 32px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    .share-btn {
-      font-family: 'DM Sans', sans-serif;
+    .bottom-cta .cta-note {
       font-size: 13px;
-      font-weight: 600;
-      padding: 8px 18px;
-      border: 1px solid rgba(255,255,255,0.25);
-      background: transparent;
-      color: rgba(255,255,255,0.8);
-      cursor: pointer;
+      color: rgba(255,255,255,0.45);
+      margin-top: 16px;
+    }
+
+    /* Footer */
+    .site-footer {
+      background: var(--green-deep);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 32px;
+      font-size: 13px;
+    }
+
+    .site-footer a {
+      color: rgba(255,255,255,0.5);
       text-decoration: none;
-      transition: background 0.2s;
-      display: inline-block;
     }
 
-    .share-btn:hover {
-      background: rgba(255,255,255,0.1);
-      color: white;
+    .site-footer a:hover { color: rgba(255,255,255,0.8); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .site-header { padding: 14px 20px; }
+      .site-nav { gap: 16px; }
+      .hero { padding: 60px 20px 70px; }
+      .bottom-cta { padding: 60px 20px; }
+      .showcase { padding: 40px 20px; }
+      .showcase-inner { gap: 32px; }
+      .showcase-inner.reverse { flex-direction: row; }
+      .phone-frame { width: 220px; }
+      .share-card { width: 240px; height: 240px; }
+      .book-img { width: 220px; }
     }
 
-    .share-copied {
-      background: rgba(255,255,255,0.15);
-      color: white;
+    @media (max-width: 480px) {
+      .site-logo { font-size: 20px; }
     }
   </style>
   <!-- Structured Data -->
@@ -798,31 +489,8 @@
       "price": "0",
       "priceCurrency": "USD"
     },
-    "description": "Free youth sports season journal for families. Capture games, practices, and moments. Turn your season into a hardcover photo book.",
+    "description": "Free season journal for youth sports families. Capture every game, practice, and moment worth remembering.",
     "url": "https://teamseason.app"
-  }
-  </script>
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Is Team Season free?",
-        "acceptedAnswer": { "@type": "Answer", "text": "The journal app is free forever. You only pay if you want a printed hardcover book ($39 plus shipping)." }
-      },
-      {
-        "@type": "Question",
-        "name": "What sports does Team Season support?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Team Season works for any youth sport including soccer, basketball, baseball, hockey, lacrosse, football, volleyball, swimming, track, tennis, gymnastics, and wrestling." }
-      },
-      {
-        "@type": "Question",
-        "name": "Can I journal for more than one child?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Create a separate season for each child and sport. Each season gets its own book." }
-      }
-    ]
   }
   </script>
 </head>
@@ -832,9 +500,8 @@
   <header class="site-header">
     <a href="/" class="site-logo">Team Season</a>
     <nav class="site-nav">
-      <a href="#features">Features</a>
       <a href="/app" class="nav-sign-in">Sign In</a>
-      <a href="/app" class="nav-cta">Start Free</a>
+      <a href="/app?skip=welcome" class="nav-cta">Start Free</a>
     </nav>
   </header>
 
@@ -849,22 +516,10 @@
       <p class="tagline">Long after the scores are forgotten, the moments remain.</p>
       <p class="lead">A simple journal for youth sports families. Capture the games, the wins, the funny car rides home. Then turn your season into a hardcover photo book.</p>
       <div class="hero-ctas">
-        <a href="/app" class="btn-primary">Start Your Free Journal</a>
+        <a href="/app?skip=welcome" class="btn-primary">Start Your Free Journal</a>
         <a href="/app" class="hero-sign-in">Already have an account? Sign in</a>
       </div>
     </div>
-  </section>
-
-  <!-- The Problem -->
-  <section class="section">
-    <h2>The Little Things Are the Best Things</h2>
-    <p>The championship game is easy to remember. But the stuff that really matters? Your kid's face after their first goal. The team chant. The pizza place you always went to after away games. That's the stuff worth holding on to.</p>
-    <ul class="problem-list">
-      <li>The moment your kid made the starting lineup</li>
-      <li>The rainy game where everyone played their hearts out</li>
-      <li>What the coach said that finally clicked</li>
-      <li>The car ride home when your kid couldn't stop smiling</li>
-    </ul>
   </section>
 
   <!-- LOG: Journal Showcase -->
@@ -874,11 +529,6 @@
         <p class="showcase-label">Log</p>
         <h2>Write It Down While It's Fresh</h2>
         <p>After every game, practice, or moment worth remembering. Add the score, a photo, what you noticed. It takes two minutes and you'll be glad you did.</p>
-        <ul class="showcase-bullets">
-          <li>Games, practices, and off-field moments</li>
-          <li>Scores, photos, and your own words</li>
-          <li>The stuff you'd forget by next week</li>
-        </ul>
       </div>
 
       <!-- Phone mockup -->
@@ -912,11 +562,6 @@
         <p class="showcase-label">Share</p>
         <h2>Turn a Moment into a Post</h2>
         <p>Any entry becomes a share card &mdash; sized for Instagram Stories or your feed. Your words, their photo, your team's colors. One tap.</p>
-        <ul class="showcase-bullets">
-          <li>Instagram Stories and feed sizes</li>
-          <li>Auto-styled with your team colors</li>
-          <li>Text grandparents or post to socials</li>
-        </ul>
       </div>
 
       <!-- Share card mockup -->
@@ -944,138 +589,25 @@
         <p class="showcase-label">Remember</p>
         <h2>A Real Book for the Shelf</h2>
         <p>At the end of the season, turn the whole journal into a printed hardcover photo book. Every entry, every score, every photo &mdash; bound and in their hands. The kind of thing they keep.</p>
-        <p style="font-weight:600;color:var(--text);margin-top:16px">$39 per book <span style="font-weight:400;font-size:13px;color:var(--text-muted)">+ shipping</span></p>
-        <p style="font-size:13px;margin-top:4px">Designed automatically from your journal. You just order it.</p>
+        <p style="font-size:13px;margin-top:16px">Designed automatically from your journal. You just order it.</p>
       </div>
 
       <img class="book-img" src="/images/book-mockup.jpg" alt="Team Season printed hardcover photo book" />
     </div>
   </section>
 
-  <!-- How It Works -->
-  <section class="section">
-    <h2>How Team Season Works</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step-number">01</div>
-        <h3>Set Up Your Season</h3>
-        <p>Pick your sport, add your child's name, name the season. Thirty seconds and you're journaling.</p>
-      </div>
-      <div class="step">
-        <div class="step-number">02</div>
-        <h3>Write After Each Game</h3>
-        <p>Quick entry after each game or practice. What happened? What stood out? Add a photo. Two minutes, tops.</p>
-      </div>
-      <div class="step">
-        <div class="step-number">03</div>
-        <h3>Print the Book</h3>
-        <p>At the end of the season, order a hardcover photo book &mdash; a real keepsake shipped to your door.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Trust / Social Proof -->
-  <section class="trust-section">
-    <div class="trust-inner">
-      <p class="trust-quote">&ldquo;My daughter asked to read her season book before bed. She went through every page and remembered things I'd already forgotten.&rdquo;</p>
-      <p class="trust-attr">&mdash; Soccer parent, Massachusetts</p>
-
-      <div class="trust-facts">
-        <div class="trust-fact">
-          <div class="trust-fact-value">Free</div>
-          <div class="trust-fact-label">The app, forever</div>
-        </div>
-        <div class="trust-fact">
-          <div class="trust-fact-value">12</div>
-          <div class="trust-fact-label">Sports supported</div>
-        </div>
-        <div class="trust-fact">
-          <div class="trust-fact-value">$39</div>
-          <div class="trust-fact-label">Hardcover book</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Features -->
-  <section class="section-alt" id="features">
-    <div class="section-inner">
-      <h2>Built for Youth Sports Families</h2>
-      <div class="features-grid">
-        <div class="feature">
-          <h3>Season Journal</h3>
-          <p>Quick entries for games, practices, tournaments, and off-field moments. Add photos, scores, and your own words.</p>
-        </div>
-        <div class="feature">
-          <h3>Any Sport</h3>
-          <p>Soccer, basketball, baseball, hockey, lacrosse, football, volleyball, swimming &mdash; pick your sport when you set up.</p>
-        </div>
-        <div class="feature">
-          <h3>Printed Hardcover Book</h3>
-          <p>Turn your journal into a hardcover photo book. Every entry becomes a page. Preview it before you buy.</p>
-        </div>
-        <div class="feature">
-          <h3>Multiple Seasons</h3>
-          <p>Journal multiple sports and seasons. Switch between them easily. Each season gets its own book.</p>
-        </div>
-        <div class="feature">
-          <h3>Share Cards</h3>
-          <p>Create shareable game-day cards from your entries. Post them or text them to grandparents.</p>
-        </div>
-        <div class="feature">
-          <h3>Works on Any Device</h3>
-          <p>Use it on your phone at the field or your laptop at home. Install it as an app or use it in the browser.</p>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Common Questions -->
-  <section class="section">
-    <h2>Common Questions</h2>
-    <ul class="problem-list">
-      <li><strong>Is it really free?</strong> The journal app is free forever. You only pay if you want a printed book ($39 plus shipping).</li>
-      <li><strong>What if I miss a few games?</strong> No pressure. Add entries whenever you want. Even 10 entries make a great book.</li>
-      <li><strong>Can I journal for more than one kid?</strong> Yes. Create a separate season for each child and sport.</li>
-      <li><strong>Is my data private?</strong> Your journal is yours. Nothing is shared unless you choose to share it.</li>
-    </ul>
-  </section>
-
   <!-- Bottom CTA -->
   <section class="bottom-cta">
     <h2>This Season Only Happens Once</h2>
     <p>Two minutes after each game. By the end of the season, you'll have a story your family keeps forever.</p>
-    <a href="/app" class="btn-primary">Start Your Free Journal</a>
+    <a href="/app?skip=welcome" class="btn-primary">Start Your Free Journal</a>
     <p class="cta-note">Free to use. No credit card required.</p>
-
-    <div class="share-row">
-      <p class="share-label">Know a sports family who'd love this?</p>
-      <div class="share-buttons">
-        <button class="share-btn" onclick="copyLink(this)">Copy Link</button>
-        <a class="share-btn" href="sms:?&body=Check%20out%20Team%20Season%20%E2%80%94%20a%20free%20journal%20for%20youth%20sports%20families.%20https%3A%2F%2Fteamseason.app">Text a Friend</a>
-        <a class="share-btn" href="mailto:?subject=Team%20Season%20%E2%80%94%20Youth%20Sports%20Journal&body=Check%20out%20Team%20Season%20%E2%80%94%20a%20free%20journal%20for%20youth%20sports%20families%20that%20turns%20your%20season%20into%20a%20hardcover%20book.%0A%0Ahttps%3A%2F%2Fteamseason.app">Email It</a>
-      </div>
-    </div>
   </section>
 
   <!-- Footer -->
   <footer class="site-footer">
-    <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/app">Open App</a> &nbsp;&middot;&nbsp; <a href="/season-recap">Season Recap Builder</a></p>
+    <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/app">Open App</a></p>
   </footer>
-
-  <script>
-    function copyLink(btn) {
-      navigator.clipboard.writeText('https://teamseason.app').then(function() {
-        btn.textContent = 'Copied!';
-        btn.classList.add('share-copied');
-        setTimeout(function() {
-          btn.textContent = 'Copy Link';
-          btn.classList.remove('share-copied');
-        }, 2000);
-      });
-    }
-  </script>
 
 </body>
 </html>

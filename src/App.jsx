@@ -10,218 +10,9 @@ import html2canvas from "html2canvas";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "YOUR_SUPABASE_URL";
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "YOUR_SUPABASE_ANON_KEY";
 
-// --- SUPABASE LITE CLIENT ---
-const supabase = {
-  auth: {
-    token: null,
-    refreshToken_: null,
-    user: null,
-    _saveSession(data) {
-      this.token = data.access_token;
-      this.refreshToken_ = data.refresh_token;
-      this.user = data.user;
-      localStorage.setItem("sb_token", data.access_token);
-      if (data.refresh_token) localStorage.setItem("sb_refresh_token", data.refresh_token);
-      localStorage.setItem("sb_user", JSON.stringify(data.user));
-    },
-    async signUp(email, password, metadata = {}) {
-      const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
-        body: JSON.stringify({ email, password, data: metadata }),
-      });
-      const data = await res.json();
-      if (data.access_token) this._saveSession(data);
-      return data;
-    },
-    async signIn(email, password) {
-      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (data.access_token) this._saveSession(data);
-      return data;
-    },
-    signOut() {
-      this.token = null;
-      this.refreshToken_ = null;
-      this.user = null;
-      localStorage.removeItem("sb_token");
-      localStorage.removeItem("sb_refresh_token");
-      localStorage.removeItem("sb_user");
-    },
-    restore() {
-      this.token = localStorage.getItem("sb_token");
-      this.refreshToken_ = localStorage.getItem("sb_refresh_token");
-      const u = localStorage.getItem("sb_user");
-      if (u) this.user = JSON.parse(u);
-      return !!this.token;
-    },
-    async refreshSession() {
-      if (!this.refreshToken_) return false;
-      try {
-        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
-          body: JSON.stringify({ refresh_token: this.refreshToken_ }),
-        });
-        const data = await res.json();
-        if (data.access_token) {
-          this._saveSession(data);
-          return true;
-        }
-      } catch (e) {
-        console.warn("Token refresh failed:", e);
-      }
-      return false;
-    },
-  },
-  from(table) {
-    let url = `${SUPABASE_URL}/rest/v1/${table}`;
-    let method = "GET";
-    let body = null;
-    let headers = {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${supabase.auth.token}`,
-      "Content-Type": "application/json",
-      Prefer: "return=representation",
-    };
-    let queryParams = [];
-
-    const builder = {
-      select(cols = "*") {
-        queryParams.push(`select=${cols}`);
-        return builder;
-      },
-      insert(data) {
-        method = "POST";
-        body = JSON.stringify(data);
-        return builder;
-      },
-      upsert(data, { onConflict } = {}) {
-        method = "POST";
-        body = JSON.stringify(data);
-        headers["Prefer"] = "return=representation,resolution=merge-duplicates";
-        if (onConflict) queryParams.push(`on_conflict=${onConflict}`);
-        return builder;
-      },
-      update(data) {
-        method = "PATCH";
-        body = JSON.stringify(data);
-        return builder;
-      },
-      delete() {
-        method = "DELETE";
-        return builder;
-      },
-      eq(col, val) {
-        queryParams.push(`${col}=eq.${val}`);
-        return builder;
-      },
-      in_(col, vals) {
-        queryParams.push(`${col}=in.(${vals.join(",")})`);
-        return builder;
-      },
-      order(col, { ascending = true } = {}) {
-        queryParams.push(`order=${col}.${ascending ? "asc" : "desc"}`);
-        return builder;
-      },
-      limit(n) {
-        queryParams.push(`limit=${n}`);
-        return builder;
-      },
-      async then(resolve) {
-        // Always use the CURRENT token at request time (not stale captured value)
-        headers.Authorization = `Bearer ${supabase.auth.token}`;
-        const q = queryParams.length ? "?" + queryParams.join("&") : "";
-        try {
-          let res = await fetch(url + q, { method, headers, body });
-          // Auto-retry on 401 (expired token) with a refreshed session
-          if (res.status === 401 && supabase.auth.refreshToken_) {
-            const refreshed = await supabase.auth.refreshSession();
-            if (refreshed) {
-              headers.Authorization = `Bearer ${supabase.auth.token}`;
-              res = await fetch(url + q, { method, headers, body });
-            }
-          }
-          if (res.ok) {
-            const data = await res.json();
-            resolve({ data, error: null });
-          } else {
-            let errBody;
-            try { errBody = await res.json(); } catch { errBody = { status: res.status, statusText: res.statusText }; }
-            resolve({ data: [], error: errBody });
-          }
-        } catch (e) {
-          resolve({ data: [], error: { message: e.message } });
-        }
-      },
-    };
-    return builder;
-  },
-  async rpc(functionName, params = {}) {
-    let res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${functionName}`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${supabase.auth.token || SUPABASE_ANON_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(params),
-    });
-    if (res.status === 401 && supabase.auth.refreshToken_) {
-      const refreshed = await supabase.auth.refreshSession();
-      if (refreshed) {
-        res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${functionName}`, {
-          method: "POST",
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${supabase.auth.token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(params),
-        });
-      }
-    }
-    const data = await res.json();
-    return { data, error: res.ok ? null : data };
-  },
-  storage: {
-    from(bucket) {
-      return {
-        async upload(path, file) {
-          let res = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`, {
-            method: "POST",
-            headers: {
-              apikey: SUPABASE_ANON_KEY,
-              Authorization: `Bearer ${supabase.auth.token}`,
-            },
-            body: file,
-          });
-          if (res.status === 401 && supabase.auth.refreshToken_) {
-            const refreshed = await supabase.auth.refreshSession();
-            if (refreshed) {
-              res = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`, {
-                method: "POST",
-                headers: {
-                  apikey: SUPABASE_ANON_KEY,
-                  Authorization: `Bearer ${supabase.auth.token}`,
-                },
-                body: file,
-              });
-            }
-          }
-          return { error: res.ok ? null : await res.json() };
-        },
-        getPublicUrl(path) {
-          return { data: { publicUrl: `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}` } };
-        },
-      };
-    },
-  },
-};
+// --- SUPABASE CLIENT (official SDK — handles token refresh automatically) ---
+import { createClient } from "@supabase/supabase-js";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // --- DEMO MODE ---
 const DEMO = SUPABASE_URL === "YOUR_SUPABASE_URL";
@@ -642,11 +433,11 @@ function AuthScreen({ onAuth, onDemo, onSkipAuth, onBack }) {
     setLoading(true);
     setError("");
     try {
-      const result = isSignUp
-        ? await supabase.auth.signUp(email, password)
-        : await supabase.auth.signIn(email, password);
-      if (result.error) throw new Error(result.error_description || result.msg || "Auth failed");
-      onAuth(result.user);
+      const { data, error } = isSignUp
+        ? await supabase.auth.signUp({ email, password })
+        : await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      onAuth(data.user);
     } catch (err) {
       setError(err.message);
     }
@@ -867,8 +658,8 @@ function OnboardShareCard({ data }) {
   );
 }
 
-function ValueOnboarding({ onComplete, onSignIn }) {
-  const [step, setStep] = useState(0);
+function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
+  const [step, setStep] = useState(initialStep);
   const [transitioning, setTransitioning] = useState(false);
   const [data, setData] = useState({
     sport: "", sportIcon: "", sportEvent: "game", sportEventDay: "Game Day",
@@ -903,9 +694,9 @@ function ValueOnboarding({ onComplete, onSignIn }) {
     setAuthLoading(true);
     setAuthError("");
     try {
-      const result = await supabase.auth.signUp(email, password);
-      if (result.error) throw new Error(result.error_description || result.msg || "Signup failed");
-      onComplete(result.user, data);
+      const { data: authData, error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+      onComplete(authData.user, data);
     } catch (err) {
       setAuthError(err.message);
     }
@@ -5256,11 +5047,11 @@ function JoinScreen({ token, onComplete, onBack }) {
     setAuthLoading(true);
     setAuthError("");
     try {
-      const result = isSignUp
-        ? await supabase.auth.signUp(email, password, { role: "parent" })
-        : await supabase.auth.signIn(email, password);
-      if (result.error) throw new Error(result.error_description || result.msg || "Auth failed");
-      onComplete(result.user, joinInfo);
+      const { data, error } = isSignUp
+        ? await supabase.auth.signUp({ email, password })
+        : await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      onComplete(data.user, joinInfo);
     } catch (err) {
       setAuthError(err.message);
     }
@@ -5408,6 +5199,21 @@ export default function SportsJournalApp() {
   const [role, setRole] = useState(null);
   const [isDemo, setIsDemo] = useState(false);
 
+  // Listen for auth state changes (SDK handles token refresh automatically)
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || event === "TOKEN_REFRESHED" && !session) {
+        setAuthed(false);
+        setUser(null);
+        setScreen("auth");
+      } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        setUser(session?.user || null);
+        setAuthed(!!session);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
   // Data (parent)
   const [team, setTeam] = useState(null);
   const [season, setSeason] = useState(null);
@@ -5504,9 +5310,11 @@ export default function SportsJournalApp() {
           setPlayers(data.players);
           setEntries(data.entries);
           setScreen("home");
-          if (!DEMO && supabase.auth.restore()) {
-            setUser(supabase.auth.user);
-            setAuthed(true);
+          // Restore auth in background (async — won't block rendering)
+          if (!DEMO) {
+            supabase.auth.getSession().then(({ data: { session } }) => {
+              if (session) { setUser(session.user); setAuthed(true); }
+            });
           }
           return;
         }
@@ -5524,13 +5332,13 @@ export default function SportsJournalApp() {
         setPlayers(data.players);
         const cleanedEntries = cleanEntryPhotos(data.entries);
         setEntries(cleanedEntries);
-        // Migrate to allSeasons with cleaned entries
         setAllSeasons([{ ...data, entries: cleanedEntries }]);
         setActiveSeasonIdx(0);
         setScreen("home");
-        if (!DEMO && supabase.auth.restore()) {
-          setUser(supabase.auth.user);
-          setAuthed(true);
+        if (!DEMO) {
+          supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) { setUser(session.user); setAuthed(true); }
+          });
         }
         return;
       } catch (e) {
@@ -5543,41 +5351,40 @@ export default function SportsJournalApp() {
       return;
     }
 
-    // No localStorage data — try cloud
-    if (supabase.auth.restore()) {
-      setUser(supabase.auth.user);
+    // No localStorage data — try cloud restore
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setScreen("onboard");
+        return;
+      }
+      setUser(session.user);
       setAuthed(true);
-      // Try loading from Supabase
-      (async () => {
-        try {
-          const uid = supabase.auth.user.id;
-          const { data: teams } = await supabase.from("teams").select("*").eq("created_by", uid).limit(1);
-          if (teams && teams.length > 0) {
-            const cloudTeam = teams[0];
-            const { data: seasons } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid).limit(1);
-            const cloudSeason = seasons?.[0];
-            if (cloudSeason) {
-              const { data: cloudPlayers } = await supabase.from("players").select("*").eq("team_id", cloudTeam.id);
-              const { data: cloudEntries } = await supabase.from("entries").select("*").eq("season_id", cloudSeason.id).order("entry_date", { ascending: false });
-              setRole("parent");
-              setTeam({ id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club" });
-              setSeason({ id: cloudSeason.id, name: cloudSeason.name, startDate: cloudSeason.start_date, endDate: cloudSeason.end_date });
-              setPlayers((cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child })));
-              setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: e.photo_url || e.photo_path || null })));
-              setScreen("home");
-              return;
-            }
+      try {
+        const uid = session.user.id;
+        const { data: teams } = await supabase.from("teams").select("*").eq("created_by", uid).limit(1);
+        if (teams && teams.length > 0) {
+          const cloudTeam = teams[0];
+          const { data: seasons } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid).limit(1);
+          const cloudSeason = seasons?.[0];
+          if (cloudSeason) {
+            const { data: cloudPlayers } = await supabase.from("players").select("*").eq("team_id", cloudTeam.id);
+            const { data: cloudEntries } = await supabase.from("entries").select("*").eq("season_id", cloudSeason.id).order("entry_date", { ascending: false });
+            setRole("parent");
+            setTeam({ id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club" });
+            setSeason({ id: cloudSeason.id, name: cloudSeason.name, startDate: cloudSeason.start_date, endDate: cloudSeason.end_date });
+            setPlayers((cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child })));
+            setEntries((cloudEntries || []).map((e) => ({ ...e, photoPreview: e.photo_url || e.photo_path || null })));
+            setScreen("home");
+            return;
           }
-        } catch (e) {
-          console.warn("Cloud load failed:", e);
         }
-        // No cloud data either — go straight to setup
-        setRole("parent");
-        setScreen("setup");
-      })();
-    } else {
-      setScreen("onboard");
-    }
+      } catch (e) {
+        console.warn("Cloud load failed:", e);
+      }
+      setRole("parent");
+      setScreen("setup");
+    })();
   }, []);
 
   // Keep a ref for activeSeasonIdx so persist useEffect always reads current value
@@ -5669,24 +5476,18 @@ export default function SportsJournalApp() {
     };
   }, [showMenu]);
 
-  // Debug state (temporary — remove after fixing cloud restore)
-  const [debugInfo, setDebugInfo] = useState(null);
 
   const handleAuth = async (authUser) => {
     setUser(authUser);
     setAuthed(true);
     setScreen("loading");
-    const debug = [];
 
     // Try loading existing data from Supabase before sending to onboarding
     try {
       const uid = authUser.id;
-      debug.push(`uid: ${uid?.slice(0, 8)}...`);
-      debug.push(`token: ${supabase.auth.token ? "yes" : "NO"}`);
 
       // Check if user is an org admin
-      const { data: memberships, error: memErr } = await supabase.from("org_members").select("org_id,role").eq("user_id", uid);
-      debug.push(`org_members: ${memberships?.length || 0}${memErr ? " ERR:" + JSON.stringify(memErr) : ""}`);
+      const { data: memberships } = await supabase.from("org_members").select("org_id,role").eq("user_id", uid);
       const adminMembership = memberships?.find((m) => m.role === "admin");
 
       if (adminMembership) {
@@ -5701,7 +5502,7 @@ export default function SportsJournalApp() {
             const playerIds = (cloudPlayers || []).map((p) => p.id);
             let connMap = {};
             if (playerIds.length > 0) {
-              const { data: connections } = await supabase.from("player_connections").select("player_id,join_token,user_id").in_("player_id", playerIds);
+              const { data: connections } = await supabase.from("player_connections").select("player_id,join_token,user_id").in("player_id", playerIds);
               (connections || []).forEach((c) => { connMap[c.player_id] = c; });
             }
             teamsWithPlayers.push({
@@ -5722,20 +5523,14 @@ export default function SportsJournalApp() {
       }
 
       // Check if user has a team (parent flow - self-created)
-      const { data: teams, error: teamErr } = await supabase.from("teams").select("*").eq("created_by", uid).limit(1);
-      debug.push(`teams: ${teams?.length || 0}${teamErr ? " ERR:" + JSON.stringify(teamErr) : ""}`);
+      const { data: teams } = await supabase.from("teams").select("*").eq("created_by", uid).limit(1);
       if (teams?.length > 0) {
         const cloudTeam = teams[0];
-        debug.push(`team: ${cloudTeam.name}`);
-        const { data: seasons, error: seasonErr } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid).limit(1);
-        debug.push(`seasons: ${seasons?.length || 0}${seasonErr ? " ERR:" + JSON.stringify(seasonErr) : ""}`);
+        const { data: seasons } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid).limit(1);
         const cloudSeason = seasons?.[0];
         if (cloudSeason) {
           const { data: cloudPlayers } = await supabase.from("players").select("*").eq("team_id", cloudTeam.id);
           const { data: cloudEntries } = await supabase.from("entries").select("*").eq("season_id", cloudSeason.id).order("entry_date", { ascending: false });
-          debug.push(`players: ${cloudPlayers?.length || 0}, entries: ${cloudEntries?.length || 0}`);
-          debug.push("→ home (cloud)");
-          setDebugInfo(debug.join(" | "));
           setRole("parent");
           setTeam({ id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club", orgId: cloudTeam.org_id || null });
           setSeason({ id: cloudSeason.id, name: cloudSeason.name, startDate: cloudSeason.start_date, endDate: cloudSeason.end_date });
@@ -5747,8 +5542,7 @@ export default function SportsJournalApp() {
       }
 
       // Check if user has a season via join flow (team owned by admin, season owned by parent)
-      const { data: joinSeasons, error: joinErr } = await supabase.from("seasons").select("*, teams(*)").eq("user_id", uid).limit(1);
-      debug.push(`joinSeasons: ${joinSeasons?.length || 0}${joinErr ? " ERR:" + JSON.stringify(joinErr) : ""}`);
+      const { data: joinSeasons } = await supabase.from("seasons").select("*, teams(*)").eq("user_id", uid).limit(1);
       if (joinSeasons?.length > 0) {
         const js = joinSeasons[0];
         const jt = js.teams;
@@ -5764,12 +5558,9 @@ export default function SportsJournalApp() {
           return;
         }
       }
-      debug.push("No cloud data found");
     } catch (e) {
-      debug.push(`CATCH: ${e.message}`);
       console.warn("Cloud restore on login failed:", e);
     }
-    setDebugInfo(debug.join(" | "));
 
     // No cloud data — check localStorage before giving up
     const allSaved = localStorage.getItem("teamSeasonAll");
@@ -5911,43 +5702,39 @@ export default function SportsJournalApp() {
     setActiveSeasonIdx(0);
     activeIdxRef.current = 0;
 
-    // Sync to cloud
+    // Sync to cloud (SDK handles token automatically)
     if (!DEMO && authUser) {
-      if (!supabase.auth.token) {
-        console.warn("Cloud sync skipped — no auth token (email confirmation may be pending)");
-      } else {
-        (async () => {
-          try {
-            const { error: teamErr } = await supabase.from("teams").insert({
-              id: teamId, created_by: authUser.id,
-              name: teamData.name, sport: teamData.sport,
-              emoji: teamData.emoji, color: teamData.color,
+      (async () => {
+        try {
+          const { error: teamErr } = await supabase.from("teams").insert({
+            id: teamId, created_by: authUser.id,
+            name: teamData.name, sport: teamData.sport,
+            emoji: teamData.emoji, color: teamData.color,
+          });
+          if (teamErr) console.warn("Team insert failed:", teamErr);
+          const { error: seasonErr } = await supabase.from("seasons").insert({
+            id: seasonId, user_id: authUser.id,
+            team_id: teamId, name: seasonData.name,
+          });
+          if (seasonErr) console.warn("Season insert failed:", seasonErr);
+          const { error: playerErr } = await supabase.from("players").insert({
+            id: playerId, team_id: teamId,
+            name: playerData.name, is_my_child: true,
+          });
+          if (playerErr) console.warn("Player insert failed:", playerErr);
+          if (onboardData.memory) {
+            const { error: entryErr } = await supabase.from("entries").insert({
+              id: entryId, user_id: authUser.id, season_id: seasonId,
+              entry_date: entryData.entry_date, entry_type: "game",
+              text: entryData.text,
             });
-            if (teamErr) console.warn("Team insert failed:", teamErr);
-            const { error: seasonErr } = await supabase.from("seasons").insert({
-              id: seasonId, user_id: authUser.id,
-              team_id: teamId, name: seasonData.name,
-            });
-            if (seasonErr) console.warn("Season insert failed:", seasonErr);
-            const { error: playerErr } = await supabase.from("players").insert({
-              id: playerId, team_id: teamId,
-              name: playerData.name, is_my_child: true,
-            });
-            if (playerErr) console.warn("Player insert failed:", playerErr);
-            if (onboardData.memory) {
-              const { error: entryErr } = await supabase.from("entries").insert({
-                id: entryId, user_id: authUser.id, season_id: seasonId,
-                entry_date: entryData.entry_date, entry_type: "game",
-                text: entryData.text,
-              });
-              if (entryErr) console.warn("Entry insert failed:", entryErr);
-            }
-            console.log("Cloud sync (onboard) complete");
-          } catch (e) {
-            console.warn("Cloud sync (onboard) failed:", e);
+            if (entryErr) console.warn("Entry insert failed:", entryErr);
           }
-        })();
-      }
+          console.log("Cloud sync (onboard) complete");
+        } catch (e) {
+          console.warn("Cloud sync (onboard) failed:", e);
+        }
+      })();
     }
   };
 
@@ -6110,8 +5897,8 @@ export default function SportsJournalApp() {
       return newIdx;
     });
 
-    // Sync to cloud (fire and forget)
-    if (!DEMO && user && supabase.auth.token) {
+    // Sync to cloud (fire and forget — SDK handles token automatically)
+    if (!DEMO && user) {
       (async () => {
         try {
           const { error: teamErr } = await supabase.from("teams").upsert({
@@ -6137,8 +5924,6 @@ export default function SportsJournalApp() {
           console.warn("Cloud sync (setup) failed:", e);
         }
       })();
-    } else if (!DEMO && user) {
-      console.warn("Cloud sync (setup) skipped — no auth token");
     }
   };
 
@@ -6241,29 +6026,28 @@ export default function SportsJournalApp() {
       return;
     }
 
-    // Sync to cloud
-    if (!DEMO && user && season?.id && supabase.auth.token) {
+    // Sync entry to cloud (SDK handles token automatically)
+    if (!DEMO && user && season?.id) {
       (async () => {
-        const syncDebug = [`uid:${user.id?.slice(0,8)}`, `sid:${season.id?.slice(0,8)}`, `tok:${supabase.auth.token?.slice(0,20)}`];
         try {
-          let photoPath = null;
+          let photoUrl = null;
+
+          // Upload photo to Supabase Storage if present
           if (newEntry.photoData) {
-            try {
-              const blob = base64ToBlob(newEntry.photoData);
-              const filePath = `${user.id}/${newEntry.id}.jpg`;
-              const { error: uploadError } = await supabase.storage.from("entry-photos").upload(filePath, blob);
-              if (!uploadError) {
-                const { data: { publicUrl } } = supabase.storage.from("entry-photos").getPublicUrl(filePath);
-                photoPath = publicUrl;
-                syncDebug.push("photo:OK");
-              } else {
-                syncDebug.push(`photo:ERR ${JSON.stringify(uploadError).slice(0,80)}`);
-              }
-            } catch (uploadErr) {
-              syncDebug.push(`photo:CATCH ${uploadErr.message}`);
+            const blob = base64ToBlob(newEntry.photoData);
+            const filePath = `${user.id}/${newEntry.id}.jpg`;
+            const { error: uploadErr } = await supabase.storage
+              .from("entry-photos")
+              .upload(filePath, blob, { contentType: "image/jpeg", upsert: true });
+            if (uploadErr) {
+              console.warn("Photo upload failed:", uploadErr);
+            } else {
+              const { data: urlData } = supabase.storage.from("entry-photos").getPublicUrl(filePath);
+              photoUrl = urlData?.publicUrl || null;
             }
           }
-          const entryPayload = {
+
+          const { error: entryErr } = await supabase.from("entries").insert({
             id: newEntry.id, user_id: user.id, season_id: season.id,
             entry_date: newEntry.entry_date,
             entry_type: newEntry.entry_type || "game",
@@ -6274,39 +6058,25 @@ export default function SportsJournalApp() {
             score_away: newEntry.score_away != null ? newEntry.score_away : null,
             result: newEntry.result || null,
             consent_shared: newEntry.consent_shared || false,
-          };
-          // DB may have photo_path (old) or photo_url (new) — only include if we have a value
-          if (photoPath) entryPayload.photo_url = photoPath;
-          const { data: insertData, error: entryErr } = await supabase.from("entries").insert(entryPayload);
-          if (entryErr) {
-            syncDebug.push(`INSERT FAILED: ${JSON.stringify(entryErr)}`);
-            setDebugInfo && setDebugInfo(`SYNC FAIL: ${syncDebug.join(" | ")}`);
-          } else {
-            syncDebug.push("INSERT OK");
-            setDebugInfo && setDebugInfo(`SYNC OK: ${syncDebug.join(" | ")}`);
-            // Replace base64 photoData with cloud URL to free localStorage space
-            if (photoPath) {
-              setEntries((prev) => prev.map((e) =>
-                e.id === newEntry.id ? { ...e, photo_url: photoPath, photoPreview: photoPath, photoData: null } : e
-              ));
-            }
+            ...(photoUrl ? { photo_url: photoUrl } : {}),
+          });
+          if (entryErr) console.warn("Entry sync failed:", entryErr);
+
+          // Update local entry with cloud URL (so localStorage doesn't bloat with base64)
+          if (photoUrl) {
+            setEntries((prev) => prev.map((e) =>
+              e.id === newEntry.id ? { ...e, photo_url: photoUrl, photoPreview: photoUrl, photoData: null } : e
+            ));
           }
         } catch (e) {
-          syncDebug.push(`CATCH: ${e.message}`);
-          setDebugInfo && setDebugInfo(`SYNC CATCH: ${syncDebug.join(" | ")}`);
+          console.warn("Entry sync error:", e.message);
         }
       })();
-    } else if (!DEMO) {
-      const missing = [];
-      if (!user) missing.push("no user");
-      if (!season?.id) missing.push("no season");
-      if (!supabase.auth.token) missing.push("no token");
-      setDebugInfo && setDebugInfo(`Entry sync SKIPPED: ${missing.join(", ")}`);
     }
   };
 
-  const handleSignOut = () => {
-    supabase.auth.signOut();
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
     localStorage.removeItem("teamSeason");
     localStorage.removeItem("teamSeasonAdmin");
     localStorage.removeItem("teamSeasonAll");
@@ -6327,13 +6097,18 @@ export default function SportsJournalApp() {
     setShowMenu(false);
   };
 
-  // Filter entries
+  // Sort entries newest first, then filter
+  const sortedEntries = [...entries].sort((a, b) => {
+    const dateCompare = new Date(b.entry_date) - new Date(a.entry_date);
+    if (dateCompare !== 0) return dateCompare;
+    return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+  });
   const offFieldTypes = ["event", "sightseeing", "food"];
   const filteredEntries = filter === "all"
-    ? entries
+    ? sortedEntries
     : filter === "off-field"
-    ? entries.filter((e) => offFieldTypes.includes(e.entry_type))
-    : entries.filter((e) => e.entry_type === filter);
+    ? sortedEntries.filter((e) => offFieldTypes.includes(e.entry_type))
+    : sortedEntries.filter((e) => e.entry_type === filter);
 
   // --- RENDER ---
   return (
@@ -6356,6 +6131,7 @@ export default function SportsJournalApp() {
         <ValueOnboarding
           onComplete={handleOnboardComplete}
           onSignIn={() => setScreen("auth")}
+          initialStep={new URLSearchParams(window.location.search).get("skip") === "welcome" ? 1 : 0}
         />
       )}
       {screen === "auth" && <AuthScreen onAuth={handleAuth} onDemo={handleDemo} onSkipAuth={() => { setRole("parent"); setScreen("setup"); }} onBack={() => setScreen("onboard")} />}
@@ -6366,10 +6142,7 @@ export default function SportsJournalApp() {
           onBack={() => { setJoinToken(null); setScreen("onboard"); }}
         />
       )}
-      {screen === "setup" && <>
-        {debugInfo && <div style={{ background: "#FEF3C7", color: "#92400E", padding: "12px 16px", fontSize: 12, fontFamily: "monospace", wordBreak: "break-all" }}>DEBUG: {debugInfo}</div>}
-        <TeamSetupScreen role={role} onComplete={handleSetup} />
-      </>}
+      {screen === "setup" && <TeamSetupScreen role={role} onComplete={handleSetup} />}
       {screen === "org-setup" && <OrgSetupScreen onComplete={handleOrgSetup} />}
       {screen === "admin" && org && (
         <AdminDashboard
@@ -6383,10 +6156,12 @@ export default function SportsJournalApp() {
       )}
 
       {screen === "home" && team && season && (<>
-        {debugInfo && <div style={{ background: debugInfo.includes("SYNC OK") ? "#D1FAE5" : "#FEE2E2", color: debugInfo.includes("SYNC OK") ? "#065F46" : "#991B1B", padding: "8px 16px", fontSize: 11, fontFamily: "monospace", wordBreak: "break-all", position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999 }} onClick={() => setDebugInfo(null)}>{debugInfo} (tap to dismiss)</div>}
         <AppShell
           accentColor={brandPrimary}
-          title={team.name}
+          title={(() => {
+            const myChild = players.find(p => p.is_my_child);
+            return myChild ? `${myChild.name} — ${team.name}` : team.name;
+          })()}
           titleIcon={team.logo ? (
             <img src={team.logo} alt="" style={{
               width: 28, height: 28, borderRadius: "50%", objectFit: "cover",
@@ -6465,7 +6240,10 @@ export default function SportsJournalApp() {
                     <div style={{
                       fontSize: 14, fontWeight: idx === activeSeasonIdx ? 600 : 400,
                       color: idx === activeSeasonIdx ? brandPrimary : theme.text,
-                    }}>{s.team?.name || "Team"}</div>
+                    }}>{(() => {
+                      const child = s.players?.find(p => p.is_my_child);
+                      return child ? `${child.name} — ${s.team?.name || "Team"}` : (s.team?.name || "Team");
+                    })()}</div>
                     <div style={{ fontSize: 12, color: theme.textMuted }}>{s.season?.name || "Season"}</div>
                   </div>
                   {idx === activeSeasonIdx && (
