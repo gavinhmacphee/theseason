@@ -1139,7 +1139,7 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
                 fontSize: 15, color: "#d4d4d4", lineHeight: 1.6,
                 margin: "0 0 20px 0", textAlign: "center",
               }}>
-                Create a free account to keep this card, share it, and start building {data.childName}'s season journal.
+                Save {data.childName}'s card and start building their season journal.
               </p>
 
               <form onSubmit={handleSignUp}>
@@ -1177,12 +1177,12 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
                     fontFamily: "'DM Sans', sans-serif",
                     opacity: authLoading ? 0.7 : 1,
                   }}>
-                  {authLoading ? "Creating account..." : "Create my free account →"}
+                  {authLoading ? "Saving..." : `Save ${data.childName}'s card →`}
                 </button>
               </form>
 
               <p style={{ fontSize: 12, color: "#555", marginTop: 12, textAlign: "center" }}>
-                Free forever. No credit card. Book is $39 + shipping.
+                Free forever. No credit card.
               </p>
             </div>
           </Fade>
