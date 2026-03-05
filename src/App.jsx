@@ -5401,15 +5401,13 @@ export default function SportsJournalApp() {
       setAuthed(true);
       try {
         const uid = session.user.id;
-        const { data: teams, error: teamsErr } = await supabase.from("teams").select("*").eq("created_by", uid);
-        console.log("[cloud-restore] uid:", uid, "teams:", teams?.length, "error:", teamsErr);
+        const { data: teams } = await supabase.from("teams").select("*").eq("created_by", uid);
         if (teams && teams.length > 0) {
           // Build allSeasons from every team + season pair
           const restoredSeasons = [];
           for (const cloudTeam of teams) {
-            const { data: seasons, error: seasonsErr } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid);
+            const { data: seasons } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid);
             const { data: cloudPlayers } = await supabase.from("players").select("*").eq("team_id", cloudTeam.id);
-            console.log("[cloud-restore] team:", cloudTeam.name, cloudTeam.sport, "seasons:", seasons?.length, "error:", seasonsErr);
             const teamObj = { id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club" };
             const playersArr = (cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child }));
             for (const cloudSeason of (seasons || [])) {
@@ -5991,9 +5989,9 @@ export default function SportsJournalApp() {
             }, { onConflict: "id" });
             if (playerErr) console.warn("Player upsert failed:", playerErr);
           }
-          console.log("[cloud-sync-setup] complete — team:", teamData.name, teamData.sport, "season:", seasonData.name, "teamErr:", teamErr, "seasonErr:", seasonErr);
+          console.log("Cloud sync (setup) complete");
         } catch (e) {
-          console.warn("[cloud-sync-setup] failed:", e);
+          console.warn("Cloud sync (setup) failed:", e);
         }
       })();
     }
