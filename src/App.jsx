@@ -5256,6 +5256,38 @@ export default function SportsJournalApp() {
     return d && (new Date() - new Date(d)) < 24 * 60 * 60 * 1000;
   });
 
+  // PWA install prompt
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(() => !localStorage.getItem("ts_install_dismissed"));
+  const [showHelp, setShowHelp] = useState(false);
+
+  // Capture beforeinstallprompt (Android/Chrome)
+  useEffect(() => {
+    const handler = (e) => { e.preventDefault(); setInstallPrompt(e); };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+
+  const handleInstall = async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      if (outcome === "accepted") {
+        setShowInstallBanner(false);
+        localStorage.setItem("ts_install_dismissed", "1");
+      }
+      setInstallPrompt(null);
+    }
+  };
+
+  const dismissInstallBanner = () => {
+    setShowInstallBanner(false);
+    localStorage.setItem("ts_install_dismissed", "1");
+  };
+
   // Dynamic brand color derived from team or org
   const brandPrimary = team?.color || org?.color || theme.primary;
   const brandPrimaryLight = lightenColor(brandPrimary, 0.08);
@@ -6205,6 +6237,13 @@ export default function SportsJournalApp() {
                   boxShadow: "0 4px 16px rgba(0,0,0,0.1)", overflow: "hidden", zIndex: 50,
                   minWidth: 140,
                 }}>
+                  <button onClick={() => { setShowMenu(false); setShowHelp(true); }} style={{
+                      display: "block", width: "100%", padding: "10px 16px",
+                      background: "none", border: "none", cursor: "pointer",
+                      fontSize: 14, color: theme.text, textAlign: "left",
+                    }}>
+                      Help & FAQ
+                  </button>
                   {allSeasons.length > 1 && (
                     <button onClick={() => { setShowMenu(false); deleteSeason(activeSeasonIdx); }} style={{
                       display: "block", width: "100%", padding: "10px 16px",
@@ -6268,6 +6307,45 @@ export default function SportsJournalApp() {
                 <span style={{ fontSize: 18, color: theme.textMuted }}>+</span>
                 <span style={{ fontSize: 14, color: theme.textMuted, fontWeight: 500 }}>New Season</span>
               </button>
+            </div>
+          )}
+
+          {/* PWA Install Banner */}
+          {showInstallBanner && !isStandalone && (installPrompt || isIOS) && (
+            <div style={{
+              background: `linear-gradient(135deg, ${brandPrimary}12, ${brandPrimary}06)`,
+              border: `1px solid ${brandPrimary}25`,
+              borderRadius: 12, padding: "16px 16px", marginBottom: 12,
+            }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: theme.text, marginBottom: 4 }}>
+                    Add to Home Screen
+                  </div>
+                  {isIOS ? (
+                    <div style={{ fontSize: 13, color: theme.textMuted, lineHeight: 1.5 }}>
+                      Tap the share button <span style={{ fontSize: 15 }}>&#x2191;</span> in Safari, then "Add to Home Screen" for the full app experience.
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 13, color: theme.textMuted, lineHeight: 1.5 }}>
+                      Install Team Season on your phone so it's ready after every game.
+                    </div>
+                  )}
+                </div>
+                <button onClick={dismissInstallBanner} style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  fontSize: 18, color: theme.textMuted, padding: 0, lineHeight: 1, flexShrink: 0,
+                }}>×</button>
+              </div>
+              {installPrompt && (
+                <button onClick={handleInstall} style={{
+                  marginTop: 12, width: "100%", padding: "10px 16px",
+                  background: brandPrimary, color: "white", border: "none",
+                  fontSize: 14, fontWeight: 600, borderRadius: 8, cursor: "pointer",
+                }}>
+                  Install App
+                </button>
+              )}
             </div>
           )}
 
@@ -6422,6 +6500,70 @@ export default function SportsJournalApp() {
               players={players}
               onClose={() => setShowOrder(false)}
             />
+          )}
+
+          {/* Help & FAQ Modal */}
+          {showHelp && (
+            <div style={{
+              position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+              zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center",
+              padding: 20,
+            }} onClick={() => setShowHelp(false)}>
+              <div style={{
+                background: "white", borderRadius: 16, maxWidth: 440, width: "100%",
+                maxHeight: "80vh", overflow: "auto", padding: "28px 24px",
+                boxShadow: "0 24px 48px rgba(0,0,0,0.15)",
+              }} onClick={(e) => e.stopPropagation()}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                  <h2 style={{
+                    fontFamily: "'Crimson Pro', Georgia, serif", fontSize: 24,
+                    fontWeight: 700, color: brandPrimary, margin: 0,
+                  }}>Help & FAQ</h2>
+                  <button onClick={() => setShowHelp(false)} style={{
+                    background: "none", border: "none", fontSize: 22, color: theme.textMuted,
+                    cursor: "pointer", padding: 0, lineHeight: 1,
+                  }}>×</button>
+                </div>
+
+                {[
+                  { q: "Is Team Season free?", a: "The journal app is free forever. You only pay if you want a printed hardcover book at the end of the season." },
+                  { q: "How do I add an entry?", a: "Tap the \"New Entry\" button after a game, practice, or any moment worth remembering. Add a score, a photo, and what you noticed." },
+                  { q: "Can I journal for more than one kid?", a: "Yes. Tap the season name at the top of your journal to switch between seasons, or tap \"+\" to start a new one." },
+                  { q: "How does the book work?", a: "At the end of the season, tap the book icon to preview your hardcover photo book. Every entry becomes a page. You can order it right from the app." },
+                  { q: "Is my data private?", a: "Your journal is yours. Nothing is shared unless you choose to share it." },
+                  { q: "How do I install the app?", a: isIOS
+                    ? "In Safari, tap the share button and select \"Add to Home Screen.\" Team Season will appear as an app on your phone."
+                    : "If you see the \"Add to Home Screen\" banner, tap \"Install App.\" You can also install from your browser's menu."
+                  },
+                ].map((item, i) => (
+                  <div key={i} style={{
+                    borderTop: i === 0 ? "none" : `1px solid ${theme.border}`,
+                    paddingTop: i === 0 ? 0 : 14, paddingBottom: 14,
+                  }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: theme.text, marginBottom: 4 }}>
+                      {item.q}
+                    </div>
+                    <div style={{ fontSize: 14, color: theme.textMuted, lineHeight: 1.6 }}>
+                      {item.a}
+                    </div>
+                  </div>
+                ))}
+
+                <div style={{
+                  borderTop: `1px solid ${theme.border}`, paddingTop: 16, marginTop: 4,
+                  textAlign: "center",
+                }}>
+                  <div style={{ fontSize: 13, color: theme.textMuted, marginBottom: 6 }}>
+                    Still have a question?
+                  </div>
+                  <a href="mailto:hello@teamseason.app" style={{
+                    fontSize: 14, fontWeight: 600, color: brandPrimary, textDecoration: "none",
+                  }}>
+                    hello@teamseason.app
+                  </a>
+                </div>
+              </div>
+            </div>
           )}
         </AppShell>
       </>)}
