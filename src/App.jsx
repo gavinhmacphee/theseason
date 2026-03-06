@@ -17,6 +17,56 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // --- DEMO MODE ---
 const DEMO = SUPABASE_URL === "YOUR_SUPABASE_URL";
 
+// --- OFFLINE SYNC QUEUE ---
+// Queues failed cloud syncs in localStorage and retries when back online
+const SYNC_QUEUE_KEY = "teamSeasonSyncQueue";
+
+function getSyncQueue() {
+  try { return JSON.parse(localStorage.getItem(SYNC_QUEUE_KEY) || "[]"); } catch { return []; }
+}
+
+function addToSyncQueue(item) {
+  const queue = getSyncQueue();
+  queue.push({ ...item, queued_at: Date.now() });
+  localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(queue));
+}
+
+async function flushSyncQueue(userId) {
+  const queue = getSyncQueue();
+  if (queue.length === 0) return;
+  const remaining = [];
+  for (const item of queue) {
+    try {
+      if (item.type === "entry") {
+        // Upload photo first if queued
+        let photoUrl = null;
+        if (item.photoData) {
+          const blob = base64ToBlob(item.photoData);
+          if (blob) {
+            const filePath = `${userId}/${item.entry.id}.jpg`;
+            const { error: uploadErr } = await supabase.storage
+              .from("entry-photos")
+              .upload(filePath, blob, { contentType: "image/jpeg", upsert: true });
+            if (!uploadErr) {
+              const { data: urlData } = supabase.storage.from("entry-photos").getPublicUrl(filePath);
+              photoUrl = urlData?.publicUrl || null;
+            }
+          }
+        }
+        const { error } = await supabase.from("entries").insert({
+          ...item.entry,
+          ...(photoUrl ? { photo_url: photoUrl } : {}),
+        });
+        if (error) { remaining.push(item); }
+      }
+    } catch {
+      remaining.push(item);
+    }
+  }
+  localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(remaining));
+  if (remaining.length === 0) localStorage.removeItem(SYNC_QUEUE_KEY);
+}
+
 // --- UUID GENERATOR ---
 function generateId() {
   return typeof crypto !== "undefined" && crypto.randomUUID
@@ -50,32 +100,32 @@ const SPORTS = [
 
 // --- BASE64 TO BLOB HELPER ---
 function base64ToBlob(dataUrl) {
+  if (!dataUrl || !dataUrl.startsWith("data:")) return null;
   const [header, data] = dataUrl.split(",");
-  const mime = header.match(/:(.*?);/)[1];
+  const mimeMatch = header.match(/:(.*?);/);
+  if (!mimeMatch || !data) return null;
   const bytes = atob(data);
   const arr = new Uint8Array(bytes.length);
   for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-  return new Blob([arr], { type: mime });
+  return new Blob([arr], { type: mimeMatch[1] });
 }
 
 // --- IMAGE RESIZE HELPER ---
 // Uses createImageBitmap for reliable EXIF orientation handling
-function resizeImage(file, maxSize) {
-  return new Promise(async (resolve) => {
-    const bitmap = await createImageBitmap(file);
-    const canvas = document.createElement("canvas");
-    let w = bitmap.width, h = bitmap.height;
-    if (w > h) {
-      if (w > maxSize) { h = h * maxSize / w; w = maxSize; }
-    } else {
-      if (h > maxSize) { w = w * maxSize / h; h = maxSize; }
-    }
-    canvas.width = w;
-    canvas.height = h;
-    canvas.getContext("2d").drawImage(bitmap, 0, 0, w, h);
-    bitmap.close();
-    resolve(canvas.toDataURL("image/jpeg", 0.85));
-  });
+async function resizeImage(file, maxSize) {
+  const bitmap = await createImageBitmap(file);
+  const canvas = document.createElement("canvas");
+  let w = bitmap.width, h = bitmap.height;
+  if (w > h) {
+    if (w > maxSize) { h = h * maxSize / w; w = maxSize; }
+  } else {
+    if (h > maxSize) { w = w * maxSize / h; h = maxSize; }
+  }
+  canvas.width = w;
+  canvas.height = h;
+  canvas.getContext("2d").drawImage(bitmap, 0, 0, w, h);
+  bitmap.close();
+  return canvas.toDataURL("image/jpeg", 0.85);
 }
 
 // --- DEMO DATA ---
@@ -5489,6 +5539,17 @@ export default function SportsJournalApp() {
     }
   }, [role, team, season, players, entries, org, orgTeams, screen, isDemo]);
 
+  // Flush offline sync queue when back online
+  useEffect(() => {
+    if (DEMO || !user) return;
+    // Try flushing on mount
+    flushSyncQueue(user.id);
+    // Listen for connectivity restored
+    const handleOnline = () => flushSyncQueue(user.id);
+    window.addEventListener("online", handleOnline);
+    return () => window.removeEventListener("online", handleOnline);
+  }, [user]);
+
   // Handle Stripe checkout return
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -6105,15 +6166,19 @@ export default function SportsJournalApp() {
           // Upload photo to Supabase Storage if present
           if (newEntry.photoData) {
             const blob = base64ToBlob(newEntry.photoData);
-            const filePath = `${user.id}/${newEntry.id}.jpg`;
-            const { error: uploadErr } = await supabase.storage
-              .from("entry-photos")
-              .upload(filePath, blob, { contentType: "image/jpeg", upsert: true });
-            if (uploadErr) {
-              console.warn("Photo upload failed:", uploadErr);
+            if (!blob) {
+              console.warn("Photo conversion failed, skipping upload");
             } else {
-              const { data: urlData } = supabase.storage.from("entry-photos").getPublicUrl(filePath);
-              photoUrl = urlData?.publicUrl || null;
+              const filePath = `${user.id}/${newEntry.id}.jpg`;
+              const { error: uploadErr } = await supabase.storage
+                .from("entry-photos")
+                .upload(filePath, blob, { contentType: "image/jpeg", upsert: true });
+              if (uploadErr) {
+                console.warn("Photo upload failed:", uploadErr);
+              } else {
+                const { data: urlData } = supabase.storage.from("entry-photos").getPublicUrl(filePath);
+                photoUrl = urlData?.publicUrl || null;
+              }
             }
           }
 
@@ -6139,7 +6204,23 @@ export default function SportsJournalApp() {
             ));
           }
         } catch (e) {
-          console.warn("Entry sync error:", e.message);
+          console.warn("Entry sync error, queuing for retry:", e.message);
+          addToSyncQueue({
+            type: "entry",
+            entry: {
+              id: newEntry.id, user_id: user.id, season_id: season.id,
+              entry_date: newEntry.entry_date,
+              entry_type: newEntry.entry_type || "game",
+              text: newEntry.text || "",
+              opponent: newEntry.opponent || null,
+              venue: newEntry.venue || null,
+              score_home: newEntry.score_home != null ? newEntry.score_home : null,
+              score_away: newEntry.score_away != null ? newEntry.score_away : null,
+              result: newEntry.result || null,
+              consent_shared: newEntry.consent_shared || false,
+            },
+            photoData: newEntry.photoData || null,
+          });
         }
       })();
     }
@@ -6150,6 +6231,7 @@ export default function SportsJournalApp() {
     localStorage.removeItem("teamSeason");
     localStorage.removeItem("teamSeasonAdmin");
     localStorage.removeItem("teamSeasonAll");
+    localStorage.removeItem(SYNC_QUEUE_KEY);
     setAuthed(false);
     setUser(null);
     setIsDemo(false);
@@ -6165,6 +6247,28 @@ export default function SportsJournalApp() {
     setOrgTeams([]);
     setRole(null);
     setShowMenu(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!confirm("Are you sure you want to delete your account? All your entries, photos, and seasons will be permanently deleted. This cannot be undone.")) return;
+    if (!confirm("This is irreversible. Type anything to confirm you want to delete everything.")) return;
+    try {
+      if (user) {
+        // Delete user's entries, seasons, players, teams
+        await supabase.from("entries").delete().eq("user_id", user.id);
+        await supabase.from("seasons").delete().eq("user_id", user.id);
+        await supabase.from("players").delete().eq("team_id", team?.id);
+        await supabase.from("teams").delete().eq("created_by", user.id);
+        // Delete photos from storage
+        const { data: files } = await supabase.storage.from("entry-photos").list(user.id);
+        if (files?.length) {
+          await supabase.storage.from("entry-photos").remove(files.map((f) => `${user.id}/${f.name}`));
+        }
+      }
+    } catch (e) {
+      console.warn("Cleanup error (continuing with signout):", e);
+    }
+    handleSignOut();
   };
 
   // Sort entries newest first, then filter
@@ -6291,6 +6395,19 @@ export default function SportsJournalApp() {
                   }}>
                     Sign Out
                   </button>
+                  <div style={{ borderTop: `1px solid ${theme.border}` }}>
+                    <button onClick={() => { setShowMenu(false); handleDeleteAccount(); }} style={{
+                      display: "block", width: "100%", padding: "10px 16px",
+                      background: "none", border: "none", cursor: "pointer",
+                      fontSize: 12, color: "#DC2626", textAlign: "left",
+                    }}>
+                      Delete Account
+                    </button>
+                  </div>
+                  <div style={{ borderTop: `1px solid ${theme.border}`, padding: "8px 16px" }}>
+                    <a href="/privacy" target="_blank" style={{ fontSize: 11, color: theme.textMuted, textDecoration: "none", marginRight: 12 }}>Privacy</a>
+                    <a href="/terms" target="_blank" style={{ fontSize: 11, color: theme.textMuted, textDecoration: "none" }}>Terms</a>
+                  </div>
                 </div>
               )}
             </div>

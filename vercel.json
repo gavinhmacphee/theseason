@@ -16,6 +16,8 @@
     { "src": "^/app$", "dest": "/app.html" },
     { "src": "^/season-recap$", "dest": "/season-recap.html" },
     { "src": "^/youth-sports-memory-book$", "dest": "/youth-sports-memory-book.html" },
+    { "src": "^/privacy$", "dest": "/privacy.html" },
+    { "src": "^/terms$", "dest": "/terms.html" },
     { "handle": "filesystem" }
   ]
 }
