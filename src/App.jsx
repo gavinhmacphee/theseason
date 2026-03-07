@@ -1505,7 +1505,7 @@ function TeamSetupScreen({ role, onComplete }) {
 }
 
 // --- ENTRY COMPOSER ---
-function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
+function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }) {
   const composerPrimary = brandColor || theme.primary;
   const [entryType, setEntryType] = useState("game");
   const [text, setText] = useState("");
@@ -1517,6 +1517,7 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [consentShared, setConsentShared] = useState(!!orgName);
+  const [entryDate, setEntryDate] = useState(new Date().toISOString().split("T")[0]);
   const fileRef = useRef(null);
 
   const entryTypes = [
@@ -1529,42 +1530,50 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
     { id: "moment", label: "Moment", emoji: "⭐" },
   ];
 
+  const childName = players?.[0]?.name || null;
+  const n = childName || "they";
+  const nPoss = childName ? `${childName}'s` : "their";
+  const nDid = childName ? `${childName} did` : "they did";
+  const nHandle = childName ? `${childName} handle` : "they handle";
+  const nTry = childName ? `${childName} try` : "they try";
+  const nLearn = childName ? `${childName} learn` : "they learn";
+
   const prompts = {
     game: [
-      "What moment made you proudest today?",
-      "What's something they did that surprised you?",
-      "How did they handle a tough moment?",
-      "What will you remember most about this game?",
-      "Did they try something new today?",
+      `What moment made you proudest of ${n} today?`,
+      `What's something ${nDid} that surprised you?`,
+      `How did ${nHandle} a tough moment?`,
+      `What will you remember most about ${nPoss} game?`,
+      `Did ${nTry} something new today?`,
     ],
     practice: [
-      "What are they working on getting better at?",
-      "What was the energy like today?",
-      "Did they learn something new?",
-      "What did the coach focus on today?",
+      `What is ${n} working on getting better at?`,
+      `What was ${nPoss} energy like today?`,
+      `Did ${nLearn} something new?`,
+      `What did the coach focus on today?`,
     ],
     tournament: [
-      "How did the team come together today?",
-      "What was the atmosphere like?",
-      "What was the highlight of the day?",
-      "How did they handle the pressure?",
+      `How did ${nPoss} team come together today?`,
+      `What was the atmosphere like?`,
+      `What was ${nPoss} highlight of the day?`,
+      `How did ${nHandle} the pressure?`,
     ],
     event: [
-      "What made this event special?",
-      "What will they remember about this?",
+      `What made this event special for ${n}?`,
+      `What will ${n} remember about this?`,
     ],
     sightseeing: [
-      "What did you discover?",
-      "What was the coolest thing you saw?",
+      `What did ${n} discover?`,
+      `What was the coolest thing you saw?`,
     ],
     food: [
-      "What was the post-game meal?",
-      "What's the team's favorite spot?",
+      `What was ${nPoss} post-game meal?`,
+      `What's the team's favorite spot?`,
     ],
     moment: [
-      "Why does this moment matter?",
-      "What do you want to remember about this?",
-      "What made you stop and smile?",
+      `Why does this moment matter?`,
+      `What do you want to remember about ${n}?`,
+      `What made you stop and smile?`,
     ],
   };
 
@@ -1602,6 +1611,7 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
     onSave({
       entry_type: entryType,
       text: text.trim(),
+      entry_date: entryDate,
       opponent: opponent || null,
       venue: venue || null,
       score_home: scoreHome !== "" ? parseInt(scoreHome) : null,
@@ -1627,6 +1637,19 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
           <button onClick={onClose} style={{
             background: "none", border: "none", fontSize: 24, cursor: "pointer", color: theme.textMuted,
           }}>×</button>
+        </div>
+
+        {/* Date picker */}
+        <div style={{ marginBottom: 16 }}>
+          <label className="label">Date</label>
+          <input
+            type="date"
+            className="input"
+            value={entryDate}
+            max={new Date().toISOString().split("T")[0]}
+            onChange={(e) => setEntryDate(e.target.value)}
+            style={{ fontSize: 15 }}
+          />
         </div>
 
         {/* Entry Type */}
@@ -1816,7 +1839,7 @@ function EntryComposer({ season, onSave, onClose, brandColor, orgName }) {
 }
 
 // --- TIMELINE ENTRY CARD ---
-function EntryCard({ entry, players, onShare, brandColor }) {
+function EntryCard({ entry, players, onShare, onDelete, brandColor }) {
   const typeColors = {
     game: entry.result === "win" ? theme.win : entry.result === "loss" ? theme.loss : theme.draw,
     practice: theme.practice,
@@ -1872,6 +1895,26 @@ function EntryCard({ entry, players, onShare, brandColor }) {
               title="Share"
             >
               ↗
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={() => onDelete(entry.id)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 13,
+                color: theme.textLight,
+                padding: "2px 4px",
+                lineHeight: 1,
+                transition: "color 0.15s",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = "#dc2626"}
+              onMouseLeave={(e) => e.currentTarget.style.color = theme.textLight}
+              title="Delete entry"
+            >
+              🗑
             </button>
           )}
         </div>
@@ -6141,7 +6184,7 @@ export default function SportsJournalApp() {
       newEntry = {
         ...rest,
         id: generateId(),
-        entry_date: new Date().toISOString().split("T")[0],
+        entry_date: entryData.entry_date || new Date().toISOString().split("T")[0],
         season_id: season?.id,
         photoData,
         photoPreview: photoData,
@@ -6226,6 +6269,28 @@ export default function SportsJournalApp() {
     }
   };
 
+  const handleDeleteEntry = async (entryId) => {
+    if (!confirm("Delete this entry? This can't be undone.")) return;
+
+    // Remove from local state
+    setEntries((prev) => prev.filter((e) => e.id !== entryId));
+
+    // Delete from Supabase
+    if (!DEMO && user) {
+      try {
+        // Delete photo from storage
+        const filePath = `${user.id}/${entryId}.jpg`;
+        await supabase.storage.from("entry-photos").remove([filePath]);
+
+        // Delete entry row
+        const { error } = await supabase.from("entries").delete().eq("id", entryId).eq("user_id", user.id);
+        if (error) console.warn("Entry delete failed:", error);
+      } catch (e) {
+        console.warn("Entry delete error:", e.message);
+      }
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     localStorage.removeItem("teamSeason");
@@ -6250,8 +6315,12 @@ export default function SportsJournalApp() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!confirm("Are you sure you want to delete your account? All your entries, photos, and seasons will be permanently deleted. This cannot be undone.")) return;
-    if (!confirm("This is irreversible. Type anything to confirm you want to delete everything.")) return;
+    if (!confirm("Are you sure? This will permanently delete all your entries, photos, and seasons. This cannot be undone.")) return;
+    const typed = prompt("Type DELETE to confirm you want to permanently erase everything:");
+    if (typed !== "DELETE") {
+      if (typed !== null) alert("Account not deleted. You must type DELETE exactly to confirm.");
+      return;
+    }
     try {
       if (user) {
         // Delete user's entries, seasons, players, teams
@@ -6574,6 +6643,8 @@ export default function SportsJournalApp() {
           <div style={{
             display: "flex", gap: 4, marginBottom: 16,
             borderBottom: `1px solid ${theme.borderLight}`, paddingBottom: 8,
+            overflowX: "auto", WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none", msOverflowStyle: "none",
           }}>
             {[
               { id: "all", label: "All" },
@@ -6590,6 +6661,7 @@ export default function SportsJournalApp() {
                   color: filter === tab.id ? brandPrimary : theme.textMuted,
                   fontWeight: filter === tab.id ? 600 : 400, fontSize: 13,
                   cursor: "pointer", transition: "all 0.15s",
+                  whiteSpace: "nowrap", flexShrink: 0,
                 }}>
                 {tab.label}
               </button>
@@ -6614,7 +6686,7 @@ export default function SportsJournalApp() {
             </div>
           ) : (
             filteredEntries.map((entry) => (
-              <EntryCard key={entry.id} entry={entry} players={players} onShare={(e) => setShareEntry(e)} brandColor={brandPrimary} />
+              <EntryCard key={entry.id} entry={entry} players={players} onShare={(e) => setShareEntry(e)} onDelete={handleDeleteEntry} brandColor={brandPrimary} />
             ))
           )}
 
@@ -6622,6 +6694,7 @@ export default function SportsJournalApp() {
           {showComposer && (
             <EntryComposer
               season={season}
+              players={players}
               onSave={handleSaveEntry}
               onClose={() => setShowComposer(false)}
               brandColor={brandPrimary}
