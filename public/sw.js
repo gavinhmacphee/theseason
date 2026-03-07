@@ -7,7 +7,7 @@ self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== 'ts-v1').map((k) => caches.delete(k)))
+      Promise.all(keys.filter((k) => k !== 'ts-v2').map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
@@ -17,7 +17,7 @@ self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('/api/') || e.request.url.includes('supabase')) return;
 
   e.respondWith(
-    caches.open('ts-v1').then(async (cache) => {
+    caches.open('ts-v2').then(async (cache) => {
       const cached = await cache.match(e.request);
       const fetchPromise = fetch(e.request)
         .then((res) => {
