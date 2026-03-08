@@ -1,13 +1,15 @@
-// Team Season — Stale-while-revalidate service worker
-// Serves cached version immediately, updates cache in background
-// API and Supabase calls always go straight to network
+// Team Season — Network-first service worker
+// Always fetches fresh from the network; cache is offline fallback only
+// API and Supabase calls bypass the SW entirely
+
+const CACHE = 'ts-v3';
 
 self.addEventListener('install', () => self.skipWaiting());
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== 'ts-v2').map((k) => caches.delete(k)))
+      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
@@ -17,15 +19,16 @@ self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('/api/') || e.request.url.includes('supabase')) return;
 
   e.respondWith(
-    caches.open('ts-v2').then(async (cache) => {
-      const cached = await cache.match(e.request);
-      const fetchPromise = fetch(e.request)
-        .then((res) => {
-          cache.put(e.request, res.clone());
-          return res;
-        })
-        .catch(() => cached);
-      return cached || fetchPromise;
-    })
+    fetch(e.request)
+      .then((res) => {
+        // Got fresh response — cache it for offline and serve it
+        const clone = res.clone();
+        caches.open(CACHE).then((cache) => cache.put(e.request, clone));
+        return res;
+      })
+      .catch(() =>
+        // Offline — serve from cache
+        caches.match(e.request)
+      )
   );
 });
