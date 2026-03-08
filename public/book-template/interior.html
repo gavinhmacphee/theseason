@@ -277,9 +277,9 @@
 
   .entry-photo {
     width: 100%;
-    max-height: 4.5in;
+    max-height: 5.5in;
     object-fit: cover;
-    border-radius: 4px;
+    object-position: center 60%;
     margin-bottom: 16px;
     display: block;
   }
@@ -317,8 +317,33 @@
   }
 
   /* --- Photo page (entry with image) --- */
+  .page.photo-page {
+    padding: 0.25in 0 0;
+  }
+
   .page.photo-page .entry-photo {
-    max-height: 5in;
+    width: 100%;
+    max-height: 5.8in;
+    object-fit: cover;
+    object-position: center 60%;
+    margin-bottom: 14px;
+  }
+
+  .page.photo-page .entry {
+    padding: 0;
+  }
+
+  .page.photo-page .entry-header,
+  .page.photo-page .entry-score,
+  .page.photo-page .entry-opponent,
+  .page.photo-page .entry-text,
+  .page.photo-page .entry-venue {
+    padding-left: 0.5in;
+    padding-right: 0.5in;
+  }
+
+  .page.photo-page .page-number {
+    bottom: 0.25in;
   }
 
   /* --- Closing Page --- */

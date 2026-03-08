@@ -1941,7 +1941,7 @@ function EntryCard({ entry, players, onShare, onDelete, brandColor }) {
       {/* Photo */}
       {(entry.photoPreview || entry.photoData) && (
         <img src={entry.photoPreview || entry.photoData} alt="" style={{
-          width: "100%", height: 180, objectFit: "cover", objectPosition: "top", borderRadius: 10, marginBottom: 10,
+          width: "100%", height: 220, objectFit: "cover", objectPosition: "center 60%", borderRadius: 10, marginBottom: 10,
         }} />
       )}
 
@@ -2195,12 +2195,14 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
   const renderEntryPage = (pageEntries) => {
     const hasAnyPhoto = pageEntries.some((e) => e.photoPreview || e.photoData);
     const isTextOnly = pageEntries.length === 1 && !hasAnyPhoto;
+    const isSinglePhoto = pageEntries.length === 1 && hasAnyPhoto;
 
     return (
       <div style={{
-        width: "100%", height: "100%", padding: isTextOnly ? 56 : 32, background: "#FFFDF8",
+        width: "100%", height: "100%", background: "#FFFDF8",
         display: "flex", flexDirection: "column",
         justifyContent: isTextOnly ? "center" : "flex-start",
+        padding: isSinglePhoto ? 0 : isTextOnly ? 56 : 24,
       }}>
         {pageEntries.map((entry, i) => {
           const hasScore = entry.score_home !== null && entry.score_away !== null;
@@ -2208,6 +2210,54 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
           const resultLabels = { win: "W", loss: "L", draw: "D" };
           const photo = entry.photoPreview || entry.photoData;
 
+          // Single photo entry: photo-first, full bleed layout
+          if (isSinglePhoto && photo) {
+            return (
+              <div key={entry.id} style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column" }}>
+                <img src={photo} alt="" style={{
+                  width: "100%", flex: 1, objectFit: "cover", objectPosition: "center 60%",
+                  display: "block", minHeight: 0,
+                }} />
+                <div style={{ padding: "16px 24px 20px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+                    <span style={{
+                      fontFamily: fonts.mono, fontSize: 7, fontWeight: 500,
+                      color: theme.textLight, textTransform: "uppercase", letterSpacing: 2,
+                    }}>{entry.entry_type}{entry.opponent ? ` vs ${entry.opponent}` : ""}</span>
+                    <span style={{ fontFamily: fonts.mono, fontSize: 8, color: theme.textLight }}>
+                      {formatDate(entry.entry_date)}
+                    </span>
+                  </div>
+                  {hasScore && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                      <span style={{
+                        fontFamily: fonts.mono, fontSize: 22, fontWeight: 700,
+                        color: theme.text, letterSpacing: 1,
+                      }}>{entry.score_home} – {entry.score_away}</span>
+                      {entry.result && (
+                        <span style={{
+                          fontFamily: fonts.mono, fontSize: 8, fontWeight: 600,
+                          padding: "2px 6px", borderRadius: 2,
+                          background: resultColors[entry.result], color: "white",
+                          letterSpacing: 1,
+                        }}>{resultLabels[entry.result]}</span>
+                      )}
+                    </div>
+                  )}
+                  {entry.text && (
+                    <p style={{
+                      fontFamily: fonts.display, fontSize: 13, lineHeight: 1.5,
+                      color: "#2A2A2A", fontStyle: "italic",
+                    }}>
+                      &ldquo;{entry.text}&rdquo;
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          }
+
+          // Multi-entry or text-only layout
           return (
             <div key={entry.id} style={{
               ...(i > 0 ? { paddingTop: 18, marginTop: 18, borderTop: `1px solid ${bookPrimary}0F` } : {}),
@@ -2247,8 +2297,8 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
 
               {photo && (
                 <img src={photo} alt="" style={{
-                  width: "100%", maxHeight: 280, objectFit: "contain", objectPosition: "top",
-                  borderRadius: 3, marginBottom: 10, display: "block",
+                  width: "100%", height: 320, objectFit: "cover", objectPosition: "center 60%",
+                  marginBottom: 10, display: "block",
                 }} />
               )}
 
@@ -5994,10 +6044,30 @@ export default function SportsJournalApp() {
     setShowSeasonSwitcher(false);
   };
 
-  const deleteSeason = (idx) => {
+  const deleteSeason = async (idx) => {
     if (allSeasons.length <= 1) return; // Can't delete the only season
     const s = allSeasons[idx];
     if (!confirm(`Delete "${s.team?.name || "Team"} — ${s.season?.name || "Season"}"? This cannot be undone.`)) return;
+
+    // Delete from Supabase cloud so it doesn't resurrect on next login
+    if (!DEMO && user?.id && s.season?.id) {
+      try {
+        // Delete entries for this season
+        await supabase.from("entries").delete().eq("season_id", s.season.id);
+        // Delete the season itself
+        await supabase.from("seasons").delete().eq("id", s.season.id).eq("user_id", user.id);
+        // Delete players if this team has no other seasons left
+        if (s.team?.id) {
+          const { data: remaining } = await supabase.from("seasons").select("id").eq("team_id", s.team.id);
+          if (!remaining || remaining.length === 0) {
+            await supabase.from("players").delete().eq("team_id", s.team.id);
+            await supabase.from("teams").delete().eq("id", s.team.id).eq("created_by", user.id);
+          }
+        }
+      } catch (e) {
+        console.warn("Cloud season delete failed:", e);
+      }
+    }
 
     setAllSeasons((prev) => {
       const updated = prev.filter((_, i) => i !== idx);
