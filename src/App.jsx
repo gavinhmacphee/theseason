@@ -6046,6 +6046,7 @@ export default function SportsJournalApp() {
     setShowSeasonSwitcher(false);
   };
 
+  // v2 — soft delete with session validation
   const deleteSeason = async (idx) => {
     if (allSeasons.length <= 1) return; // Can't delete the only season
     const s = allSeasons[idx];

@@ -2,13 +2,14 @@
 // Always fetches fresh from the network; cache is offline fallback only
 // API and Supabase calls bypass the SW entirely
 
-const CACHE = 'ts-v3';
+const CACHE = 'ts-v4';
 
 self.addEventListener('install', () => self.skipWaiting());
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
+      // Delete ALL old caches — including any workbox-precache caches from VitePWA
       Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
