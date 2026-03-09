@@ -2213,13 +2213,13 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
           // Single photo entry: photo-first, full bleed layout
           if (isSinglePhoto && photo) {
             return (
-              <div key={entry.id} style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column" }}>
+              <div key={entry.id} style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", padding: "16px 24px" }}>
                 <img src={photo} alt="" style={{
-                  width: "100%", flex: 1, objectFit: "cover", objectPosition: "center 60%",
-                  display: "block", minHeight: 0,
+                  maxWidth: "90%", flex: 1, objectFit: "cover", objectPosition: "center 60%",
+                  display: "block", minHeight: 0, margin: "0 auto",
                 }} />
-                <div style={{ padding: "16px 24px 20px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+                <div style={{ padding: "16px 0 8px", textAlign: "center" }}>
+                  <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", gap: 12, marginBottom: 6 }}>
                     <span style={{
                       fontFamily: fonts.mono, fontSize: 7, fontWeight: 500,
                       color: theme.textLight, textTransform: "uppercase", letterSpacing: 2,
@@ -2229,7 +2229,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
                     </span>
                   </div>
                   {hasScore && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 4 }}>
                       <span style={{
                         fontFamily: fonts.mono, fontSize: 22, fontWeight: 700,
                         color: theme.text, letterSpacing: 1,
@@ -2247,7 +2247,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
                   {entry.text && (
                     <p style={{
                       fontFamily: fonts.display, fontSize: 13, lineHeight: 1.5,
-                      color: "#2A2A2A", fontStyle: "italic",
+                      color: "#2A2A2A", fontStyle: "italic", textAlign: "center",
                     }}>
                       &ldquo;{entry.text}&rdquo;
                     </p>
@@ -2260,9 +2260,10 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
           // Multi-entry or text-only layout
           return (
             <div key={entry.id} style={{
+              textAlign: "center",
               ...(i > 0 ? { paddingTop: 18, marginTop: 18, borderTop: `1px solid ${bookPrimary}0F` } : {}),
             }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+              <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", gap: 12, marginBottom: 8 }}>
                 <span style={{
                   fontFamily: fonts.mono, fontSize: 7, fontWeight: 500,
                   color: theme.textLight, textTransform: "uppercase", letterSpacing: 2,
@@ -2273,7 +2274,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
               </div>
 
               {hasScore && (
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 10 }}>
                   <span style={{
                     fontFamily: fonts.mono, fontSize: isTextOnly ? 32 : 26, fontWeight: 700,
                     color: theme.text, letterSpacing: 1,
@@ -2290,29 +2291,29 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
               )}
 
               {entry.opponent && (
-                <p style={{ fontFamily: fonts.body, fontSize: 10, color: theme.textMuted, marginBottom: 8 }}>
+                <p style={{ fontFamily: fonts.body, fontSize: 10, color: theme.textMuted, marginBottom: 8, textAlign: "center" }}>
                   vs {entry.opponent}
                 </p>
               )}
 
               {photo && (
                 <img src={photo} alt="" style={{
-                  width: "100%", height: 320, objectFit: "cover", objectPosition: "center 60%",
-                  marginBottom: 10, display: "block",
+                  maxWidth: "90%", height: 320, objectFit: "cover", objectPosition: "center 60%",
+                  marginBottom: 10, display: "block", margin: "0 auto 10px",
                 }} />
               )}
 
               {entry.text && (
                 <p style={{
                   fontFamily: fonts.display, fontSize: isTextOnly ? 15 : 12, lineHeight: 1.6,
-                  color: "#2A2A2A", fontStyle: "italic",
+                  color: "#2A2A2A", fontStyle: "italic", textAlign: "center",
                 }}>
                   &ldquo;{entry.text}&rdquo;
                 </p>
               )}
 
               {entry.venue && (
-                <p style={{ fontFamily: fonts.body, fontSize: 8, color: theme.textLight, marginTop: 6 }}>
+                <p style={{ fontFamily: fonts.body, fontSize: 8, color: theme.textLight, marginTop: 6, textAlign: "center" }}>
                   {entry.venue}
                 </p>
               )}
@@ -2324,7 +2325,8 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
   };
 
   const renderClosingPage = () => {
-    const playerName = players[0]?.name || "yours";
+    const playerName = players[0]?.name;
+    const closingLine = playerName ? `This was ${playerName}'s.` : "This was yours.";
     return (
       <div style={{
         width: "100%", height: "100%", display: "flex", flexDirection: "column",
@@ -2335,7 +2337,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
           fontFamily: fonts.headline, fontStyle: "italic", fontSize: 18,
           lineHeight: 1.5, color: theme.textMuted, marginBottom: 36,
         }}>
-          Every season tells a story.<br />This was {playerName}'s.
+          Every season tells a story.<br />{closingLine}
         </p>
         <div style={{ width: 30, height: 1.5, background: bookPrimary, marginBottom: 16 }} />
         <p style={{
@@ -5549,7 +5551,7 @@ export default function SportsJournalApp() {
           // Build allSeasons from every team + season pair
           const restoredSeasons = [];
           for (const cloudTeam of teams) {
-            const { data: seasons } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid);
+            const { data: seasons } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid).is("deleted_at", null);
             const { data: cloudPlayers } = await supabase.from("players").select("*").eq("team_id", cloudTeam.id);
             const teamObj = { id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club" };
             const playersArr = (cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child }));
@@ -5736,7 +5738,7 @@ export default function SportsJournalApp() {
       if (teams?.length > 0) {
         const restoredSeasons = [];
         for (const cloudTeam of teams) {
-          const { data: seasons } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid);
+          const { data: seasons } = await supabase.from("seasons").select("*").eq("team_id", cloudTeam.id).eq("user_id", uid).is("deleted_at", null);
           const { data: cloudPlayers } = await supabase.from("players").select("*").eq("team_id", cloudTeam.id);
           const teamObj = { id: cloudTeam.id, name: cloudTeam.name, sport: cloudTeam.sport, emoji: cloudTeam.emoji, color: cloudTeam.color || "#1B4332", logo: null, orgType: "club", orgId: cloudTeam.org_id || null };
           const playersArr = (cloudPlayers || []).map((p) => ({ id: p.id, name: p.name, number: p.number, position: p.position, is_my_child: p.is_my_child }));
@@ -5766,7 +5768,7 @@ export default function SportsJournalApp() {
       }
 
       // Check if user has a season via join flow (team owned by admin, season owned by parent)
-      const { data: joinSeasons } = await supabase.from("seasons").select("*, teams(*)").eq("user_id", uid).limit(1);
+      const { data: joinSeasons } = await supabase.from("seasons").select("*, teams(*)").eq("user_id", uid).is("deleted_at", null).limit(1);
       if (joinSeasons?.length > 0) {
         const js = joinSeasons[0];
         const jt = js.teams;
@@ -6049,29 +6051,40 @@ export default function SportsJournalApp() {
     const s = allSeasons[idx];
     if (!confirm(`Delete "${s.team?.name || "Team"} — ${s.season?.name || "Season"}"? This cannot be undone.`)) return;
 
-    // Delete from Supabase cloud so it doesn't resurrect on next login
+    // Soft delete — set deleted_at timestamp instead of hard delete
     if (!DEMO && user?.id && s.season?.id) {
       try {
-        // Delete entries for this season
-        await supabase.from("entries").delete().eq("season_id", s.season.id);
-        // Delete the season itself
-        await supabase.from("seasons").delete().eq("id", s.season.id).eq("user_id", user.id);
-        // Delete players if this team has no other seasons left
-        if (s.team?.id) {
-          const { data: remaining } = await supabase.from("seasons").select("id").eq("team_id", s.team.id);
-          if (!remaining || remaining.length === 0) {
-            await supabase.from("players").delete().eq("team_id", s.team.id);
-            await supabase.from("teams").delete().eq("id", s.team.id).eq("created_by", user.id);
-          }
+        const { data: sessionData } = await supabase.auth.getSession();
+        console.log("[DELETE] Session check:", sessionData?.session ? "valid" : "EXPIRED", "user:", user?.id, "season:", s.season.id);
+        if (!sessionData?.session) {
+          alert("Your session has expired. Please sign out and sign back in, then try again.");
+          return;
+        }
+
+        const { data: updated, error } = await supabase
+          .from("seasons")
+          .update({ deleted_at: new Date().toISOString() })
+          .eq("id", s.season.id)
+          .eq("user_id", user.id)
+          .select();
+
+        console.log("[DELETE] Soft delete result:", updated?.length, "rows updated, error:", error);
+
+        if (error || !updated || updated.length === 0) {
+          alert("Failed to delete the season. Please try again.");
+          console.error("Soft delete failed:", error, "Rows:", updated?.length);
+          return;
         }
       } catch (e) {
-        console.warn("Cloud season delete failed:", e);
+        alert("Something went wrong deleting that season. Please try again.");
+        console.error("Cloud season delete failed:", e);
+        return;
       }
     }
 
+    // Only remove from local state after cloud delete confirmed
     setAllSeasons((prev) => {
       const updated = prev.filter((_, i) => i !== idx);
-      // If deleting the active season, switch to the first remaining one
       let newIdx = activeIdxRef.current;
       if (idx === newIdx) {
         newIdx = 0;

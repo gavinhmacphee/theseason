@@ -219,8 +219,9 @@
 
   .entry-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: baseline;
+    gap: 16px;
     margin-bottom: 14px;
   }
 
@@ -242,6 +243,7 @@
   .entry-score {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 14px;
     margin-bottom: 16px;
   }
@@ -273,14 +275,15 @@
     font-size: 14px;
     color: var(--text-muted);
     margin-bottom: 14px;
+    text-align: center;
   }
 
   .entry-photo {
-    width: 100%;
+    max-width: 90%;
     max-height: 5.5in;
     object-fit: cover;
     object-position: center 60%;
-    margin-bottom: 16px;
+    margin: 0 auto 16px;
     display: block;
   }
 
@@ -290,6 +293,7 @@
     font-size: 16px;
     line-height: 1.7;
     color: #2A2A2A;
+    text-align: center;
   }
 
   .entry-venue {
@@ -297,6 +301,7 @@
     font-size: 11px;
     color: var(--text-light);
     margin-top: 12px;
+    text-align: center;
   }
 
   /* --- Text-only page (single entry, no photo) --- */
@@ -318,28 +323,34 @@
 
   /* --- Photo page (entry with image) --- */
   .page.photo-page {
-    padding: 0.25in 0 0;
+    padding: 0.4in 0.5in 0.5in;
   }
 
   .page.photo-page .entry-photo {
-    width: 100%;
-    max-height: 5.8in;
+    max-width: 100%;
+    max-height: 5.2in;
     object-fit: cover;
     object-position: center 60%;
-    margin-bottom: 14px;
+    margin: 0 auto 18px;
+    display: block;
   }
 
   .page.photo-page .entry {
     padding: 0;
+    text-align: center;
   }
 
-  .page.photo-page .entry-header,
-  .page.photo-page .entry-score,
-  .page.photo-page .entry-opponent,
-  .page.photo-page .entry-text,
-  .page.photo-page .entry-venue {
-    padding-left: 0.5in;
-    padding-right: 0.5in;
+  .page.photo-page .entry-header {
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .page.photo-page .entry-score {
+    justify-content: center;
+  }
+
+  .page.photo-page .entry-opponent {
+    text-align: center;
   }
 
   .page.photo-page .page-number {
@@ -725,12 +736,12 @@ function renderBook(data) {
 
   // --- Closing Page ---
   pageNum++;
-  const closingName = playerName || 'yours';
+  const closingText = playerName ? `This was ${esc(playerName)}'s.` : 'This was yours.';
   html += `
     <div class="page closing-page">
       <div class="closing-text">
         Every season tells a story.<br>
-        This was ${esc(closingName)}'s.
+        ${closingText}
       </div>
       <div class="closing-accent"></div>
       <div class="brand">Made with Team Season</div>
