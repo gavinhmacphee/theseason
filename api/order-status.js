@@ -43,7 +43,7 @@ export default async function handler(req, res) {
 
     const luluStatus = luluOrder.status?.name || 'CREATED';
 
-    return res.status(200).json({
+    const response = {
       orderId: luluOrder.id,
       externalId: luluOrder.external_id,
       status: statusMap[luluStatus] || 'ordered',
@@ -51,7 +51,17 @@ export default async function handler(req, res) {
       trackingNumber: tracking?.id || null,
       trackingUrl: tracking?.url || null,
       estimatedShipDate: luluOrder.estimated_shipping_dates?.arrival_min || null,
-    });
+    };
+
+    // Include full details for debugging (requires secret)
+    if (req.query.debug === '1' && req.query.secret === 'test-lulu-2026') {
+      response.raw = luluOrder;
+    } else if (luluStatus === 'REJECTED' || luluStatus === 'ERROR') {
+      response.statusMessages = luluOrder.status?.messages || [];
+      response.normalization = lineItem?.printable_normalization || {};
+    }
+
+    return res.status(200).json(response);
   } catch (err) {
     console.error('Order status error:', err);
     return res.status(500).json({ error: err.message });

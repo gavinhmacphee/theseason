@@ -33,7 +33,7 @@ export default async function handler(req, res) {
         const trackingUrl = trackingInfo.url || `https://track.aftership.com/${trackingInfo.id}`;
 
         await resend.emails.send({
-          from: 'Team Season <books@teamseason.app>',
+          from: 'Team Season <books@send.youthsoccermarketing.com>',
           to: contactEmail,
           subject: 'Your Season Book Has Shipped!',
           html: `

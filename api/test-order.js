@@ -11,8 +11,8 @@ export const config = {
   maxDuration: 120,
 };
 
-const INTERIOR_WIDTH = '8in';
-const INTERIOR_HEIGHT = '8in';
+const INTERIOR_WIDTH = '7.75in';    // 7.5 + 0.125 bleed each side
+const INTERIOR_HEIGHT = '7.75in';   // 7.5 + 0.125 bleed each side
 const COVER_HEIGHT = '9.25in';
 
 function getCoverWidth(pageCount) {
@@ -20,7 +20,7 @@ function getCoverWidth(pageCount) {
   return `${8.375 + spineWidth + 8.375}in`;
 }
 
-async function generatePdf(browser, origin, bookData, type, pageCount) {
+async function generatePdfWithPageCount(browser, origin, bookData, type, pageCount) {
   const page = await browser.newPage();
   await page.goto(`${origin}/book-template/${type}.html`, {
     waitUntil: 'networkidle0',
@@ -37,9 +37,16 @@ async function generatePdf(browser, origin, bookData, type, pageCount) {
     ? { width: getCoverWidth(pageCount), height: COVER_HEIGHT, printBackground: true, margin: { top: 0, right: 0, bottom: 0, left: 0 } }
     : { width: INTERIOR_WIDTH, height: INTERIOR_HEIGHT, printBackground: true, margin: { top: 0, right: 0, bottom: 0, left: 0 } };
 
-  const pdfBuffer = await page.pdf(pdfOptions);
+  const pdfResult = await page.pdf(pdfOptions);
+  const pdfBuffer = Buffer.isBuffer(pdfResult) ? pdfResult : Buffer.from(pdfResult);
+
+  let actualPageCount = 0;
+  const pdfStr = pdfBuffer.toString('latin1');
+  const matches = pdfStr.match(/\/Type\s*\/Page[^s]/g);
+  actualPageCount = matches ? matches.length : 0;
+
   await page.close();
-  return pdfBuffer;
+  return { pdf: pdfBuffer, pageCount: actualPageCount };
 }
 
 export default async function handler(req, res) {
@@ -62,10 +69,9 @@ export default async function handler(req, res) {
     if (!bookDataRes.ok) throw new Error(`Fetch failed: ${bookDataRes.status}`);
     const bookData = await bookDataRes.json();
     const entryCount = bookData.entries?.length || 0;
-    const estimatedPageCount = Math.max(24, 2 + 2 + entryCount * 2 + 1);
-    log('book_data', `${entryCount} entries, ~${estimatedPageCount} pages`);
+    log('book_data', `${entryCount} entries`);
 
-    // 2. Launch browser + generate PDFs
+    // 2. Launch browser + generate PDFs — interior first for actual page count
     const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
@@ -77,12 +83,13 @@ export default async function handler(req, res) {
       ? `https://${process.env.VERCEL_URL}`
       : 'https://teamseason.app';
 
-    const [coverPdf, interiorPdf] = await Promise.all([
-      generatePdf(browser, origin, bookData, 'cover', estimatedPageCount),
-      generatePdf(browser, origin, bookData, 'interior', estimatedPageCount),
-    ]);
+    const { pdf: interiorPdf, pageCount: actualPageCount } = await generatePdfWithPageCount(browser, origin, bookData, 'interior', 0);
+    log('interior', `${(interiorPdf.length/1024).toFixed(0)}KB, ${actualPageCount} pages`);
+
+    const { pdf: coverPdf } = await generatePdfWithPageCount(browser, origin, bookData, 'cover', actualPageCount);
+    log('cover', `${(coverPdf.length/1024).toFixed(0)}KB (sized for ${actualPageCount} pages)`);
+
     await browser.close();
-    log('pdfs', `cover=${(coverPdf.length/1024).toFixed(0)}KB, interior=${(interiorPdf.length/1024).toFixed(0)}KB`);
 
     // 3. Upload to Blob
     const orderId = `test_${Date.now()}`;

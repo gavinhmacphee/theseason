@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Team Season</string>
+    <string name="title_activity_main">Team Season</string>
+    <string name="package_name">app.teamseason</string>
+    <string name="custom_url_scheme">app.teamseason</string>
+</resources>

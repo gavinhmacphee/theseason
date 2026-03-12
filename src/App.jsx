@@ -26,9 +26,13 @@ function getSyncQueue() {
 }
 
 function addToSyncQueue(item) {
-  const queue = getSyncQueue();
-  queue.push({ ...item, queued_at: Date.now() });
-  localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(queue));
+  try {
+    const queue = getSyncQueue();
+    queue.push({ ...item, queued_at: Date.now() });
+    localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(queue));
+  } catch (e) {
+    console.warn("Failed to add to sync queue:", e.message);
+  }
 }
 
 async function flushSyncQueue(userId) {
@@ -95,6 +99,7 @@ const SPORTS = [
   { name: "Swimming", emoji: "🏊", event: "meet", eventDay: "Meet Day" },
   { name: "Track & Field", emoji: "🏃", event: "meet", eventDay: "Meet Day" },
   { name: "Tennis", emoji: "🎾", event: "match", eventDay: "Match Day" },
+  { name: "Multi-Sport", emoji: "🎽", event: "game", eventDay: "Game Day" },
   { name: "Other", emoji: "🏅", event: "game", eventDay: "Game Day" },
 ];
 
@@ -113,7 +118,23 @@ function base64ToBlob(dataUrl) {
 // --- IMAGE RESIZE HELPER ---
 // Uses createImageBitmap for reliable EXIF orientation handling
 async function resizeImage(file, maxSize) {
-  const bitmap = await createImageBitmap(file);
+  let bitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch (err) {
+    // HEIC or corrupt image — fall back to Image element
+    const url = URL.createObjectURL(file);
+    try {
+      bitmap = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error("Could not load image. Try a JPG or PNG."));
+        img.src = url;
+      });
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
   const canvas = document.createElement("canvas");
   let w = bitmap.width, h = bitmap.height;
   if (w > h) {
@@ -124,7 +145,7 @@ async function resizeImage(file, maxSize) {
   canvas.width = w;
   canvas.height = h;
   canvas.getContext("2d").drawImage(bitmap, 0, 0, w, h);
-  bitmap.close();
+  if (bitmap.close) bitmap.close();
   return canvas.toDataURL("image/jpeg", 0.85);
 }
 
@@ -310,18 +331,51 @@ const fonts = {
   mono: "'JetBrains Mono', monospace",
 };
 
+// --- ERROR BOUNDARY ---
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false }; }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(err, info) { console.error("ErrorBoundary caught:", err, info); }
+  render() {
+    if (this.state.hasError) {
+      return React.createElement("div", {
+        style: {
+          minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center",
+          justifyContent: "center", padding: 32, fontFamily: "'DM Sans', sans-serif",
+          background: "#1B4332", color: "white", textAlign: "center", gap: 16,
+        },
+      },
+        React.createElement("div", { style: { fontSize: 32 } }, "\u26A0\uFE0F"),
+        React.createElement("h2", { style: { fontSize: 20, fontWeight: 700 } }, "Something went wrong"),
+        React.createElement("p", { style: { fontSize: 14, color: "rgba(255,255,255,0.7)", maxWidth: 300 } },
+          "The app hit an unexpected error. Tap below to reload."),
+        React.createElement("button", {
+          onClick: () => window.location.reload(),
+          style: {
+            marginTop: 8, padding: "12px 32px", borderRadius: 10, border: "none",
+            background: "rgba(255,255,255,0.2)", color: "white", fontSize: 15,
+            fontWeight: 600, cursor: "pointer",
+          },
+        }, "Reload App"),
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // --- GLOBAL STYLES ---
 const GlobalStyle = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:wght@300;400;500;600;700&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
 
     body {
       font-family: ${fonts.body};
       background: ${theme.bg};
       color: ${theme.text};
       -webkit-font-smoothing: antialiased;
+      touch-action: manipulation;
     }
 
     input, textarea, select, button {
@@ -427,11 +481,82 @@ const GlobalStyle = () => (
   `}</style>
 );
 
+// --- CONFIRM MODAL ---
+function ConfirmModal({ title, message, confirmLabel = "Delete", confirmColor = "#e74c3c", onConfirm, onCancel, inputConfirm = null }) {
+  const [inputValue, setInputValue] = useState("");
+  const canConfirm = inputConfirm ? inputValue === inputConfirm : true;
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
+      onClick={onCancel}>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }} />
+      <div style={{ position: "relative", background: theme.card, borderRadius: 16, padding: 24, maxWidth: 340, width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}
+        onClick={(e) => e.stopPropagation()}>
+        <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: theme.text }}>{title}</h3>
+        <p style={{ margin: "0 0 20px", fontSize: 14, lineHeight: 1.5, color: theme.textMuted }}>{message}</p>
+        {inputConfirm && (
+          <input
+            type="text"
+            placeholder={`Type ${inputConfirm} to confirm`}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            autoFocus
+            style={{
+              width: "100%", padding: "10px 12px", marginBottom: 16, fontSize: 14,
+              border: `1px solid ${theme.border}`, borderRadius: 8, background: theme.bg,
+              color: theme.text, boxSizing: "border-box", fontFamily: "DM Sans, sans-serif",
+            }}
+          />
+        )}
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={onCancel} style={{
+            flex: 1, padding: "12px 16px", borderRadius: 10, border: `1px solid ${theme.border}`,
+            background: "transparent", color: theme.text, fontSize: 14, fontWeight: 600, cursor: "pointer",
+          }}>Cancel</button>
+          <button onClick={() => canConfirm && onConfirm()} disabled={!canConfirm} style={{
+            flex: 1, padding: "12px 16px", borderRadius: 10, border: "none",
+            background: canConfirm ? confirmColor : theme.border, color: "white",
+            fontSize: 14, fontWeight: 600, cursor: canConfirm ? "pointer" : "not-allowed",
+            opacity: canConfirm ? 1 : 0.5,
+          }}>{confirmLabel}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- TOAST NOTIFICATION ---
+function Toast({ message, type = "error", onDone }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 4000);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  const colors = { error: "#e74c3c", success: "#27ae60", info: theme.primary };
+  return (
+    <div style={{
+      position: "fixed", bottom: "calc(24px + env(safe-area-inset-bottom, 0px))", left: 16, right: 16,
+      zIndex: 10001, display: "flex", justifyContent: "center", pointerEvents: "none",
+    }}>
+      <div style={{
+        background: colors[type] || colors.error, color: "white", padding: "12px 20px",
+        borderRadius: 12, fontSize: 14, fontWeight: 500, maxWidth: 360, textAlign: "center",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.25)", pointerEvents: "auto",
+      }}>{message}</div>
+    </div>
+  );
+}
+
 // --- LAYOUT ---
 function AppShell({ children, title, titleIcon, subtitle, subtitleIcon, onBack, actions, accentColor }) {
   const shellPrimary = accentColor || theme.primary;
   return (
-    <div style={{ maxWidth: 480, margin: "0 auto", minHeight: "100vh", padding: "0 16px 100px" }}>
+    <div style={{ maxWidth: 480, margin: "0 auto", minHeight: "100dvh", padding: "env(safe-area-inset-top, 0px) 16px calc(24px + env(safe-area-inset-bottom, 0px))" }}>
       <header style={{
         padding: "16px 0",
         display: "flex",
@@ -496,13 +621,14 @@ function AuthScreen({ onAuth, onDemo, onSkipAuth, onBack }) {
 
   return (
     <div style={{
-      minHeight: "100vh", display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center", padding: 24,
+      minHeight: "100dvh", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      padding: "calc(24px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px))",
       background: `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 50%, #40916C 100%)`,
       position: "relative",
     }}>
       {onBack && <button onClick={onBack} style={{
-        position: "absolute", top: 16, left: 16, background: "rgba(255,255,255,0.15)",
+        position: "absolute", top: "calc(16px + env(safe-area-inset-top, 0px))", left: 16, background: "rgba(255,255,255,0.15)",
         border: "none", color: "white", fontFamily: "'DM Sans', sans-serif",
         fontSize: 14, padding: "8px 16px", cursor: "pointer",
       }}>{"\u2190 Back"}</button>}
@@ -539,13 +665,13 @@ function AuthScreen({ onAuth, onDemo, onSkipAuth, onBack }) {
         <div style={{ marginBottom: 14 }}>
           <label className="label">Email</label>
           <input className="input" type="email" value={email}
-            onChange={(e) => setEmail(e.target.value)} required />
+            onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
         </div>
 
         <div style={{ marginBottom: 20 }}>
           <label className="label">Password</label>
           <input className="input" type="password" value={password}
-            onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+            onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete="current-password" />
         </div>
 
         <button className="btn btn-primary" type="submit"
@@ -765,9 +891,10 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
     "#111",                                                 // 7: dark payoff
   ];
   const container = {
-    minHeight: "100vh", fontFamily: "'DM Sans', sans-serif",
+    minHeight: "100dvh", fontFamily: "'DM Sans', sans-serif",
     display: "flex", flexDirection: "column",
-    alignItems: "center", justifyContent: "center", padding: "40px 20px",
+    alignItems: "center", justifyContent: "center",
+    padding: "calc(40px + env(safe-area-inset-top, 0px)) 20px calc(40px + env(safe-area-inset-bottom, 0px))",
     background: stepBgs[step] || "#FAFAF7",
     transition: "background 0.5s ease",
   };
@@ -800,15 +927,13 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
     letterSpacing: 0.2,
   });
   const handleBack = () => {
-    if (step <= initialStep) {
-      window.location.href = "/";
-    } else {
+    if (step > initialStep) {
       goBack();
     }
   };
-  const backArrow = step > 0 ? (
+  const backArrow = step > initialStep ? (
     <button onClick={handleBack} style={{
-      position: "absolute", top: 20, left: 20, background: "none",
+      position: "absolute", top: "calc(20px + env(safe-area-inset-top, 0px))", left: 20, background: "none",
       border: "none", fontSize: 14, color: "#a3a3a3", cursor: "pointer",
       fontFamily: "'DM Sans', sans-serif", fontWeight: 600,
     }}>
@@ -1201,7 +1326,7 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
                   }}>{authError}</div>
                 )}
                 <input type="email" placeholder="Email" value={email}
-                  onChange={(e) => setEmail(e.target.value)} required
+                  onChange={(e) => setEmail(e.target.value)} required autoComplete="email"
                   style={{
                     width: "100%", padding: "14px 16px", border: "1px solid #333",
                     background: "#0a0a0a", color: "#fafafa", fontSize: 15,
@@ -1210,7 +1335,7 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
                   }}
                 />
                 <input type="password" placeholder="Password (6+ characters)" value={password}
-                  onChange={(e) => setPassword(e.target.value)} required minLength={6}
+                  onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete="new-password"
                   style={{
                     width: "100%", padding: "14px 16px", border: "1px solid #333",
                     background: "#0a0a0a", color: "#fafafa", fontSize: 15,
@@ -1308,7 +1433,7 @@ function TeamSetupScreen({ role, onComplete }) {
   };
 
   return (
-    <div style={{ minHeight: "100vh", padding: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div style={{ minHeight: "100dvh", padding: "calc(24px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px))", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <form onSubmit={handleSubmit} className="slide-up" style={{ maxWidth: 400, width: "100%" }}>
         <h1 style={{ fontFamily: fonts.display, fontSize: 28, fontWeight: 700, color: theme.primary, marginBottom: 6 }}>
           {role === "parent" ? "Set up your child's season" : "Set up your season"}
@@ -1504,6 +1629,125 @@ function TeamSetupScreen({ role, onComplete }) {
   );
 }
 
+// --- EDIT SEASON MODAL ---
+function EditSeasonModal({ team, season, players, onSave, onClose, brandColor }) {
+  const [teamName, setTeamName] = useState(team?.name || "");
+  const [seasonName, setSeasonName] = useState(season?.name || "");
+  const [childName, setChildName] = useState(players?.[0]?.name || "");
+  const [color, setColor] = useState(team?.color || "#1B4332");
+  const [selectedSport, setSelectedSport] = useState(() =>
+    SPORTS.find((s) => s.name === team?.sport) || SPORTS[SPORTS.length - 1]
+  );
+  const [customSport, setCustomSport] = useState(
+    SPORTS.find((s) => s.name === team?.sport) ? "" : (team?.sport || "")
+  );
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const sportName = selectedSport?.name === "Other" ? (customSport || "Sports") : (selectedSport?.name || team?.sport || "Sports");
+    const sportEmoji = selectedSport?.emoji || team?.emoji || "🏅";
+    onSave({
+      team: { ...team, name: teamName || team?.name, sport: sportName, emoji: sportEmoji, color },
+      season: { ...season, name: seasonName || season?.name },
+      players: players?.length > 0
+        ? [{ ...players[0], name: childName || players[0]?.name }]
+        : childName ? [{ id: generateId(), name: childName, is_my_child: true }] : [],
+    });
+  };
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      zIndex: 100, padding: 16,
+    }}>
+      <form onSubmit={handleSubmit} style={{
+        background: "white", borderRadius: 16, padding: 24,
+        maxWidth: 380, width: "100%", maxHeight: "90vh", overflowY: "auto",
+        boxShadow: "0 16px 64px rgba(0,0,0,0.2)",
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <h2 style={{ fontFamily: fonts.display, fontSize: 22, fontWeight: 700, color: theme.text }}>Edit Season</h2>
+          <button type="button" onClick={onClose} style={{
+            background: "none", border: "none", fontSize: 22, color: theme.textMuted, cursor: "pointer",
+          }}>&times;</button>
+        </div>
+
+        {/* Sport */}
+        <div style={{ marginBottom: 16 }}>
+          <label className="label">Sport</label>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+            {SPORTS.map((s) => (
+              <button key={s.name} type="button" onClick={() => setSelectedSport(s)}
+                style={{
+                  padding: "8px 2px", cursor: "pointer",
+                  border: `1.5px solid ${selectedSport?.name === s.name ? color : theme.border}`,
+                  background: selectedSport?.name === s.name ? `${color}10` : "white",
+                  borderRadius: 8, display: "flex", flexDirection: "column",
+                  alignItems: "center", gap: 2, transition: "all 0.15s",
+                }}>
+                <span style={{ fontSize: 18 }}>{s.emoji}</span>
+                <span style={{
+                  fontSize: 10, fontWeight: selectedSport?.name === s.name ? 600 : 400,
+                  color: selectedSport?.name === s.name ? color : theme.textMuted,
+                }}>{s.name}</span>
+              </button>
+            ))}
+          </div>
+          {selectedSport?.name === "Other" && (
+            <input className="input" value={customSport} onChange={(e) => setCustomSport(e.target.value)}
+              placeholder="Enter sport name" style={{ marginTop: 8 }} />
+          )}
+        </div>
+
+        {/* Team Name */}
+        <div style={{ marginBottom: 16 }}>
+          <label className="label">Team Name</label>
+          <input className="input" value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder="Thunder U12" />
+        </div>
+
+        {/* Season Name */}
+        <div style={{ marginBottom: 16 }}>
+          <label className="label">Season Name</label>
+          <input className="input" value={seasonName} onChange={(e) => setSeasonName(e.target.value)} placeholder="Spring 2026" />
+        </div>
+
+        {/* Child Name */}
+        <div style={{ marginBottom: 16 }}>
+          <label className="label">Child's Name</label>
+          <input className="input" value={childName} onChange={(e) => setChildName(e.target.value)} placeholder="Alex" />
+        </div>
+
+        {/* Team Color */}
+        <div style={{ marginBottom: 20 }}>
+          <label className="label">Team Color</label>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            {COLOR_PRESETS.map((c) => (
+              <button key={c.hex} type="button" title={c.label}
+                onClick={() => setColor(c.hex)}
+                style={{
+                  width: 32, height: 32, borderRadius: "50%", border: "none", cursor: "pointer",
+                  background: c.hex, flexShrink: 0,
+                  outline: color === c.hex ? `2px solid ${c.hex}` : "2px solid transparent",
+                  outlineOffset: 3, transition: "outline 0.15s",
+                }} />
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: 10 }}>
+          <button type="button" onClick={onClose} className="btn btn-ghost" style={{ flex: 1, padding: "12px 16px" }}>
+            Cancel
+          </button>
+          <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: "12px 16px", background: color }}>
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 // --- ENTRY COMPOSER ---
 function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }) {
   const composerPrimary = brandColor || theme.primary;
@@ -1519,6 +1763,11 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
   const [consentShared, setConsentShared] = useState(!!orgName);
   const [entryDate, setEntryDate] = useState(new Date().toISOString().split("T")[0]);
   const fileRef = useRef(null);
+  const previewUrlRef = useRef(null);
+
+  useEffect(() => {
+    return () => { if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current); };
+  }, []);
 
   const entryTypes = [
     { id: "game", label: "Game", emoji: "🏟️" },
@@ -1593,8 +1842,11 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
   const handlePhoto = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    const url = URL.createObjectURL(file);
+    previewUrlRef.current = url;
     setPhoto(file);
-    setPhotoPreview(URL.createObjectURL(file));
+    setPhotoPreview(url);
   };
 
   const computeResult = () => {
@@ -1628,7 +1880,7 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
       display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 100,
     }}>
       <div className="slide-up" style={{
-        background: "white", borderRadius: "18px 18px 0 0", padding: 24,
+        background: "white", borderRadius: "18px 18px 0 0", padding: "24px 24px calc(24px + env(safe-area-inset-bottom, 0px))",
         width: "100%", maxWidth: 480, maxHeight: "90vh", overflow: "auto",
       }}>
         {/* Header */}
@@ -1728,7 +1980,7 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
               <img src={photoPreview} alt="" style={{
                 width: "100%", height: 180, objectFit: "cover", objectPosition: "top", borderRadius: 12,
               }} />
-              <button onClick={() => { setPhoto(null); setPhotoPreview(null); }}
+              <button onClick={() => { if (previewUrlRef.current) { URL.revokeObjectURL(previewUrlRef.current); previewUrlRef.current = null; } setPhoto(null); setPhotoPreview(null); }}
                 style={{
                   position: "absolute", top: 8, right: 8,
                   background: "rgba(0,0,0,0.6)", color: "white",
@@ -2472,7 +2724,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
     if (saved) {
       try { return JSON.parse(saved).shipping || {}; } catch (e) {}
     }
-    return { name: "", email: "", street: "", city: "", state: "", zip: "" };
+    return { name: "", email: "", street: "", city: "", state: "", zip: "", phone: "" };
   });
 
   const [orderStatus, setOrderStatus] = useState(() => {
@@ -2498,6 +2750,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
     if (!shipping.city.trim()) errs.city = "City is required";
     if (!shipping.state.trim() || shipping.state.trim().length !== 2) errs.state = "Two-letter state code";
     if (!shipping.zip.trim() || !/^\d{5}(-\d{4})?$/.test(shipping.zip.trim())) errs.zip = "Valid ZIP code";
+    if (!shipping.phone.trim() || !/^\d{10}$/.test(shipping.phone.trim().replace(/\D/g, ''))) errs.phone = "10-digit phone number";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -2549,7 +2802,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
       const checkoutRes = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bookDataUrl, shipping }),
+        body: JSON.stringify({ bookDataUrl, shipping: { ...shipping, phone: shipping.phone.replace(/\D/g, '') } }),
       });
 
       if (!checkoutRes.ok) {
@@ -2628,7 +2881,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                 <span style={{ fontSize: 14, color: theme.textMuted }}>Format</span>
-                <span style={{ fontSize: 14, fontWeight: 500 }}>7.75" Square Hardcover</span>
+                <span style={{ fontSize: 14, fontWeight: 500 }}>7.5" Square Hardcover</span>
               </div>
               <div style={{ height: 1, background: theme.border, margin: "12px 0" }} />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -2647,6 +2900,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
           <>
             {shippingField("name", "Full Name", "Alex Johnson")}
             {shippingField("email", "Email", "alex@email.com", { type: "email" })}
+            {shippingField("phone", "Phone", "(555) 123-4567", { type: "tel" })}
             {shippingField("street", "Street Address", "123 Main St")}
             {shippingField("city", "City", "Springfield")}
             <div style={{ display: "flex", gap: 12 }}>
@@ -2673,6 +2927,7 @@ function OrderFlow({ entries, team, season, players, onClose }) {
               <p style={{ fontSize: 13, color: theme.textMuted }}>{shipping.street}</p>
               <p style={{ fontSize: 13, color: theme.textMuted }}>{shipping.city}, {shipping.state} {shipping.zip}</p>
               <p style={{ fontSize: 13, color: theme.textMuted }}>{shipping.email}</p>
+              <p style={{ fontSize: 13, color: theme.textMuted }}>{shipping.phone}</p>
             </div>
             <div className="card" style={{ marginBottom: 16 }}>
               <p className="label">Book</p>
@@ -3385,6 +3640,12 @@ function ShareCardModal({ entry, team, season, onClose, entryNumber, entries = [
   const cardColor = team?.color || theme.primary;
 
   const [savedUrl, setSavedUrl] = useState(null);
+  const savedUrlRef = useRef(null);
+
+  useEffect(() => {
+    savedUrlRef.current = savedUrl;
+    return () => { if (savedUrlRef.current) URL.revokeObjectURL(savedUrlRef.current); };
+  }, [savedUrl]);
 
   const previewScale = aspect === "story"
     ? Math.min(300 / 1080, (window.innerHeight * 0.45) / 1920)
@@ -3646,7 +3907,7 @@ function LandingPage({ onDemo, onStart }) {
   };
 
   return (
-    <div style={{ background: theme.bg, minHeight: "100vh" }}>
+    <div style={{ background: theme.bg, minHeight: "100dvh" }}>
       {/* ====== HERO ====== */}
       <div style={{
         background: `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 50%, #40916C 100%)`,
@@ -4491,7 +4752,7 @@ function OrgSetupScreen({ onComplete }) {
   };
 
   return (
-    <div style={{ minHeight: "100vh", padding: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div style={{ minHeight: "100dvh", padding: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <form onSubmit={handleSubmit} className="slide-up" style={{ maxWidth: 400, width: "100%" }}>
         <h1 style={{ fontFamily: fonts.display, fontSize: 28, fontWeight: 700, color: theme.primary, marginBottom: 6 }}>
           Set up your organization
@@ -4745,7 +5006,7 @@ function AdminDashboard({ org, teams, onAddTeam, onAddPlayer, onSignOut, accentC
   const resultLabels = { win: "W", loss: "L", draw: "D" };
 
   return (
-    <div style={{ minHeight: "100vh", background: theme.bg }}>
+    <div style={{ minHeight: "100dvh", background: theme.bg }}>
       {/* Header */}
       <div style={{
         background: accent, padding: "16px 20px",
@@ -5213,7 +5474,7 @@ function JoinScreen({ token, onComplete, onBack }) {
   if (loading) {
     return (
       <div style={{
-        minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+        minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center",
         background: theme.bg,
       }}>
         <div style={{ textAlign: "center", color: theme.textMuted, fontFamily: fonts.body }}>
@@ -5226,7 +5487,7 @@ function JoinScreen({ token, onComplete, onBack }) {
   if (error || joinInfo?.already_claimed) {
     return (
       <div style={{
-        minHeight: "100vh", display: "flex", flexDirection: "column",
+        minHeight: "100dvh", display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center", padding: 24,
         background: theme.bg,
       }}>
@@ -5258,7 +5519,7 @@ function JoinScreen({ token, onComplete, onBack }) {
 
   return (
     <div style={{
-      minHeight: "100vh", display: "flex", flexDirection: "column",
+      minHeight: "100dvh", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center", padding: 24,
       background: gradientFromColor(accent),
     }}>
@@ -5317,12 +5578,12 @@ function JoinScreen({ token, onComplete, onBack }) {
         <div style={{ marginBottom: 14 }}>
           <label className="label">Email</label>
           <input className="input" type="email" value={email}
-            onChange={(e) => setEmail(e.target.value)} required />
+            onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
         </div>
         <div style={{ marginBottom: 20 }}>
           <label className="label">Password</label>
           <input className="input" type="password" value={password}
-            onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+            onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete="current-password" />
         </div>
 
         <button className="btn btn-primary" type="submit" disabled={authLoading}
@@ -5344,7 +5605,7 @@ function JoinScreen({ token, onComplete, onBack }) {
 
 
 // --- MAIN APP ---
-export default function SportsJournalApp() {
+function SportsJournalAppInner() {
   const [authed, setAuthed] = useState(false);
   const [user, setUser] = useState(null);
   const [screen, setScreen] = useState("loading"); // loading, onboard, auth, setup, home
@@ -5354,7 +5615,9 @@ export default function SportsJournalApp() {
   // Listen for auth state changes (SDK handles token refresh automatically)
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT" || event === "TOKEN_REFRESHED" && !session) {
+      const isSignedOut = event === "SIGNED_OUT";
+      const isTokenRefreshFailed = event === "TOKEN_REFRESHED" && !session;
+      if (isSignedOut || isTokenRefreshFailed) {
         setAuthed(false);
         setUser(null);
         setScreen("auth");
@@ -5393,6 +5656,11 @@ export default function SportsJournalApp() {
   const menuRef = useRef(null);
   const joinTokenRef = useRef(null);
 
+  // Confirm modal + toast state
+  const [confirmModal, setConfirmModal] = useState(null);
+  const [toast, setToast] = useState(null);
+  const showToast = useCallback((message, type = "error") => setToast({ message, type }), []);
+
   // Share card state
   const [shareEntry, setShareEntry] = useState(null);
   const [showSharePrompt, setShowSharePrompt] = useState(false);
@@ -5405,6 +5673,7 @@ export default function SportsJournalApp() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(() => !localStorage.getItem("ts_install_dismissed"));
   const [showHelp, setShowHelp] = useState(false);
+  const [showEditSeason, setShowEditSeason] = useState(false);
 
   // Capture beforeinstallprompt (Android/Chrome)
   useEffect(() => {
@@ -6036,7 +6305,7 @@ export default function SportsJournalApp() {
         setTeam(s.team);
         setSeason(s.season);
         setPlayers(s.players);
-        setEntries((s.entries || []).map((e) => ({ ...e, photoPreview: e.photoData || e.photo_url || null })));
+        setEntries((s.entries || []).map((e) => ({ ...e, photoPreview: e.photo_url || e.photoData || null })));
       }
       return updated;
     });
@@ -6047,18 +6316,15 @@ export default function SportsJournalApp() {
   };
 
   // v2 — soft delete with session validation
-  const deleteSeason = async (idx) => {
-    if (allSeasons.length <= 1) return; // Can't delete the only season
+  const executeDeleteSeason = async (idx) => {
     const s = allSeasons[idx];
-    if (!confirm(`Delete "${s.team?.name || "Team"} — ${s.season?.name || "Season"}"? This cannot be undone.`)) return;
-
     // Soft delete — set deleted_at timestamp instead of hard delete
     if (!DEMO && user?.id && s.season?.id) {
       try {
         const { data: sessionData } = await supabase.auth.getSession();
         console.log("[DELETE] Session check:", sessionData?.session ? "valid" : "EXPIRED", "user:", user?.id, "season:", s.season.id);
         if (!sessionData?.session) {
-          alert("Your session has expired. Please sign out and sign back in, then try again.");
+          showToast("Your session has expired. Please sign out and sign back in.");
           return;
         }
 
@@ -6072,12 +6338,12 @@ export default function SportsJournalApp() {
         console.log("[DELETE] Soft delete result:", updated?.length, "rows updated, error:", error);
 
         if (error || !updated || updated.length === 0) {
-          alert("Failed to delete the season. Please try again.");
+          showToast("Failed to delete the season. Please try again.");
           console.error("Soft delete failed:", error, "Rows:", updated?.length);
           return;
         }
       } catch (e) {
-        alert("Something went wrong deleting that season. Please try again.");
+        showToast("Something went wrong deleting that season. Please try again.");
         console.error("Cloud season delete failed:", e);
         return;
       }
@@ -6098,7 +6364,7 @@ export default function SportsJournalApp() {
         setTeam(target.team);
         setSeason(target.season);
         setPlayers(target.players);
-        setEntries((target.entries || []).map((e) => ({ ...e, photoPreview: e.photoData || e.photo_url || null })));
+        setEntries((target.entries || []).map((e) => ({ ...e, photoPreview: e.photo_url || e.photoData || null })));
       }
       activeIdxRef.current = newIdx;
       setActiveSeasonIdx(newIdx);
@@ -6106,6 +6372,17 @@ export default function SportsJournalApp() {
       return updated;
     });
     setShowSeasonSwitcher(false);
+  };
+
+  const deleteSeason = (idx) => {
+    if (allSeasons.length <= 1) return;
+    const s = allSeasons[idx];
+    setConfirmModal({
+      title: "Delete Season",
+      message: `Delete "${s.team?.name || "Team"} — ${s.season?.name || "Season"}"? This cannot be undone.`,
+      confirmLabel: "Delete",
+      onConfirm: () => { setConfirmModal(null); executeDeleteSeason(idx); },
+    });
   };
 
   const startNewSeason = () => {
@@ -6257,6 +6534,45 @@ export default function SportsJournalApp() {
     }
   };
 
+  const handleEditSeason = async (editData) => {
+    const newTeam = editData.team;
+    const newSeason = editData.season;
+    const newPlayers = editData.players;
+
+    setTeam(newTeam);
+    setSeason(newSeason);
+    setPlayers(newPlayers);
+    setShowEditSeason(false);
+
+    // Sync to Supabase
+    if (!DEMO && user) {
+      (async () => {
+        try {
+          if (newTeam?.id) {
+            await supabase.from("teams").update({
+              name: newTeam.name, sport: newTeam.sport,
+              emoji: newTeam.emoji, color: newTeam.color,
+            }).eq("id", newTeam.id).eq("created_by", user.id);
+          }
+          if (newSeason?.id) {
+            await supabase.from("seasons").update({
+              name: newSeason.name,
+            }).eq("id", newSeason.id).eq("user_id", user.id);
+          }
+          if (newPlayers?.[0]?.id && newTeam?.id) {
+            await supabase.from("players").upsert({
+              id: newPlayers[0].id, team_id: newTeam.id,
+              name: newPlayers[0].name, is_my_child: newPlayers[0].is_my_child || true,
+            }, { onConflict: "id" });
+          }
+          console.log("Season edit synced to cloud");
+        } catch (e) {
+          console.warn("Season edit sync failed:", e);
+        }
+      })();
+    }
+  };
+
   const handleSaveEntry = async (entryData) => {
     let newEntry;
     try {
@@ -6353,26 +6669,30 @@ export default function SportsJournalApp() {
     }
   };
 
-  const handleDeleteEntry = async (entryId) => {
-    if (!confirm("Delete this entry? This can't be undone.")) return;
-
+  const executeDeleteEntry = async (entryId) => {
     // Remove from local state
     setEntries((prev) => prev.filter((e) => e.id !== entryId));
 
     // Delete from Supabase
     if (!DEMO && user) {
       try {
-        // Delete photo from storage
         const filePath = `${user.id}/${entryId}.jpg`;
         await supabase.storage.from("entry-photos").remove([filePath]);
-
-        // Delete entry row
         const { error } = await supabase.from("entries").delete().eq("id", entryId).eq("user_id", user.id);
         if (error) console.warn("Entry delete failed:", error);
       } catch (e) {
         console.warn("Entry delete error:", e.message);
       }
     }
+  };
+
+  const handleDeleteEntry = (entryId) => {
+    setConfirmModal({
+      title: "Delete Entry",
+      message: "Delete this entry? This can't be undone.",
+      confirmLabel: "Delete",
+      onConfirm: () => { setConfirmModal(null); executeDeleteEntry(entryId); },
+    });
   };
 
   const handleSignOut = async () => {
@@ -6398,21 +6718,13 @@ export default function SportsJournalApp() {
     setShowMenu(false);
   };
 
-  const handleDeleteAccount = async () => {
-    if (!confirm("Are you sure? This will permanently delete all your entries, photos, and seasons. This cannot be undone.")) return;
-    const typed = prompt("Type DELETE to confirm you want to permanently erase everything:");
-    if (typed !== "DELETE") {
-      if (typed !== null) alert("Account not deleted. You must type DELETE exactly to confirm.");
-      return;
-    }
+  const executeDeleteAccount = async () => {
     try {
       if (user) {
-        // Delete user's entries, seasons, players, teams
         await supabase.from("entries").delete().eq("user_id", user.id);
         await supabase.from("seasons").delete().eq("user_id", user.id);
         await supabase.from("players").delete().eq("team_id", team?.id);
         await supabase.from("teams").delete().eq("created_by", user.id);
-        // Delete photos from storage
         const { data: files } = await supabase.storage.from("entry-photos").list(user.id);
         if (files?.length) {
           await supabase.storage.from("entry-photos").remove(files.map((f) => `${user.id}/${f.name}`));
@@ -6422,6 +6734,16 @@ export default function SportsJournalApp() {
       console.warn("Cleanup error (continuing with signout):", e);
     }
     handleSignOut();
+  };
+
+  const handleDeleteAccount = () => {
+    setConfirmModal({
+      title: "Delete Account",
+      message: "This will permanently delete all your entries, photos, and seasons. This cannot be undone.",
+      confirmLabel: "Delete Everything",
+      inputConfirm: "DELETE",
+      onConfirm: () => { setConfirmModal(null); executeDeleteAccount(); },
+    });
   };
 
   // Sort entries newest first, then filter
@@ -6449,7 +6771,12 @@ export default function SportsJournalApp() {
           flexDirection: "column", gap: 12,
           background: `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 50%, #40916C 100%)`,
         }}>
-          <div style={{ fontSize: 32 }}>🏆</div>
+          <div style={{
+            width: 32, height: 32, border: "3px solid rgba(255,255,255,0.2)",
+            borderTopColor: "rgba(255,255,255,0.8)", borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+          }} />
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           <span style={{ fontSize: 14 }}>Loading your journal...</span>
         </div>
       )}
@@ -6531,6 +6858,13 @@ export default function SportsJournalApp() {
                       fontSize: 14, color: theme.text, textAlign: "left",
                     }}>
                       Help & FAQ
+                  </button>
+                  <button onClick={() => { setShowMenu(false); setShowEditSeason(true); }} style={{
+                      display: "block", width: "100%", padding: "10px 16px",
+                      background: "none", border: "none", cursor: "pointer",
+                      fontSize: 14, color: theme.text, textAlign: "left",
+                    }}>
+                      Edit Season
                   </button>
                   {allSeasons.length > 1 && (
                     <button onClick={() => { setShowMenu(false); deleteSeason(activeSeasonIdx); }} style={{
@@ -6807,6 +7141,18 @@ export default function SportsJournalApp() {
             />
           )}
 
+          {/* Edit Season Modal */}
+          {showEditSeason && (
+            <EditSeasonModal
+              team={team}
+              season={season}
+              players={players}
+              brandColor={brandPrimary}
+              onSave={handleEditSeason}
+              onClose={() => setShowEditSeason(false)}
+            />
+          )}
+
           {/* Help & FAQ Modal */}
           {showHelp && (
             <div style={{
@@ -6903,6 +7249,26 @@ export default function SportsJournalApp() {
           })()}
         />
       )}
+
+      {confirmModal && (
+        <ConfirmModal
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmLabel={confirmModal.confirmLabel}
+          confirmColor={confirmModal.confirmColor}
+          inputConfirm={confirmModal.inputConfirm}
+          onConfirm={confirmModal.onConfirm}
+          onCancel={() => setConfirmModal(null)}
+        />
+      )}
+
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onDone={() => setToast(null)} />
+      )}
     </>
   );
+}
+
+export default function SportsJournalApp() {
+  return <ErrorBoundary><SportsJournalAppInner /></ErrorBoundary>;
 }

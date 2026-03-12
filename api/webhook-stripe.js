@@ -7,6 +7,7 @@ import puppeteer from 'puppeteer-core';
 import { put } from '@vercel/blob';
 import { waitUntil } from '@vercel/functions';
 import { createPrintOrder } from './lib/lulu.js';
+import { Resend } from 'resend';
 
 export const config = {
   api: { bodyParser: false },
@@ -33,9 +34,9 @@ async function getRawBody(req) {
   return Buffer.concat(chunks);
 }
 
-// Lulu 7.75x7.75" square hardcover case wrap specs with 0.125" bleed
-const INTERIOR_WIDTH = '8in';    // 7.75 + 0.125 bleed each side
-const INTERIOR_HEIGHT = '8in';   // 7.75 + 0.125 bleed each side
+// Lulu 7.5x7.5" square hardcover case wrap specs with 0.125" bleed each side
+const INTERIOR_WIDTH = '7.75in';    // 7.5 + 0.125 bleed each side
+const INTERIOR_HEIGHT = '7.75in';   // 7.5 + 0.125 bleed each side
 // Cover: back + spine + front. Spine width depends on page count.
 // Hardcover case wrap panels include board overhang beyond trim.
 // At 48 pages: total cover = 17in wide x 9.25in tall, spine = 0.25in
@@ -46,7 +47,7 @@ function getCoverWidth(pageCount) {
   return `${8.375 + spineWidth + 8.375}in`;
 }
 
-async function generatePdf(browser, origin, bookData, type, pageCount) {
+async function generatePdfWithPageCount(browser, origin, bookData, type, pageCount) {
   const page = await browser.newPage();
 
   await page.goto(`${origin}/book-template/${type}.html`, {
@@ -76,9 +77,17 @@ async function generatePdf(browser, origin, bookData, type, pageCount) {
         margin: { top: 0, right: 0, bottom: 0, left: 0 },
       };
 
-  const pdfBuffer = await page.pdf(pdfOptions);
+  const pdfResult = await page.pdf(pdfOptions);
+  const pdfBuffer = Buffer.isBuffer(pdfResult) ? pdfResult : Buffer.from(pdfResult);
+
+  // Count pages by searching for /Type /Page (not /Pages) in the PDF structure
+  let actualPageCount = 0;
+  const pdfStr = pdfBuffer.toString('latin1');
+  const matches = pdfStr.match(/\/Type\s*\/Page[^s]/g);
+  actualPageCount = matches ? matches.length : 0;
+
   await page.close();
-  return pdfBuffer;
+  return { pdf: pdfBuffer, pageCount: actualPageCount };
 }
 
 export default async function handler(req, res) {
@@ -140,9 +149,7 @@ async function fulfillOrder(session) {
   }
   const bookData = await bookDataRes.json();
   const entryCount = bookData.entries?.length || 0;
-  // Title + summary + entries (2 pages each estimate) + closing
-  const estimatedPageCount = Math.max(24, 2 + 2 + entryCount * 2 + 1);
-  console.log(`Book data fetched: ${entryCount} entries, ~${estimatedPageCount} pages`);
+  console.log(`Book data fetched: ${entryCount} entries`);
 
   // 2. Generate PDFs with Puppeteer
   const browser = await puppeteer.launch({
@@ -157,12 +164,14 @@ async function fulfillOrder(session) {
     : 'https://teamseason.app';
 
   try {
-    const [coverPdf, interiorPdf] = await Promise.all([
-      generatePdf(browser, origin, bookData, 'cover', estimatedPageCount),
-      generatePdf(browser, origin, bookData, 'interior', estimatedPageCount),
-    ]);
+    // Generate interior first to get actual page count
+    const { pdf: interiorPdf, pageCount: actualPageCount } = await generatePdfWithPageCount(browser, origin, bookData, 'interior', 0);
+    console.log(`Interior PDF: ${interiorPdf.length}b, ${actualPageCount} pages`);
 
-    console.log(`PDFs generated: cover=${coverPdf.length}b, interior=${interiorPdf.length}b`);
+    // Generate cover with correct spine width based on actual page count
+    const { pdf: coverPdf } = await generatePdfWithPageCount(browser, origin, bookData, 'cover', actualPageCount);
+    console.log(`Cover PDF: ${coverPdf.length}b (sized for ${actualPageCount} pages)`);
+
     await browser.close();
 
     // 3. Upload PDFs to Vercel Blob
@@ -199,6 +208,15 @@ async function fulfillOrder(session) {
         luluId: luluOrder.id,
         status: luluOrder.status?.name,
       });
+
+      // 5. Send confirmation email
+      await sendConfirmationEmail({
+        to: shippingAddress.email || session.customer_email,
+        teamName: bookData.team?.name || 'Your Team',
+        seasonName: bookData.season?.name || 'Season',
+        entryCount,
+        shippingName: shippingAddress.name,
+      });
     } else {
       console.log('Lulu not configured, skipping print submission. PDFs available at:', {
         cover: coverBlob.url,
@@ -210,5 +228,56 @@ async function fulfillOrder(session) {
   } catch (err) {
     await browser.close().catch(() => {});
     throw err;
+  }
+}
+
+async function sendConfirmationEmail({ to, teamName, seasonName, entryCount, shippingName }) {
+  const { RESEND_API_KEY } = process.env;
+  if (!RESEND_API_KEY || !to) {
+    console.log('Skipping confirmation email — no API key or no email address');
+    return;
+  }
+
+  try {
+    const resend = new Resend(RESEND_API_KEY);
+    const firstName = shippingName?.split(' ')[0] || '';
+
+    await resend.emails.send({
+      from: 'Team Season <books@send.youthsoccermarketing.com>',
+      to,
+      subject: `We're making your ${teamName} book`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 520px; margin: 0 auto; color: #1a1a18;">
+          <div style="padding: 32px 0 24px;">
+            <h1 style="font-size: 24px; font-weight: 700; color: #1B4332; margin: 0 0 16px;">
+              Your book is on its way to the printer${firstName ? `, ${firstName}` : ''}.
+            </h1>
+            <p style="font-size: 16px; line-height: 1.6; color: #333; margin: 0 0 24px;">
+              <strong>${teamName} — ${seasonName}</strong><br/>
+              ${entryCount} ${entryCount === 1 ? 'entry' : 'entries'}, hardcover, full color.
+            </p>
+            <div style="background: #f8f5ef; padding: 20px; margin: 0 0 24px;">
+              <p style="font-size: 15px; line-height: 1.5; color: #333; margin: 0;">
+                <strong>What happens next:</strong><br/>
+                Your book is being printed and bound right now.
+                Expect it at your door in <strong>5–10 business days</strong>.
+                We'll email you again when it ships with tracking info.
+              </p>
+            </div>
+            <p style="font-size: 14px; color: #888; line-height: 1.5; margin: 0; padding-top: 16px; border-top: 1px solid #eee;">
+              Long after the scores are forgotten, the moments remain.
+            </p>
+            <p style="font-size: 13px; color: #aaa; margin: 16px 0 0;">
+              Team Season · teamseason.app
+            </p>
+          </div>
+        </div>
+      `,
+    });
+
+    console.log(`Confirmation email sent to ${to}`);
+  } catch (err) {
+    // Don't fail the order if email fails
+    console.error('Confirmation email failed:', err.message);
   }
 }
