@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-28LL3GT86B"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-28LL3GT86B');</script>
+  <meta name="theme-color" content="#1B4332" />
+  <meta name="description" content="A soccer season journal for parents. Log every game, practice, and moment from your kid's season — then turn it into a printed hardcover book. Free app." />
+  <title>Soccer Season Journal for Parents | Team Season</title>
+  <link rel="canonical" href="https://teamseason.app/soccer-season-journal" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="/icons/icon-180.png" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Soccer Season Journal — Capture Every Game, Print the Book" />
+  <meta property="og:description" content="A free journal app for soccer parents. Log games, scores, and moments all season — then turn it into a hardcover book." />
+  <meta property="og:url" content="https://teamseason.app/soccer-season-journal" />
+  <meta property="og:site_name" content="Team Season" />
+  <meta property="og:image" content="https://teamseason.app/images/book-mockup.jpg" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Soccer Season Journal — Capture Every Game, Print the Book" />
+  <meta name="twitter:description" content="A free journal app for soccer parents. Log games, scores, and moments all season." />
+  <meta name="twitter:image" content="https://teamseason.app/images/book-mockup.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --green: #1B4332; --green-deep: #122d22; --green-light: #2D6A4F; --accent: #E07A5F; --accent-light: #e8937c; --bg: #FAFAF7; --white: #ffffff; --text: #1A1A1A; --text-muted: #6B7280; --border: #E8E8E4; }
+    body { font-family: 'DM Sans', -apple-system, sans-serif; color: var(--text); background: var(--bg); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    .site-header { background: var(--bg); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; }
+    .site-logo { font-family: 'Crimson Pro', Georgia, serif; font-size: 24px; font-weight: 700; color: var(--green); text-decoration: none; }
+    .site-nav { display: flex; align-items: center; gap: 24px; }
+    .site-nav a { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); text-decoration: none; }
+    .site-nav a:hover { color: var(--green); }
+    .site-nav .nav-cta { background: var(--green); color: white; padding: 8px 20px; text-decoration: none; }
+    .site-nav .nav-cta:hover { background: var(--green-light); color: white; }
+    .gradient-stripe { height: 3px; background: linear-gradient(90deg, var(--green-deep), var(--green), var(--green-light)); }
+    .hero { background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 50%, #40916C 100%); color: var(--white); padding: 80px 32px 90px; text-align: center; }
+    .hero-inner { max-width: 700px; margin: 0 auto; }
+    .hero h1 { font-family: 'Crimson Pro', Georgia, serif; font-size: clamp(36px, 6vw, 56px); line-height: 1.1; font-weight: 700; margin-bottom: 20px; }
+    .hero .lead { font-size: 17px; line-height: 1.7; color: rgba(255,255,255,0.8); max-width: 560px; margin: 0 auto 36px; }
+    .btn-primary { display: inline-block; background: var(--accent); color: white; padding: 16px 40px; font-size: 16px; font-weight: 700; text-decoration: none; transition: background 0.2s, transform 0.2s; }
+    .btn-primary:hover { background: var(--accent-light); transform: translateY(-1px); }
+    .cta-note { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 16px; }
+    .content { max-width: 720px; margin: 0 auto; padding: 64px 32px; }
+    .content h2 { font-family: 'Crimson Pro', Georgia, serif; font-size: 32px; font-weight: 700; color: var(--green); margin: 48px 0 16px; }
+    .content h2:first-child { margin-top: 0; }
+    .content p { font-size: 16px; line-height: 1.7; color: var(--text-muted); margin-bottom: 16px; }
+    .content strong { color: var(--text); }
+    .content ul { list-style: none; padding: 0; margin: 16px 0 24px; }
+    .content ul li { font-size: 16px; color: var(--text); padding: 10px 0 10px 20px; border-bottom: 1px solid var(--border); position: relative; }
+    .content ul li::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+    .book-showcase { display: flex; align-items: flex-start; gap: 40px; flex-wrap: wrap; justify-content: center; margin: 40px 0; padding: 40px; background: var(--white); border: 1px solid var(--border); }
+    .book-showcase img { width: 220px; box-shadow: 0 12px 32px rgba(0,0,0,0.1); flex-shrink: 0; }
+    .book-showcase-copy { flex: 1 1 260px; min-width: 240px; }
+    .book-showcase-copy h3 { font-family: 'Crimson Pro', Georgia, serif; font-size: 24px; font-weight: 700; color: var(--green); margin-bottom: 12px; }
+    .book-showcase-copy p { font-size: 15px; color: var(--text-muted); line-height: 1.6; margin-bottom: 8px; }
+    .book-price { font-weight: 700; color: var(--green); font-size: 15px; margin-top: 12px; }
+    .pullquote { font-family: 'Crimson Pro', Georgia, serif; font-size: 24px; font-style: italic; color: var(--green); line-height: 1.5; text-align: center; padding: 40px 0; margin: 32px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .pullquote-attr { display: block; font-family: 'DM Sans', sans-serif; font-style: normal; font-size: 14px; color: var(--text-muted); margin-top: 12px; }
+    .steps-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin: 32px 0; }
+    .mini-step h3 { font-size: 14px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .mini-step p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+    .bottom-cta { background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 100%); color: var(--white); text-align: center; padding: 80px 32px; }
+    .bottom-cta h2 { font-family: 'Crimson Pro', Georgia, serif; font-size: 36px; font-weight: 700; margin-bottom: 16px; color: var(--white); }
+    .bottom-cta p { font-size: 17px; color: rgba(255,255,255,0.75); margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto; }
+    .site-footer { background: var(--green-deep); color: rgba(255,255,255,0.5); text-align: center; padding: 32px; font-size: 13px; }
+    .site-footer a { color: rgba(255,255,255,0.5); text-decoration: none; }
+    .site-footer a:hover { color: rgba(255,255,255,0.8); }
+    @media (max-width: 768px) { .site-header { padding: 14px 20px; } .hero { padding: 60px 20px 70px; } .content { padding: 48px 20px; } .steps-row { grid-template-columns: 1fr; gap: 24px; } .book-showcase { padding: 24px; } .bottom-cta { padding: 60px 20px; } }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Soccer Season Journal for Parents",
+    "description": "A free journal app for soccer parents. Log every game, practice, and moment — then turn it into a printed hardcover book.",
+    "url": "https://teamseason.app/soccer-season-journal",
+    "publisher": { "@type": "Organization", "name": "Team Season", "url": "https://teamseason.app" }
+  }
+  </script>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="site-logo">Team Season</a>
+    <nav class="site-nav">
+      <a href="/">Home</a>
+      <a href="/app" class="nav-cta">Start Free</a>
+    </nav>
+  </header>
+
+  <div class="gradient-stripe"></div>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <h1>A Soccer Season Journal That Turns Into a Book</h1>
+      <p class="lead">Log every match, practice, and sideline moment from your kid's soccer season. At the end, it becomes a printed hardcover book.</p>
+      <a href="/app" class="btn-primary">Start Your Free Journal</a>
+      <p class="cta-note">Free to use. Books start at $39 when you're ready.</p>
+    </div>
+  </section>
+
+  <div class="content">
+
+    <h2>You'll Forget More Than You Think</h2>
+    <p>Your kid plays fall and spring soccer. That's 30, 40, maybe 50 games a year. Add in tournaments, practices, and the random Tuesday that turned into their best goal ever.</p>
+    <p>You're there for all of it. But by the next season, you've already lost the details. Which game was the rainy one where they scored twice? What did the coach say at halftime that changed everything? What was the name of the goalkeeper on that team from the tournament in October?</p>
+    <p>The big moments stick. The rest fades. Unless you write it down.</p>
+
+    <h2>Two Minutes After the Whistle</h2>
+    <p>Team Season is built for the car ride home. Open the app, tap "New Entry," and write what happened while it's still fresh. The score. What you noticed. A photo from the sideline. Takes two minutes.</p>
+    <p>You don't need to be a writer. You don't need paragraphs. <strong>"3-1, Ella scored from the corner. Coach moved her to center mid second half and it clicked."</strong> That's an entry. That's a page in the book.</p>
+
+    <div class="steps-row">
+      <div class="mini-step">
+        <h3>1. Set Up Your Season</h3>
+        <p>Pick soccer, add your kid's name, name the team. Takes 30 seconds.</p>
+      </div>
+      <div class="mini-step">
+        <h3>2. Journal After Each Game</h3>
+        <p>Quick entries with scores, opponents, photos, and what you noticed. On the drive home.</p>
+      </div>
+      <div class="mini-step">
+        <h3>3. Order the Book</h3>
+        <p>At the end of the season, your entries become a hardcover book shipped to your door.</p>
+      </div>
+    </div>
+
+    <div class="pullquote">
+      &ldquo;I started writing things down after games because I kept forgetting the details. By the end of the season I had this whole story I didn't know I was writing.&rdquo;
+      <span class="pullquote-attr">&mdash; Soccer parent, Massachusetts</span>
+    </div>
+
+    <h2>What a Soccer Season Book Looks Like</h2>
+    <p>Every entry becomes a page. Game entries show the score, the opponent, your notes, and your photos. Practice entries capture the small breakthroughs. Moment entries hold the stuff that doesn't fit anywhere else but matters the most.</p>
+    <ul>
+      <li><strong>Game pages</strong> &mdash; 3-1 W vs Northside FC, your notes, your sideline photos</li>
+      <li><strong>Practice pages</strong> &mdash; the drill that finally clicked, what the coach said</li>
+      <li><strong>Tournament pages</strong> &mdash; the whole weekend in one section</li>
+      <li><strong>Moment pages</strong> &mdash; team dinners, car rides, the cleat shopping trip</li>
+      <li><strong>Season summary</strong> &mdash; win-loss record, total games, goals, date range</li>
+    </ul>
+
+    <div class="book-showcase">
+      <img src="/images/book-mockup.jpg" alt="Team Season printed hardcover soccer season book" />
+      <div class="book-showcase-copy">
+        <h3>A Real Hardcover Book</h3>
+        <p>7.5" square hardcover with your team name and colors on the cover. Printed on thick, full-color paper.</p>
+        <p>Preview every page before you order. If you don't love it, don't buy it.</p>
+        <p class="book-price">$39 <span style="font-weight:400;font-size:13px;color:var(--text-muted)">+ shipping</span></p>
+      </div>
+    </div>
+
+    <h2>Built for Soccer Parents</h2>
+    <p>Team Season supports everything about a soccer season. Log scores with home and away goals. Track opponents. Record wins, losses, and draws. Add tournament results. The season summary does the math for you.</p>
+    <p>If your kid plays on multiple teams or plays another sport too, create a separate season for each one. They all live in the same app, and each becomes its own book.</p>
+
+    <h2>Better Than a Photo Album</h2>
+    <p>You probably have 300 soccer photos on your phone right now. They're mixed in with screenshots, random stuff, and photos from two seasons ago. You'd need a weekend to sort through them.</p>
+    <p>Team Season is different. Each photo is attached to a game, a date, and your own words about what happened. When you flip through the book, you don't just see photos &mdash; you see the whole story.</p>
+
+    <h2>Free to Start</h2>
+    <p>The app is free. No subscriptions, no premium tiers. You only pay when you want a printed book. Even if you never order one, you'll have a complete journal of your kid's soccer season.</p>
+
+  </div>
+
+  <section class="bottom-cta">
+    <h2>This Soccer Season Only Happens Once</h2>
+    <p>Start capturing it now. Two minutes after each game. A book your kid keeps forever.</p>
+    <a href="/app" class="btn-primary">Start Your Free Journal</a>
+    <p class="cta-note">Free to use. No credit card required.</p>
+  </section>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/youth-sports-memory-book">Memory Book</a> &nbsp;&middot;&nbsp; <a href="/app">Open App</a></p>
+  </footer>
+
+</body>
+</html>

@@ -2,7 +2,6 @@
   "functions": {
     "api/generate-pdf.js": { "memory": 1024, "maxDuration": 60 },
     "api/test-fulfillment.js": { "memory": 1024, "maxDuration": 60 },
-    "api/test-order.js": { "memory": 1024, "maxDuration": 120 },
     "api/checkout.js": { "maxDuration": 10 },
     "api/webhook-stripe.js": { "memory": 1024, "maxDuration": 60 },
     "api/store-book-data.js": { "maxDuration": 10 },
@@ -16,6 +15,9 @@
     { "src": "^/app$", "dest": "/app.html" },
     { "src": "^/season-recap$", "dest": "/season-recap.html" },
     { "src": "^/youth-sports-memory-book$", "dest": "/youth-sports-memory-book.html" },
+    { "src": "^/soccer-season-journal$", "dest": "/soccer-season-journal.html" },
+    { "src": "^/baseball-season-journal$", "dest": "/baseball-season-journal.html" },
+    { "src": "^/basketball-season-journal$", "dest": "/basketball-season-journal.html" },
     { "src": "^/privacy$", "dest": "/privacy.html" },
     { "src": "^/terms$", "dest": "/terms.html" },
     { "handle": "filesystem" }

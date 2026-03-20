@@ -2,7 +2,7 @@
 // Caches ONLY static app-shell assets (JS, CSS, fonts, images, icons).
 // API calls, Supabase data/storage, and HTML pages are NEVER cached.
 
-const CACHE = 'ts-v7';
+const CACHE = 'ts-v8';
 
 // Extensions that are safe to cache (hashed filenames from Vite build)
 const CACHEABLE_EXT = /\.(js|css|woff2?|ttf|eot|png|jpg|jpeg|svg|ico|webp|avif)(\?.*)?$/i;

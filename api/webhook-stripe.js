@@ -209,7 +209,15 @@ async function fulfillOrder(session) {
         status: luluOrder.status?.name,
       });
 
-      // 5. Send confirmation email
+      // 5. Store order mapping for client status polling
+      await put(`orders/status-${session.id}.json`, JSON.stringify({
+        luluOrderId: luluOrder.id,
+        lastKnownStatus: 'ordered',
+        externalId: orderId,
+        createdAt: new Date().toISOString(),
+      }), { contentType: 'application/json', access: 'public' });
+
+      // 6. Send confirmation email
       await sendConfirmationEmail({
         to: shippingAddress.email || session.customer_email,
         teamName: bookData.team?.name || 'Your Team',

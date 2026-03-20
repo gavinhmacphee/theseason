@@ -222,6 +222,70 @@ function demoData() {
   };
 }
 
+function coachDemoData() {
+  const today = new Date();
+  const d = (daysAgo) => {
+    const dt = new Date(today);
+    dt.setDate(dt.getDate() - daysAgo);
+    return dt.toISOString().split("T")[0];
+  };
+
+  return {
+    role: "coach",
+    team: { id: "demo-coach-team", name: "Watertown Raiders", sport: "Football", emoji: "🏈", logo: null, orgType: "school", color: "#B91C1C" },
+    season: { name: "Varsity Football 2025", id: "s_coach_demo" },
+    players: [],
+    entries: [
+      {
+        id: "ec_1", entry_type: "game",
+        text: "Down 14 at the half. Went no-huddle in the third and the kids responded. Martinez found the seam twice. Defense locked down their run game completely in the second half. Won by 3. This team has guts.",
+        entry_date: d(2), opponent: "Belmont",
+        score_home: 24, score_away: 21, result: "win",
+        venue: "Victory Field",
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "ec_2", entry_type: "practice",
+        text: "Best practice of the year. Ran the new screen package and the timing was perfect by the third rep. O-line is starting to gel. Need to clean up the snap count — two false starts in the team period.",
+        entry_date: d(4),
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "ec_3", entry_type: "film",
+        text: "Watched the Belmont film twice. Our safeties are biting on play action every time — that's the third game in a row. Need to drill eyes in practice this week. Also noticed #54 is getting pushed back on inside runs. Might need to move Thompson there.",
+        entry_date: d(5),
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "ec_4", entry_type: "player",
+        text: "Jake Rivera. This kid has come so far since August. Couldn't run a clean route to save his life in camp. Now he's our most reliable third-down target. Had that conversation with him last week about playing with confidence and you can see the difference. College guys need to see this tape.",
+        entry_date: d(7),
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "ec_5", entry_type: "game",
+        text: "Flat from the start. No energy in warmups and it carried into the first quarter. We were lucky to only be down 7 at half. Made adjustments but the damage was done. Need to figure out how to start faster. Two weeks in a row we've been slow out of the gate.",
+        entry_date: d(9), opponent: "Waltham",
+        score_home: 10, score_away: 17, result: "loss",
+        venue: "Away",
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "ec_6", entry_type: "week",
+        text: "Tough week. Lost to Waltham and the kids are frustrated. But the film showed we're not far off — two blown assignments on defense were the difference. Kept practice light on Monday and ramped up intensity Wednesday. Locker room feels right. They want to bounce back. Playoffs start in three weeks.",
+        entry_date: d(10),
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "ec_7", entry_type: "moment",
+        text: "Senior night. Parents on the field, kids in tears. Nineteen seniors — most I've ever had. Said a few words about each one. When I got to Rivera his mom completely lost it. This is why you coach.",
+        entry_date: d(14),
+        created_at: new Date().toISOString(),
+      },
+    ],
+  };
+}
+
 // --- PAGINATION ALGORITHM (for print book) ---
 function paginateEntries(entries) {
   const PAGE_BUDGET = 1500; // px — 7.75x7.75" square safe area minus bleed/margins at ~260 PPI
@@ -277,6 +341,157 @@ function paginateEntries(entries) {
   }
 
   return pages;
+}
+
+// --- FLAG EMOJI HELPER ---
+function countryFlag(iso2) {
+  // Converts 2-letter ISO code to flag emoji (regional indicator symbols)
+  if (!iso2 || iso2.length !== 2) return "";
+  const base = 0x1F1E6 - 0x41;
+  return String.fromCodePoint(base + iso2.toUpperCase().charCodeAt(0)) +
+         String.fromCodePoint(base + iso2.toUpperCase().charCodeAt(1));
+}
+
+const FLAG_COUNTRIES = [
+  { iso: "US", name: "USA" },
+  { iso: "MX", name: "Mexico" },
+  { iso: "BR", name: "Brazil" },
+  { iso: "GB", name: "UK" },
+  { iso: "CA", name: "Canada" },
+  { iso: "CO", name: "Colombia" },
+  { iso: "AR", name: "Argentina" },
+  { iso: "DE", name: "Germany" },
+  { iso: "FR", name: "France" },
+  { iso: "IT", name: "Italy" },
+  { iso: "ES", name: "Spain" },
+  { iso: "PT", name: "Portugal" },
+  { iso: "JP", name: "Japan" },
+  { iso: "KR", name: "Korea" },
+  { iso: "NG", name: "Nigeria" },
+  { iso: "GH", name: "Ghana" },
+  { iso: "JM", name: "Jamaica" },
+  { iso: "HT", name: "Haiti" },
+  { iso: "SV", name: "El Salvador" },
+  { iso: "GT", name: "Guatemala" },
+  { iso: "HN", name: "Honduras" },
+  { iso: "IE", name: "Ireland" },
+  { iso: "PL", name: "Poland" },
+  { iso: "IN", name: "India" },
+  { iso: "CN", name: "China" },
+  { iso: "AU", name: "Australia" },
+  { iso: "NL", name: "Netherlands" },
+  { iso: "SE", name: "Sweden" },
+  { iso: "NO", name: "Norway" },
+  { iso: "DK", name: "Denmark" },
+  { iso: "TR", name: "Turkey" },
+  { iso: "EG", name: "Egypt" },
+  { iso: "MA", name: "Morocco" },
+  { iso: "CI", name: "Ivory Coast" },
+  { iso: "SN", name: "Senegal" },
+  { iso: "EC", name: "Ecuador" },
+  { iso: "UY", name: "Uruguay" },
+  { iso: "CL", name: "Chile" },
+  { iso: "PE", name: "Peru" },
+  { iso: "VE", name: "Venezuela" },
+  { iso: "DO", name: "Dominican Rep." },
+  { iso: "CU", name: "Cuba" },
+  { iso: "PR", name: "Puerto Rico" },
+  { iso: "TT", name: "Trinidad" },
+  { iso: "BB", name: "Barbados" },
+  { iso: "GY", name: "Guyana" },
+  { iso: "PY", name: "Paraguay" },
+  { iso: "BO", name: "Bolivia" },
+  { iso: "CR", name: "Costa Rica" },
+  { iso: "PA", name: "Panama" },
+  { iso: "NI", name: "Nicaragua" },
+  { iso: "BE", name: "Belgium" },
+  { iso: "CH", name: "Switzerland" },
+  { iso: "AT", name: "Austria" },
+  { iso: "HR", name: "Croatia" },
+  { iso: "RS", name: "Serbia" },
+  { iso: "UA", name: "Ukraine" },
+  { iso: "RU", name: "Russia" },
+  { iso: "ZA", name: "South Africa" },
+];
+
+// --- FLAG PICKER COMPONENT ---
+function FlagPicker({ selectedFlags = [], onChange, onClose }) {
+  const [search, setSearch] = useState("");
+  const filtered = FLAG_COUNTRIES.filter(
+    (c) => c.name.toLowerCase().includes(search.toLowerCase()) || c.iso.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const toggle = (iso) => {
+    if (selectedFlags.includes(iso)) {
+      onChange(selectedFlags.filter((f) => f !== iso));
+    } else if (selectedFlags.length < 2) {
+      onChange([...selectedFlags, iso]);
+    }
+  };
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)",
+      zIndex: 5000, display: "flex", alignItems: "flex-end", justifyContent: "center",
+    }} onClick={onClose}>
+      <div style={{
+        background: "white", borderRadius: "18px 18px 0 0",
+        padding: "20px 16px calc(20px + env(safe-area-inset-bottom, 0px))",
+        width: "100%", maxWidth: 480, maxHeight: "60vh", overflow: "hidden",
+        display: "flex", flexDirection: "column",
+      }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 16, color: theme.text }}>Pick Flags</div>
+            <div style={{ fontSize: 12, color: theme.textMuted }}>Up to two countries</div>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: theme.textMuted }}>×</button>
+        </div>
+        {selectedFlags.length > 0 && (
+          <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+            {selectedFlags.map((iso) => (
+              <button key={iso} onClick={() => toggle(iso)} style={{
+                display: "flex", alignItems: "center", gap: 6, padding: "4px 10px",
+                background: theme.borderLight, border: `1px solid ${theme.border}`,
+                borderRadius: 20, fontSize: 13, cursor: "pointer",
+              }}>
+                {countryFlag(iso)} {iso} ×
+              </button>
+            ))}
+          </div>
+        )}
+        <input
+          type="text"
+          placeholder="Search country..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            padding: "8px 12px", border: `1px solid ${theme.border}`,
+            borderRadius: 8, fontSize: 14, marginBottom: 10, width: "100%",
+            boxSizing: "border-box", outline: "none",
+          }}
+        />
+        <div style={{ overflowY: "auto", flex: 1 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+            {filtered.map((c) => {
+              const selected = selectedFlags.includes(c.iso);
+              return (
+                <button key={c.iso} onClick={() => toggle(c.iso)} style={{
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+                  padding: "8px 4px", border: `2px solid ${selected ? theme.primary : theme.border}`,
+                  background: selected ? `${theme.primary}10` : "white",
+                  borderRadius: 6, cursor: "pointer", transition: "all 0.15s",
+                }}>
+                  <span style={{ fontSize: 22 }}>{countryFlag(c.iso)}</span>
+                  <span style={{ fontSize: 9, color: theme.textMuted, lineHeight: 1.2, textAlign: "center" }}>{c.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // --- STYLES ---
@@ -556,7 +771,7 @@ function Toast({ message, type = "error", onDone }) {
 function AppShell({ children, title, titleIcon, subtitle, subtitleIcon, onBack, actions, accentColor }) {
   const shellPrimary = accentColor || theme.primary;
   return (
-    <div style={{ maxWidth: 480, margin: "0 auto", minHeight: "100dvh", padding: "env(safe-area-inset-top, 0px) 16px calc(24px + env(safe-area-inset-bottom, 0px))" }}>
+    <div style={{ maxWidth: 480, margin: "0 auto", minHeight: "100dvh", padding: "env(safe-area-inset-top, 0px) 16px calc(24px + env(safe-area-inset-bottom, 0px))", position: "relative" }}>
       <header style={{
         padding: "16px 0",
         display: "flex",
@@ -729,6 +944,26 @@ const ONBOARD_COLORS = [
   { key: "purple", hex: "#5B21B6" },
   { key: "orange", hex: "#C2410C" },
 ];
+const ONBOARD_WHYS = [
+  { label: "The big moments", icon: "🏆", desc: "Goals, wins, breakthroughs" },
+  { label: "The funny stuff", icon: "😂", desc: "Car rides, snack bars, team chaos" },
+  { label: "Watching them grow", icon: "🌱", desc: "Confidence, effort, resilience" },
+  { label: "All of it", icon: "📖", desc: "The whole season, start to finish" },
+];
+const ONBOARD_MEMORY_PROMPTS = {
+  parent: [
+    "Scored their first goal and didn't know what to do",
+    "Fell down, got back up, kept going",
+    "Couldn't stop talking about it in the car",
+    "Made a play that surprised everyone",
+  ],
+  coach: [
+    "Down at the half. Changed the plan. Kids responded.",
+    "A kid who'd been struggling finally had their moment",
+    "The play we practiced all week finally worked",
+    "Post-game speech that actually landed",
+  ],
+};
 
 // Fade-in animation (must be at module level, not inside a component)
 function OnboardFade({ children, delay = 0, style: s = {} }) {
@@ -747,107 +982,140 @@ function OnboardFade({ children, delay = 0, style: s = {} }) {
   );
 }
 
-function OnboardProgressBar({ current, total = 6 }) {
+function OnboardProgressBar({ current, total = 8 }) {
+  const pct = ((current + 1) / total) * 100;
   return (
-    <div style={{ width: "100%", height: 2, background: "rgba(0,0,0,0.1)", marginBottom: 32 }}>
-      <div style={{
-        height: "100%", background: "#1a1a1a",
-        width: `${((current + 1) / total) * 100}%`,
-        transition: "width 0.4s ease",
-      }} />
+    <div style={{ width: "100%", marginBottom: 32 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+        <span style={{ fontSize: 11, fontWeight: 600, color: "#a3a3a3", letterSpacing: 0.5 }}>
+          {current + 1} of {total}
+        </span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: "#a3a3a3" }}>
+          {Math.round(pct)}%
+        </span>
+      </div>
+      <div style={{ width: "100%", height: 4, background: "rgba(0,0,0,0.08)" }}>
+        <div style={{
+          height: "100%", background: "#1a1a1a",
+          width: `${pct}%`,
+          transition: "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+        }} />
+      </div>
     </div>
   );
 }
 
 function OnboardShareCard({ data }) {
   const c = data.teamColor || "#1B4332";
+  const hasPhoto = !!data.photo;
+  const bg = hasPhoto ? "#000" : `linear-gradient(160deg, ${c} 0%, ${c}cc 60%, ${c}88 100%)`;
+  const dateStr = new Date().toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+  });
+  // Match the real ShareCardRender "classic" template at preview scale
   return (
     <div style={{
-      width: 320, overflow: "hidden", background: "#0a0a0a",
+      width: 320, height: 320, overflow: "hidden",
       fontFamily: "'DM Sans', sans-serif",
       boxShadow: "0 20px 50px rgba(0,0,0,0.35)",
+      background: hasPhoto ? "#000" : bg,
+      display: "flex", flexDirection: "column",
+      position: "relative",
     }}>
-      {data.photo ? (
-        <div style={{ width: "100%", height: 180, overflow: "hidden", position: "relative" }}>
-          <img src={data.photo} alt="" style={{
-            width: "100%", height: "100%", objectFit: "cover", display: "block",
+      {hasPhoto && (
+        <>
+          <div style={{
+            position: "absolute", inset: 0,
+            backgroundImage: `url(${data.photo})`,
+            backgroundSize: "cover", backgroundPosition: "center 40%",
+            opacity: 0.45,
           }} />
           <div style={{
-            position: "absolute", bottom: 0, left: 0, right: 0, height: 60,
-            background: "linear-gradient(transparent, #0a0a0a)",
+            position: "absolute", inset: 0,
+            background: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)",
           }} />
-        </div>
-      ) : (
-        <div style={{ height: 4, background: `linear-gradient(90deg, ${c}, ${c}88)` }} />
+        </>
       )}
-      <div style={{ padding: data.photo ? "12px 24px 20px" : "28px 24px 20px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 18 }}>{data.sportIcon}</span>
-            <span style={{
-              fontSize: 11, fontWeight: 700, letterSpacing: 1.5,
-              textTransform: "uppercase", color: c,
-            }}>
-              {data.teamName || "Team Season"}
-            </span>
-          </div>
-          <span style={{ fontSize: 11, color: "#666" }}>{data.sportEventDay || "Game Day"}</span>
-        </div>
-        <div style={{ marginBottom: 16 }}>
-          <div style={{
-            fontSize: 28, fontWeight: 800, color: "#fafafa",
-            lineHeight: 1.1, letterSpacing: -0.5,
-          }}>
-            {data.childName}'s Moment
-          </div>
-        </div>
+      <div style={{
+        position: "relative", zIndex: 1, flex: 1,
+        display: "flex", flexDirection: "column",
+        justifyContent: "flex-end", padding: "24px 24px 20px",
+      }}>
+        {/* Team strip */}
         <div style={{
-          background: "#141414", padding: "16px 18px",
-          marginBottom: 20, borderLeft: `3px solid ${c}`,
+          display: "flex", alignItems: "center", gap: 6,
+          marginBottom: 12,
         }}>
-          <p style={{
-            fontSize: 15, color: "#d4d4d4", lineHeight: 1.55,
-            margin: 0, fontStyle: "italic",
+          <span style={{ fontSize: 14 }}>{data.sportIcon}</span>
+          <span style={{
+            fontSize: 9, fontWeight: 700, letterSpacing: 1.5,
+            textTransform: "uppercase", color: hasPhoto ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.7)",
           }}>
-            "{data.memory}"
-          </p>
+            {data.teamName || "Team Season"}
+          </span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-          <div style={{
-            padding: "4px 10px", background: c + "20",
-            fontSize: 11, fontWeight: 600, color: c,
-          }}>
-            Spring 2026
-          </div>
-          <span style={{ fontSize: 11, color: "#555" }}>·</span>
-          <span style={{ fontSize: 11, color: "#555" }}>{data.sport}</span>
+
+        {/* Headline */}
+        <h2 style={{
+          fontFamily: "'Crimson Pro', Georgia, serif",
+          fontStyle: "italic", fontWeight: 400,
+          fontSize: 22, color: "white", lineHeight: 1.15,
+          marginBottom: 12, letterSpacing: -0.3,
+        }}>
+          {`${data.childName}'s Moment`}
+        </h2>
+
+        {/* Quote */}
+        <p style={{
+          fontSize: 12, color: "rgba(255,255,255,0.8)", lineHeight: 1.5,
+          fontStyle: "italic", margin: "0 0 16px",
+          display: "-webkit-box", WebkitLineClamp: 3,
+          WebkitBoxOrient: "vertical", overflow: "hidden",
+        }}>
+          &ldquo;{data.memory}&rdquo;
+        </p>
+
+        {/* Date */}
+        <div style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", marginBottom: 12 }}>
+          {dateStr}
         </div>
+
+        {/* Watermark */}
         <div style={{
           display: "flex", justifyContent: "space-between", alignItems: "center",
-          paddingTop: 14, borderTop: "1px solid #1a1a1a",
+          paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.12)",
         }}>
-          <span style={{ fontSize: 10, color: "#444", fontWeight: 600, letterSpacing: 0.5 }}>TEAM SEASON</span>
-          <span style={{ fontSize: 10, color: "#444" }}>teamseason.app</span>
+          <span style={{
+            fontSize: 8, fontWeight: 700, color: "rgba(255,255,255,0.4)",
+            letterSpacing: 2, textTransform: "uppercase",
+          }}>teamseason.app</span>
+          <span style={{
+            fontSize: 8, color: "rgba(255,255,255,0.3)",
+          }}>Entry #1</span>
         </div>
       </div>
     </div>
   );
 }
 
-function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
+function ValueOnboarding({ onComplete, onSignIn, onDemo, initialStep = 0 }) {
   const [step, setStep] = useState(initialStep);
   const [transitioning, setTransitioning] = useState(false);
   const [data, setData] = useState({
+    userRole: "parent", // "parent" or "coach"
     sport: "", sportIcon: "", sportEvent: "game", sportEventDay: "Game Day",
-    childName: "", seasonsPlayed: "",
+    childName: "", childFlags: [], seasonsPlayed: "", teamLevel: "",
     teamName: "", teamColor: "#1B4332", memory: "", photo: null,
+    whyJournal: "", // "what matters most" answer
   });
+  const [showOnboardFlagPicker, setShowOnboardFlagPicker] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState("");
   const memoryRef = useRef(null);
   const photoRef = useRef(null);
+  const celebCardRef = useRef(null);
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
@@ -881,14 +1149,16 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
 
   // Background shifts as you progress: warm cream → cool gray → dark reveal
   const stepBgs = [
-    `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 50%, #40916C 100%)`,  // 0: green (matches landing page)
-    "linear-gradient(180deg, #FAF8F4 0%, #F0EDE6 100%)",  // 1: still warm
-    "linear-gradient(180deg, #F6F5F2 0%, #ECEAE5 100%)",  // 2: cooling
-    "linear-gradient(180deg, #F2F1EF 0%, #E5E3DF 100%)",  // 3: neutral
-    "linear-gradient(180deg, #EEEDEB 0%, #DDDBD7 100%)",  // 4: mirror — cooler
-    "linear-gradient(180deg, #E8E7E5 0%, #D5D3CF 100%)",  // 5: getting serious
-    "linear-gradient(180deg, #E0DFDD 0%, #CCCAC6 100%)",  // 6: write memory — weighted
-    "#111",                                                 // 7: dark payoff
+    `linear-gradient(160deg, ${theme.primary} 0%, #2D6A4F 50%, #40916C 100%)`,  // 0: green (welcome)
+    "linear-gradient(180deg, #FAF8F4 0%, #F0EDE6 100%)",  // 1: sport
+    "linear-gradient(180deg, #F6F5F2 0%, #ECEAE5 100%)",  // 2: name
+    "linear-gradient(180deg, #F4F3F0 0%, #E8E6E2 100%)",  // 3: why (new)
+    "linear-gradient(180deg, #F2F1EF 0%, #E5E3DF 100%)",  // 4: seasons
+    "linear-gradient(180deg, #EEEDEB 0%, #DDDBD7 100%)",  // 5: mirror
+    "linear-gradient(180deg, #E8E7E5 0%, #D5D3CF 100%)",  // 6: team + color
+    "linear-gradient(180deg, #E0DFDD 0%, #CCCAC6 100%)",  // 7: write memory
+    "#111",                                                 // 8: celebration (dark payoff)
+    "#0a0a0a",                                              // 9: signup (darker)
   ];
   const container = {
     minHeight: "100dvh", fontFamily: "'DM Sans', sans-serif",
@@ -943,7 +1213,7 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
 
   const Fade = OnboardFade;
 
-  // STEP 0: Welcome (green — matches landing page hero)
+  // STEP 0: Welcome + Role Picker (green — matches landing page hero)
   if (step === 0) {
     return (
       <div style={container}>
@@ -966,14 +1236,19 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
           </Fade>
           <Fade delay={300}>
             <p style={{ ...sub, color: "rgba(255,255,255,0.7)" }}>
-              Four quick questions. Then we'll show you something worth keeping.
+              A few quick questions. Then we'll show you something worth keeping.
             </p>
           </Fade>
           <Fade delay={500}>
-            <button style={{
-              ...solidBtn(),
-              background: "white", color: theme.primary,
-            }} onClick={goNext}>Let's go →</button>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <button style={{
+                ...solidBtn(),
+                background: "white", color: theme.primary,
+              }} onClick={() => {
+                setData((d) => ({ ...d, userRole: "parent" }));
+                goNext();
+              }}>Let's go →</button>
+            </div>
           </Fade>
           <Fade delay={600}>
             <p style={{ textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.45)", marginTop: 16 }}>
@@ -981,7 +1256,7 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
             </p>
           </Fade>
           <Fade delay={700}>
-            <p style={{ textAlign: "center", marginTop: 24 }}>
+            <p style={{ textAlign: "center", marginTop: 16 }}>
               <span onClick={onSignIn} style={{
                 fontSize: 14, color: "rgba(255,255,255,0.8)", fontWeight: 600,
                 cursor: "pointer", textDecoration: "underline",
@@ -1049,18 +1324,38 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
             <p style={sub}>First name is perfect.</p>
           </Fade>
           <Fade delay={200}>
-            <input autoFocus type="text" placeholder="e.g. Freya"
-              value={data.childName}
-              onChange={(e) => setData((d) => ({ ...d, childName: e.target.value }))}
-              onKeyDown={(e) => e.key === "Enter" && data.childName.trim() && goNext()}
-              style={{
-                width: "100%", padding: "18px 20px",
-                border: "2px solid #e5e5e5", fontSize: 18,
-                fontFamily: "'DM Sans', sans-serif", outline: "none",
-                marginBottom: 20, textAlign: "center",
-                fontWeight: 600, color: "#1a1a1a", boxSizing: "border-box",
-              }}
-            />
+            <div style={{ display: "flex", gap: 10, marginBottom: 20, alignItems: "stretch" }}>
+              <input autoFocus type="text" placeholder="e.g. Freya"
+                value={data.childName}
+                onChange={(e) => setData((d) => ({ ...d, childName: e.target.value }))}
+                onKeyDown={(e) => e.key === "Enter" && data.childName.trim() && goNext()}
+                style={{
+                  flex: 1, padding: "18px 20px",
+                  border: "2px solid #e5e5e5", fontSize: 18,
+                  fontFamily: "'DM Sans', sans-serif", outline: "none",
+                  textAlign: "center",
+                  fontWeight: 600, color: "#1a1a1a", boxSizing: "border-box",
+                }}
+              />
+              <button onClick={() => setShowOnboardFlagPicker(true)} style={{
+                padding: "0 16px", border: "2px solid #e5e5e5",
+                background: "rgba(255,255,255,0.85)", cursor: "pointer",
+                fontSize: 22, display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0,
+                fontFamily: "'DM Sans', sans-serif",
+              }}>
+                {data.childFlags && data.childFlags.length > 0
+                  ? data.childFlags.map((iso) => countryFlag(iso)).join("")
+                  : "🌍"}
+              </button>
+            </div>
+            {showOnboardFlagPicker && (
+              <FlagPicker
+                selectedFlags={data.childFlags || []}
+                onChange={(flags) => setData((d) => ({ ...d, childFlags: flags }))}
+                onClose={() => setShowOnboardFlagPicker(false)}
+              />
+            )}
             <button style={solidBtn(data.childName.trim().length > 0)}
               onClick={() => data.childName.trim() && goNext()}>
               Continue →
@@ -1071,13 +1366,59 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
     );
   }
 
-  // STEP 3: Seasons played
+  // STEP 3: What matters most (NEW — Duolingo-style personalization)
   if (step === 3) {
     return (
       <div style={container}>
         {backArrow}
         <div style={card}>
           <OnboardProgressBar current={2} />
+          <Fade>
+            <p style={label}>{data.sportIcon} {data.sport}</p>
+            <h2 style={heading}>
+              {`What do you want to remember about ${data.childName}'s season?`}
+            </h2>
+            <p style={sub}>Pick the one that feels right.</p>
+          </Fade>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {ONBOARD_WHYS.map((w, i) => (
+              <Fade key={w.label} delay={150 + i * 80}>
+                <button
+                  onClick={() => {
+                    setData((d) => ({ ...d, whyJournal: w.label }));
+                    setTimeout(goNext, 250);
+                  }}
+                  style={{
+                    width: "100%", padding: "16px 20px",
+                    border: data.whyJournal === w.label ? "2px solid #1a1a1a" : "2px solid #e5e5e5",
+                    background: data.whyJournal === w.label ? "rgba(245,245,244,0.9)" : "rgba(255,255,255,0.8)",
+                    fontSize: 15, fontWeight: 600, cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif", textAlign: "left",
+                    transition: "all 0.15s ease", color: "#1a1a1a",
+                    display: "flex", alignItems: "center", gap: 14,
+                  }}
+                >
+                  <span style={{ fontSize: 24 }}>{w.icon}</span>
+                  <div>
+                    <div>{w.label}</div>
+                    <div style={{ fontSize: 12, fontWeight: 400, color: "#737373", marginTop: 2 }}>{w.desc}</div>
+                  </div>
+                </button>
+              </Fade>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // STEP 4: Seasons played
+  if (step === 4) {
+    return (
+      <div style={container}>
+        {backArrow}
+        <div style={card}>
+          <OnboardProgressBar current={3} />
           <Fade>
             <p style={label}>{data.childName}'s {data.sport.toLowerCase()} journey</p>
             <h2 style={heading}>How many seasons has {data.childName} played?</h2>
@@ -1110,15 +1451,15 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
     );
   }
 
-  // STEP 4: Mirror moment
-  if (step === 4) {
+  // STEP 5: Mirror moment
+  if (step === 5) {
     const mirror = ONBOARD_MIRROR[data.seasonsPlayed] || ONBOARD_MIRROR["2-3 seasons"];
     const isFirst = data.seasonsPlayed === "This is their first";
     return (
       <div style={container}>
         {backArrow}
         <div style={card}>
-          <OnboardProgressBar current={3} />
+          <OnboardProgressBar current={4} />
           <Fade>
             <div style={{
               background: "rgba(255,255,255,0.7)", padding: "36px 28px",
@@ -1151,32 +1492,32 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
     );
   }
 
-  // STEP 5: Team name + color
-  if (step === 5) {
+  // STEP 6: Team name + color
+  if (step === 6) {
     return (
       <div style={container}>
         {backArrow}
         <div style={card}>
-          <OnboardProgressBar current={4} />
+          <OnboardProgressBar current={5} />
           <Fade>
             <p style={label}>Almost there</p>
             <h2 style={heading}>What's the team name?</h2>
-            <p style={sub}>This goes on {data.childName}'s share cards.</p>
+            <p style={sub}>{`This goes on ${data.childName}'s share cards.`}</p>
           </Fade>
-          <Fade delay={200}>
-            <input autoFocus type="text" placeholder="e.g. Thunder FC"
-              value={data.teamName}
-              onChange={(e) => setData((d) => ({ ...d, teamName: e.target.value }))}
-              onKeyDown={(e) => e.key === "Enter" && data.teamName.trim() && goNext()}
-              style={{
-                width: "100%", padding: "18px 20px",
-                border: "2px solid #e5e5e5", fontSize: 18,
-                fontFamily: "'DM Sans', sans-serif", outline: "none",
-                marginBottom: 20, textAlign: "center",
-                fontWeight: 600, color: "#1a1a1a", boxSizing: "border-box",
-              }}
-            />
-          </Fade>
+            <Fade delay={200}>
+              <input autoFocus type="text" placeholder="e.g. Thunder FC"
+                value={data.teamName}
+                onChange={(e) => setData((d) => ({ ...d, teamName: e.target.value }))}
+                onKeyDown={(e) => e.key === "Enter" && data.teamName.trim() && goNext()}
+                style={{
+                  width: "100%", padding: "18px 20px",
+                  border: "2px solid #e5e5e5", fontSize: 18,
+                  fontFamily: "'DM Sans', sans-serif", outline: "none",
+                  marginBottom: 20, textAlign: "center",
+                  fontWeight: 600, color: "#1a1a1a", boxSizing: "border-box",
+                }}
+              />
+            </Fade>
           <Fade delay={300}>
             <p style={{ ...label, marginBottom: 10, marginTop: 4 }}>Pick a team color</p>
             <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 28 }}>
@@ -1205,22 +1546,37 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
     );
   }
 
-  // STEP 6: Write a memory
-  if (step === 6) {
+  // STEP 7: Write a memory (with tap prompts — Duolingo "impossible to fail")
+  if (step === 7) {
+    const prompts = ONBOARD_MEMORY_PROMPTS.parent;
     return (
       <div style={container}>
         {backArrow}
         <div style={card}>
-          <OnboardProgressBar current={5} />
+          <OnboardProgressBar current={6} />
           <Fade>
             <p style={label}>Try it right now</p>
-            <h2 style={heading}>Think about {data.childName}'s last {data.sportEvent}</h2>
-            <p style={sub}>
-              What's one thing you remember? A moment, something they said in the car after.
-            </p>
+            <h2 style={heading}>{`Think about ${data.childName}'s last ${data.sportEvent}`}</h2>
+            <p style={sub}>Tap one that sounds familiar, or write your own.</p>
           </Fade>
           <Fade delay={200}>
-            <textarea ref={memoryRef} autoFocus
+            {!data.memory && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+                {prompts.map((p) => (
+                  <button key={p} onClick={() => setData((d) => ({ ...d, memory: p }))}
+                    style={{
+                      padding: "10px 14px", border: "2px solid #e5e5e5",
+                      background: "rgba(255,255,255,0.8)", fontSize: 13, fontWeight: 500,
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                      color: "#525252", textAlign: "left", lineHeight: 1.4,
+                      transition: "all 0.15s ease", flex: "1 1 45%", minWidth: 150,
+                    }}>
+                    "{p}"
+                  </button>
+                ))}
+              </div>
+            )}
+            <textarea ref={memoryRef} autoFocus={!!data.memory}
               placeholder={data.sportEvent === "meet"
                 ? `"Dropped two seconds off her best time and didn't even realize..."`
                 : data.sportEvent === "match"
@@ -1280,43 +1636,124 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
     );
   }
 
-  // STEP 7: Payoff — share card + signup
-  if (step === 7) {
+  // STEP 8: Celebration — share card payoff (NEW — Duolingo-style reward before signup)
+  if (step === 8) {
     return (
       <div style={container}>
         <div style={{ ...card, maxWidth: 480 }}>
           <Fade>
+            <div style={{ textAlign: "center", marginBottom: 8 }}>
+              <span style={{ fontSize: 48, display: "inline-block", animation: "none" }}>
+                {data.sportIcon}
+              </span>
+            </div>
             <p style={{
-              textAlign: "center", fontSize: 13, fontWeight: 600, color: "#555",
+              textAlign: "center", fontSize: 13, fontWeight: 600, color: data.teamColor || "#1B4332",
               textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8,
             }}>
-              Here's {data.childName}'s first card
+              First memory captured
             </p>
             <h2 style={{
-              ...heading, color: "#fafafa", marginBottom: 32, fontSize: 22,
+              ...heading, color: "#fafafa", marginBottom: 6, fontSize: 24,
             }}>
-              One entry. Imagine a whole season of these.
+              {`That's ${data.childName}'s first entry.`}
             </h2>
+            <p style={{
+              fontSize: 15, color: "#888", textAlign: "center", lineHeight: 1.5, marginBottom: 28,
+            }}>
+              Imagine a whole season of these — every game, every moment, all in one place.
+            </p>
           </Fade>
 
           <Fade delay={400}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 36 }}>
+            <div ref={celebCardRef} style={{ display: "flex", justifyContent: "center", marginBottom: 28 }}>
               <OnboardShareCard data={data} />
             </div>
           </Fade>
 
-          <Fade delay={900}>
+          <Fade delay={800}>
+            <div style={{
+              display: "flex", gap: 10, marginBottom: 20,
+              justifyContent: "center",
+            }}>
+              <button onClick={() => {
+                // Screenshot the share card for download
+                if (typeof html2canvas !== "undefined" && celebCardRef.current) {
+                  html2canvas(celebCardRef.current, { scale: 2, backgroundColor: "#0a0a0a" }).then(canvas => {
+                    const link = document.createElement("a");
+                    link.download = `${data.childName || "team-season"}-first-memory.png`;
+                    link.href = canvas.toDataURL("image/png");
+                    link.click();
+                  });
+                }
+              }}
+                style={{
+                  padding: "12px 20px", border: "1px solid #333",
+                  background: "transparent", color: "#ccc", fontSize: 14,
+                  fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  display: "flex", alignItems: "center", gap: 8,
+                }}>
+                Save image
+              </button>
+              {typeof navigator !== "undefined" && navigator.share && (
+                <button onClick={() => {
+                  navigator.share({
+                    title: "Team Season",
+                    text: data.memory,
+                    url: "https://teamseason.app",
+                  }).catch(() => {});
+                }}
+                  style={{
+                    padding: "12px 20px", border: "1px solid #333",
+                    background: "transparent", color: "#ccc", fontSize: 14,
+                    fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                    display: "flex", alignItems: "center", gap: 8,
+                  }}>
+                  Share
+                </button>
+              )}
+            </div>
+          </Fade>
+
+          <Fade delay={1100}>
+            <button style={{
+              ...solidBtn(), background: data.teamColor || "#1B4332",
+              color: "#fafafa", fontSize: 16, marginBottom: 12,
+            }} onClick={goNext}>
+              {`Keep ${data.childName}'s season going →`}
+            </button>
+            <p style={{ textAlign: "center", fontSize: 12, color: "#555" }}>
+              Takes 10 seconds — free forever
+            </p>
+          </Fade>
+        </div>
+      </div>
+    );
+  }
+
+  // STEP 9: Signup — soft wall with "maybe later" (Duolingo-style delayed registration)
+  if (step === 9) {
+    return (
+      <div style={container}>
+        <div style={{ ...card, maxWidth: 440 }}>
+          <Fade>
+            <h2 style={{
+              ...heading, color: "#fafafa", marginBottom: 8, fontSize: 22,
+            }}>
+              Create an account to save your progress
+            </h2>
+            <p style={{
+              fontSize: 14, color: "#777", textAlign: "center", lineHeight: 1.5, marginBottom: 28,
+            }}>
+              Your first memory is ready. Sign up so you don't lose it.
+            </p>
+          </Fade>
+
+          <Fade delay={300}>
             <div style={{
               background: "#1a1a1a", padding: 24,
               marginBottom: 20, border: "1px solid #262626",
             }}>
-              <p style={{
-                fontSize: 15, color: "#d4d4d4", lineHeight: 1.6,
-                margin: "0 0 20px 0", textAlign: "center",
-              }}>
-                Save {data.childName}'s card and start building their season journal.
-              </p>
-
               <form onSubmit={handleSignUp}>
                 {authError && (
                   <div style={{
@@ -1352,7 +1789,7 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
                     fontFamily: "'DM Sans', sans-serif",
                     opacity: authLoading ? 0.7 : 1,
                   }}>
-                  {authLoading ? "Saving..." : `Save ${data.childName}'s card →`}
+                  {authLoading ? "Saving..." : "Save my season →"}
                 </button>
               </form>
 
@@ -1362,7 +1799,16 @@ function ValueOnboarding({ onComplete, onSignIn, initialStep = 0 }) {
             </div>
           </Fade>
 
-          <Fade delay={1200}>
+          <Fade delay={600}>
+            <button onClick={() => onComplete(null, data)}
+              style={{
+                width: "100%", padding: "14px 24px", border: "1px solid #333",
+                background: "transparent", color: "#777", fontSize: 14, fontWeight: 600,
+                cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                marginBottom: 16,
+              }}>
+              Maybe later — just let me in
+            </button>
             <p style={{ textAlign: "center" }}>
               <span onClick={onSignIn} style={{
                 fontSize: 13, color: "#555", cursor: "pointer",
@@ -1630,10 +2076,12 @@ function TeamSetupScreen({ role, onComplete }) {
 }
 
 // --- EDIT SEASON MODAL ---
-function EditSeasonModal({ team, season, players, onSave, onClose, brandColor }) {
+function EditSeasonModal({ team, season, players, onSave, onClose, brandColor, role }) {
   const [teamName, setTeamName] = useState(team?.name || "");
   const [seasonName, setSeasonName] = useState(season?.name || "");
   const [childName, setChildName] = useState(players?.[0]?.name || "");
+  const [childFlags, setChildFlags] = useState(players?.[0]?.flags || []);
+  const [showFlagPicker, setShowFlagPicker] = useState(false);
   const [color, setColor] = useState(team?.color || "#1B4332");
   const [selectedSport, setSelectedSport] = useState(() =>
     SPORTS.find((s) => s.name === team?.sport) || SPORTS[SPORTS.length - 1]
@@ -1650,8 +2098,8 @@ function EditSeasonModal({ team, season, players, onSave, onClose, brandColor })
       team: { ...team, name: teamName || team?.name, sport: sportName, emoji: sportEmoji, color },
       season: { ...season, name: seasonName || season?.name },
       players: players?.length > 0
-        ? [{ ...players[0], name: childName || players[0]?.name }]
-        : childName ? [{ id: generateId(), name: childName, is_my_child: true }] : [],
+        ? [{ ...players[0], name: childName || players[0]?.name, flags: childFlags }]
+        : childName ? [{ id: generateId(), name: childName, is_my_child: true, flags: childFlags }] : [],
     });
   };
 
@@ -1712,11 +2160,31 @@ function EditSeasonModal({ team, season, players, onSave, onClose, brandColor })
           <input className="input" value={seasonName} onChange={(e) => setSeasonName(e.target.value)} placeholder="Spring 2026" />
         </div>
 
-        {/* Child Name */}
-        <div style={{ marginBottom: 16 }}>
-          <label className="label">Child's Name</label>
-          <input className="input" value={childName} onChange={(e) => setChildName(e.target.value)} placeholder="Alex" />
-        </div>
+        {/* Child Name (parent only) */}
+        {role !== "coach" && (
+          <div style={{ marginBottom: 16 }}>
+            <label className="label">Child's Name</label>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input className="input" value={childName} onChange={(e) => setChildName(e.target.value)} placeholder="Alex" style={{ flex: 1 }} />
+              <button type="button" onClick={() => setShowFlagPicker(true)} style={{
+                padding: "10px 12px", border: `1.5px solid ${theme.border}`,
+                background: "white", borderRadius: 10, cursor: "pointer",
+                fontSize: 16, flexShrink: 0, display: "flex", alignItems: "center", gap: 4,
+              }}>
+                {childFlags.length > 0
+                  ? childFlags.map((iso) => countryFlag(iso)).join("")
+                  : "🌍"}
+              </button>
+            </div>
+          </div>
+        )}
+        {showFlagPicker && (
+          <FlagPicker
+            selectedFlags={childFlags}
+            onChange={setChildFlags}
+            onClose={() => setShowFlagPicker(false)}
+          />
+        )}
 
         {/* Team Color */}
         <div style={{ marginBottom: 20 }}>
@@ -1749,19 +2217,25 @@ function EditSeasonModal({ team, season, players, onSave, onClose, brandColor })
 }
 
 // --- ENTRY COMPOSER ---
-function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }) {
+function EntryComposer({ season, players, onSave, onClose, brandColor, orgName, role, prefillDate, prefillOpponent }) {
   const composerPrimary = brandColor || theme.primary;
+  const isCoach = role === "coach";
   const [entryType, setEntryType] = useState("game");
   const [text, setText] = useState("");
-  const [opponent, setOpponent] = useState("");
+  const [opponent, setOpponent] = useState(prefillOpponent || "");
   const [venue, setVenue] = useState("");
   const [scoreHome, setScoreHome] = useState("");
   const [scoreAway, setScoreAway] = useState("");
-  const [showGameData, setShowGameData] = useState(false);
+  const [showGameData, setShowGameData] = useState(!!prefillOpponent);
+  const [goals, setGoals] = useState("");
+  const [assists, setAssists] = useState("");
+  const [cleanSheet, setCleanSheet] = useState(false);
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [consentShared, setConsentShared] = useState(!!orgName);
-  const [entryDate, setEntryDate] = useState(new Date().toISOString().split("T")[0]);
+  const [entryDate, setEntryDate] = useState(prefillDate || new Date().toISOString().split("T")[0]);
+  const [mood, setMood] = useState(null);
+  const [highlights, setHighlights] = useState([]);
   const fileRef = useRef(null);
   const previewUrlRef = useRef(null);
 
@@ -1769,7 +2243,7 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
     return () => { if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current); };
   }, []);
 
-  const entryTypes = [
+  const parentEntryTypes = [
     { id: "game", label: "Game", emoji: "🏟️" },
     { id: "practice", label: "Practice", emoji: "🔄" },
     { id: "tournament", label: "Tournament", emoji: "🏆" },
@@ -1779,6 +2253,17 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
     { id: "moment", label: "Moment", emoji: "⭐" },
   ];
 
+  const coachEntryTypes = [
+    { id: "game", label: "Game Recap", emoji: "🏟️" },
+    { id: "practice", label: "Practice", emoji: "📋" },
+    { id: "film", label: "Film Notes", emoji: "🎬" },
+    { id: "player", label: "Player Note", emoji: "👤" },
+    { id: "week", label: "Week Recap", emoji: "📓" },
+    { id: "moment", label: "Moment", emoji: "⭐" },
+  ];
+
+  const entryTypes = isCoach ? coachEntryTypes : parentEntryTypes;
+
   const childName = players?.[0]?.name || null;
   const n = childName || "they";
   const nPoss = childName ? `${childName}'s` : "their";
@@ -1787,7 +2272,7 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
   const nTry = childName ? `${childName} try` : "they try";
   const nLearn = childName ? `${childName} learn` : "they learn";
 
-  const prompts = {
+  const parentPrompts = {
     game: [
       `What moment made you proudest of ${n} today?`,
       `What's something ${nDid} that surprised you?`,
@@ -1826,6 +2311,47 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
     ],
   };
 
+  const coachPrompts = {
+    game: [
+      "What was the turning point of the game?",
+      "What adjustment made the biggest difference?",
+      "Who stepped up when it mattered?",
+      "What do you wish you'd done differently?",
+      "What did you see that the stats won't show?",
+    ],
+    practice: [
+      "What drill got the best response today?",
+      "Who showed the most improvement?",
+      "What do you need to clean up before game day?",
+      "What was the energy like out there?",
+    ],
+    film: [
+      "What did you see on film that you missed live?",
+      "What pattern keeps showing up?",
+      "What's the one thing to fix before next game?",
+      "Who looked different on film than you expected?",
+    ],
+    player: [
+      "What's this kid doing better than a month ago?",
+      "What's holding them back right now?",
+      "What conversation do you need to have with them?",
+      "What role could they grow into?",
+    ],
+    week: [
+      "What was the theme of this week?",
+      "What are you most proud of from this week?",
+      "What's the one thing to carry into next week?",
+      "How's the locker room right now?",
+    ],
+    moment: [
+      "Why does this moment matter to the season?",
+      "What will you want to remember about this?",
+      "What made you stop and take it in?",
+    ],
+  };
+
+  const prompts = isCoach ? coachPrompts : parentPrompts;
+
   const [showPrompt, setShowPrompt] = useState(false);
   const [promptIdx, setPromptIdx] = useState(0);
 
@@ -1859,16 +2385,38 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
   };
 
   const handleSave = () => {
-    if (!text.trim()) return;
+    // With mood/highlights, text is optional — auto-generate if empty
+    let finalText = text.trim();
+    if (!finalText && (mood || highlights.length > 0)) {
+      const parts = [];
+      if (mood) {
+        const moodLabel = GAME_MOODS.find((m) => m.id === mood)?.label || mood;
+        parts.push(moodLabel + " day.");
+      }
+      if (highlights.length > 0) {
+        const tags = highlights.map((h) => {
+          const tag = [...(HIGHLIGHT_TAGS.parent || []), ...(HIGHLIGHT_TAGS.coach || [])].find((t) => t.id === h);
+          return tag?.label || h;
+        });
+        parts.push(tags.join(", ") + ".");
+      }
+      finalText = parts.join(" ");
+    }
+    if (!finalText) return;
     onSave({
       entry_type: entryType,
-      text: text.trim(),
+      text: finalText,
       entry_date: entryDate,
       opponent: opponent || null,
       venue: venue || null,
       score_home: scoreHome !== "" ? parseInt(scoreHome) : null,
       score_away: scoreAway !== "" ? parseInt(scoreAway) : null,
       result: computeResult(),
+      goals: goals !== "" ? parseInt(goals) : null,
+      assists: assists !== "" ? parseInt(assists) : null,
+      clean_sheet: cleanSheet || false,
+      mood: mood || null,
+      highlights: highlights.length > 0 ? highlights : null,
       photo,
       consent_shared: orgName ? consentShared : false,
     });
@@ -1928,6 +2476,47 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
           ))}
         </div>
 
+        {/* Quick Mood (Daylio-style — game/tournament entries only) */}
+        {(entryType === "game" || entryType === "tournament") && (
+          <div style={{ marginBottom: 16 }}>
+            <label className="label">How'd it go?</label>
+            <div style={{ display: "flex", gap: 6, overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+              {GAME_MOODS.map((m) => (
+                <QuickMoodTag key={m.id} label={m.label} icon={m.icon}
+                  selected={mood === m.id} onClick={() => setMood(mood === m.id ? null : m.id)}
+                  color={composerPrimary} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Highlight Tags (tap-based, Daylio-style) */}
+        {(entryType === "game" || entryType === "tournament") && (
+          <div style={{ marginBottom: 16 }}>
+            <label className="label">Highlights</label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {(HIGHLIGHT_TAGS[isCoach ? "coach" : "parent"] || []).map((tag) => {
+                const sel = highlights.includes(tag.id);
+                return (
+                  <button key={tag.id} onClick={() => setHighlights((prev) =>
+                    sel ? prev.filter((h) => h !== tag.id) : [...prev, tag.id]
+                  )}
+                    style={{
+                      padding: "7px 12px", border: `1.5px solid ${sel ? composerPrimary : theme.border}`,
+                      background: sel ? `${composerPrimary}10` : "white",
+                      borderRadius: 20, cursor: "pointer", fontSize: 12, fontWeight: sel ? 600 : 400,
+                      color: sel ? composerPrimary : theme.textMuted,
+                      transition: "all 0.15s", display: "flex", alignItems: "center", gap: 4,
+                    }}>
+                    <span style={{ fontSize: 13 }}>{tag.icon}</span>
+                    {tag.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* The Line */}
         <div style={{ marginBottom: 16 }}>
           {showPrompt && (
@@ -1954,9 +2543,11 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
             className="input"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Write the moment..."
-            maxLength={500}
-            rows={3}
+            placeholder={mood || highlights.length > 0
+              ? "Add more details (optional)..."
+              : isCoach ? "What happened today..." : "Write the moment..."}
+            maxLength={isCoach ? 2000 : 500}
+            rows={isCoach ? 6 : 3}
             style={{ resize: "none", fontSize: 16, lineHeight: 1.5 }}
           />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
@@ -1968,7 +2559,7 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
                 💡 Need inspiration?
               </button>
             ) : <span />}
-            <span style={{ fontSize: 11, color: theme.textLight }}>{text.length}/500</span>
+            <span style={{ fontSize: 11, color: theme.textLight }}>{text.length}/{isCoach ? 2000 : 500}</span>
           </div>
         </div>
 
@@ -1995,7 +2586,7 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
                 border: `2px dashed ${theme.border}`, background: theme.borderLight,
                 cursor: "pointer", color: theme.textMuted, fontSize: 14,
               }}>
-              📷 Add Photo
+              📷 {isCoach ? "Add Photo (optional)" : "Add Photo"}
             </button>
           )}
         </div>
@@ -2039,6 +2630,34 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
                   <input className="input" value={venue} onChange={(e) => setVenue(e.target.value)}
                     placeholder="Field name or location" style={{ background: "white" }} />
                 </div>
+
+                {/* Player stats */}
+                {!isCoach && (
+                  <div style={{ marginTop: 12, borderTop: `1px solid ${theme.border}`, paddingTop: 12 }}>
+                    <label className="label">Player Stats (optional)</label>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <div style={{ flex: 1 }}>
+                        <input className="input" value={goals} onChange={(e) => setGoals(e.target.value)}
+                          placeholder="Goals" type="number" min="0" style={{ background: "white", textAlign: "center" }} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <input className="input" value={assists} onChange={(e) => setAssists(e.target.value)}
+                          placeholder="Assists" type="number" min="0" style={{ background: "white", textAlign: "center" }} />
+                      </div>
+                      <button type="button" onClick={() => setCleanSheet(!cleanSheet)}
+                        style={{
+                          flex: 1, padding: "10px 8px", cursor: "pointer",
+                          border: `1.5px solid ${cleanSheet ? composerPrimary : theme.border}`,
+                          background: cleanSheet ? `${composerPrimary}10` : "white",
+                          color: cleanSheet ? composerPrimary : theme.textMuted,
+                          fontSize: 12, fontWeight: cleanSheet ? 600 : 400,
+                          borderRadius: 8, transition: "all 0.15s",
+                        }}>
+                        Clean Sheet
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </>
@@ -2077,10 +2696,10 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
 
         {/* Save */}
         <button className="btn btn-primary" onClick={handleSave}
-          disabled={!text.trim()}
+          disabled={!text.trim() && !mood && highlights.length === 0}
           style={{
             width: "100%", padding: "14px 24px", fontSize: 16,
-            opacity: text.trim() ? 1 : 0.5,
+            opacity: (text.trim() || mood || highlights.length > 0) ? 1 : 0.5,
             background: composerPrimary,
           }}>
           Save Entry ✓
@@ -2089,6 +2708,499 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName }
     </div>
   );
 }
+
+// --- ON THIS DAY (Day One-style memory resurfacing) ---
+function OnThisDay({ entries, playerName, brandColor, onEntryTap }) {
+  const color = brandColor || theme.primary;
+  const today = new Date();
+  const month = today.getMonth();
+  const day = today.getDate();
+
+  // Find entries from previous years on this date (or within 1 day)
+  const memories = entries.filter((e) => {
+    if (!e.entry_date) return false;
+    const d = new Date(e.entry_date);
+    if (d.getFullYear() === today.getFullYear()) return false;
+    return d.getMonth() === month && Math.abs(d.getDate() - day) <= 1;
+  });
+
+  if (memories.length === 0) return null;
+
+  const memory = memories[0];
+  const memoryDate = new Date(memory.entry_date);
+  const yearsAgo = today.getFullYear() - memoryDate.getFullYear();
+  const dateStr = memoryDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+
+  return (
+    <div onClick={() => onEntryTap?.(memory)} style={{
+      background: `linear-gradient(135deg, ${color}08, ${color}04)`,
+      border: `1px solid ${color}20`,
+      borderRadius: 12, padding: "14px 16px", marginBottom: 12, cursor: "pointer",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+        <span style={{ fontSize: 16 }}>📅</span>
+        <span style={{
+          fontSize: 12, fontWeight: 700, color, textTransform: "uppercase", letterSpacing: 0.8,
+        }}>
+          {yearsAgo === 1 ? "One year ago today" : `${yearsAgo} years ago today`}
+        </span>
+      </div>
+      <p style={{
+        fontSize: 14, color: theme.text, lineHeight: 1.5, margin: "0 0 6px",
+        fontStyle: "italic", display: "-webkit-box", WebkitLineClamp: 2,
+        WebkitBoxOrient: "vertical", overflow: "hidden",
+      }}>
+        "{memory.text}"
+      </p>
+      <span style={{ fontSize: 11, color: theme.textMuted }}>{dateStr}</span>
+    </div>
+  );
+}
+
+// --- SCHEDULE IMPORT & UPCOMING GAMES ---
+function parseICS(text) {
+  const events = [];
+  const lines = text.replace(/\r\n /g, "").split(/\r?\n/);
+  let current = null;
+  for (const line of lines) {
+    if (line === "BEGIN:VEVENT") { current = {}; continue; }
+    if (line === "END:VEVENT" && current) {
+      if (current.dtstart) {
+        events.push({
+          id: current.uid || String(Math.random()),
+          date: current.dtstart,
+          summary: current.summary || "Game",
+          location: current.location || "",
+        });
+      }
+      current = null;
+      continue;
+    }
+    if (!current) continue;
+    const colonIdx = line.indexOf(":");
+    if (colonIdx < 0) continue;
+    const keyFull = line.slice(0, colonIdx);
+    const val = line.slice(colonIdx + 1);
+    const key = keyFull.split(";")[0].toUpperCase();
+    if (key === "DTSTART") {
+      // Handle both 20260315T100000 and 20260315T100000Z and 20260315 formats
+      const clean = val.replace(/[Z]/g, "");
+      if (clean.length === 8) {
+        current.dtstart = `${clean.slice(0, 4)}-${clean.slice(4, 6)}-${clean.slice(6, 8)}`;
+      } else if (clean.length >= 15) {
+        current.dtstart = `${clean.slice(0, 4)}-${clean.slice(4, 6)}-${clean.slice(6, 8)}`;
+        current.time = `${clean.slice(9, 11)}:${clean.slice(11, 13)}`;
+      }
+    }
+    if (key === "SUMMARY") current.summary = val;
+    if (key === "LOCATION") current.location = val;
+    if (key === "UID") current.uid = val;
+  }
+  return events.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function parseScheduleCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const headers = lines[0].toLowerCase().split(",").map((h) => h.trim().replace(/"/g, ""));
+  const dateCol = headers.findIndex((h) => /date/.test(h));
+  const summaryCol = headers.findIndex((h) => /summary|title|event|opponent|team|description/.test(h));
+  const locationCol = headers.findIndex((h) => /location|venue|field|where/.test(h));
+  const timeCol = headers.findIndex((h) => /^time$|start.?time/.test(h));
+
+  if (dateCol < 0) return [];
+
+  return lines.slice(1).map((line, i) => {
+    const cols = line.split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
+    const rawDate = cols[dateCol] || "";
+    // Try to parse various date formats
+    let date = "";
+    const d = new Date(rawDate);
+    if (!isNaN(d.getTime())) {
+      date = d.toISOString().split("T")[0];
+    } else {
+      date = rawDate;
+    }
+    return {
+      id: `csv-${i}`,
+      date,
+      summary: cols[summaryCol] || "Game",
+      location: cols[locationCol] || "",
+      time: cols[timeCol] || "",
+    };
+  }).filter((e) => e.date).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function ScheduleImportModal({ onImport, onClose, brandColor }) {
+  const color = brandColor || theme.primary;
+  const fileRef = useRef(null);
+  const [error, setError] = useState("");
+  const [preview, setPreview] = useState(null);
+  const [manualEvents, setManualEvents] = useState([{ date: "", summary: "", location: "" }]);
+  const [mode, setMode] = useState("file"); // "file" or "manual"
+
+  const handleFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setError("");
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target.result;
+      let events;
+      if (file.name.endsWith(".ics") || file.name.endsWith(".ical")) {
+        events = parseICS(text);
+      } else if (file.name.endsWith(".csv")) {
+        events = parseScheduleCSV(text);
+      } else {
+        // Try ICS first, then CSV
+        events = parseICS(text);
+        if (events.length === 0) events = parseScheduleCSV(text);
+      }
+      if (events.length === 0) {
+        setError("No events found. Try a .ics or .csv file with a date column.");
+        return;
+      }
+      setPreview(events);
+    };
+    reader.readAsText(file);
+  };
+
+  const addManualRow = () => {
+    setManualEvents((prev) => [...prev, { date: "", summary: "", location: "" }]);
+  };
+
+  const updateManualRow = (i, field, val) => {
+    setManualEvents((prev) => prev.map((e, j) => j === i ? { ...e, [field]: val } : e));
+  };
+
+  const handleManualImport = () => {
+    const valid = manualEvents.filter((e) => e.date);
+    if (valid.length === 0) return;
+    onImport(valid.map((e, i) => ({ ...e, id: `manual-${i}` })));
+  };
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+      display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 100,
+    }}>
+      <div className="slide-up" style={{
+        background: "white", borderRadius: "18px 18px 0 0",
+        padding: "24px 24px calc(24px + env(safe-area-inset-bottom, 0px))",
+        width: "100%", maxWidth: 480, maxHeight: "85vh", overflow: "auto",
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+          <h2 style={{ fontFamily: fonts.display, fontSize: 22, fontWeight: 700 }}>Import Schedule</h2>
+          <button onClick={onClose} style={{
+            background: "none", border: "none", fontSize: 24, cursor: "pointer", color: theme.textMuted,
+          }}>×</button>
+        </div>
+
+        <p style={{ fontSize: 13, color: theme.textMuted, marginBottom: 16, lineHeight: 1.5 }}>
+          Import from TeamSnap, Google Calendar, or any .ics/.csv file. Or add games manually.
+        </p>
+
+        {/* Mode tabs */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+          {[{ id: "file", label: "Import File" }, { id: "manual", label: "Add Manually" }].map((m) => (
+            <button key={m.id} onClick={() => setMode(m.id)}
+              style={{
+                flex: 1, padding: "10px 12px", border: `1.5px solid ${mode === m.id ? color : theme.border}`,
+                background: mode === m.id ? `${color}10` : "white",
+                color: mode === m.id ? color : theme.textMuted,
+                fontSize: 14, fontWeight: mode === m.id ? 600 : 400,
+                borderRadius: 8, cursor: "pointer", transition: "all 0.15s",
+              }}>
+              {m.label}
+            </button>
+          ))}
+        </div>
+
+        {mode === "file" && (
+          <>
+            <input ref={fileRef} type="file" accept=".ics,.ical,.csv,.txt"
+              onChange={handleFile} style={{ display: "none" }} />
+            {!preview ? (
+              <button onClick={() => fileRef.current?.click()}
+                style={{
+                  width: "100%", padding: 20, borderRadius: 12,
+                  border: `2px dashed ${theme.border}`, background: theme.borderLight,
+                  cursor: "pointer", color: theme.textMuted, fontSize: 14,
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+                }}>
+                <span style={{ fontSize: 24 }}>📁</span>
+                <span>Choose .ics or .csv file</span>
+                <span style={{ fontSize: 11, color: theme.textLight }}>
+                  Works with TeamSnap, Google Calendar, Apple Calendar
+                </span>
+              </button>
+            ) : (
+              <div>
+                <div style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12,
+                }}>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: theme.text }}>
+                    {preview.length} game{preview.length !== 1 ? "s" : ""} found
+                  </span>
+                  <button onClick={() => { setPreview(null); setError(""); }}
+                    style={{ background: "none", border: "none", fontSize: 13, color: color, cursor: "pointer", fontWeight: 600 }}>
+                    Choose different file
+                  </button>
+                </div>
+                <div style={{
+                  maxHeight: 200, overflow: "auto", border: `1px solid ${theme.border}`,
+                  borderRadius: 8, marginBottom: 16,
+                }}>
+                  {preview.map((ev, i) => (
+                    <div key={i} style={{
+                      padding: "10px 14px", borderBottom: i < preview.length - 1 ? `1px solid ${theme.borderLight}` : "none",
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                    }}>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: theme.text }}>{ev.summary}</div>
+                        <div style={{ fontSize: 11, color: theme.textMuted }}>
+                          {new Date(ev.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                          {ev.time ? ` at ${ev.time}` : ""}
+                          {ev.location ? ` — ${ev.location}` : ""}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={() => onImport(preview)}
+                  className="btn btn-primary"
+                  style={{ width: "100%", padding: "14px 24px", fontSize: 16, background: color }}>
+                  Import {preview.length} Game{preview.length !== 1 ? "s" : ""}
+                </button>
+              </div>
+            )}
+          </>
+        )}
+
+        {mode === "manual" && (
+          <div>
+            {manualEvents.map((ev, i) => (
+              <div key={i} style={{
+                display: "flex", gap: 8, marginBottom: 8, alignItems: "center",
+              }}>
+                <input type="date" value={ev.date}
+                  onChange={(e) => updateManualRow(i, "date", e.target.value)}
+                  className="input" style={{ flex: 1, fontSize: 13, padding: "10px 8px" }} />
+                <input type="text" placeholder="vs Opponent" value={ev.summary}
+                  onChange={(e) => updateManualRow(i, "summary", e.target.value)}
+                  className="input" style={{ flex: 1.5, fontSize: 13, padding: "10px 8px" }} />
+                <input type="text" placeholder="Location" value={ev.location}
+                  onChange={(e) => updateManualRow(i, "location", e.target.value)}
+                  className="input" style={{ flex: 1, fontSize: 13, padding: "10px 8px" }} />
+              </div>
+            ))}
+            <button onClick={addManualRow}
+              style={{
+                background: "none", border: `1px dashed ${theme.border}`,
+                borderRadius: 8, padding: "8px 14px", cursor: "pointer",
+                fontSize: 13, color: theme.textMuted, width: "100%", marginBottom: 16,
+              }}>
+              + Add another game
+            </button>
+            <button onClick={handleManualImport}
+              className="btn btn-primary"
+              disabled={!manualEvents.some((e) => e.date)}
+              style={{
+                width: "100%", padding: "14px 24px", fontSize: 16,
+                background: manualEvents.some((e) => e.date) ? color : theme.border,
+                opacity: manualEvents.some((e) => e.date) ? 1 : 0.5,
+              }}>
+              Save Schedule
+            </button>
+          </div>
+        )}
+
+        {error && (
+          <div style={{
+            background: "#FEE2E2", color: "#991B1B", padding: "10px 14px",
+            fontSize: 13, marginTop: 12, borderLeft: "3px solid #991B1B",
+          }}>{error}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function UpcomingGames({ schedule, entries, brandColor, onLogGame, onOpenSchedule }) {
+  const color = brandColor || theme.primary;
+  const today = new Date().toISOString().split("T")[0];
+
+  // Find next upcoming games
+  const upcoming = schedule
+    .filter((g) => g.date >= today)
+    .slice(0, 3);
+
+  // Find past games with no entry logged
+  const missedGames = schedule
+    .filter((g) => {
+      if (g.date >= today) return false;
+      // Check if there's an entry within 1 day of the game
+      return !entries.some((e) => {
+        const diff = Math.abs(new Date(e.entry_date) - new Date(g.date));
+        return diff < 2 * 86400000; // within 2 days
+      });
+    })
+    .slice(-2); // last 2 missed
+
+  if (upcoming.length === 0 && missedGames.length === 0) return null;
+
+  return (
+    <div style={{ marginBottom: 12 }}>
+      {/* Missed game nudge */}
+      {missedGames.length > 0 && (
+        <div style={{
+          background: "#FEF3C7", border: "1px solid #FCD34D",
+          borderRadius: 12, padding: "12px 14px", marginBottom: 8,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+            <span style={{ fontSize: 14 }}>📝</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#92400E", textTransform: "uppercase", letterSpacing: 0.5 }}>
+              Don't forget
+            </span>
+          </div>
+          {missedGames.map((g) => (
+            <div key={g.id} style={{
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              padding: "6px 0",
+            }}>
+              <div>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "#78350F" }}>{g.summary}</span>
+                <span style={{ fontSize: 11, color: "#92400E", marginLeft: 8 }}>
+                  {new Date(g.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                </span>
+              </div>
+              <button onClick={() => onLogGame(g)}
+                style={{
+                  background: "#92400E", color: "white", border: "none",
+                  borderRadius: 6, padding: "6px 12px", fontSize: 12,
+                  fontWeight: 600, cursor: "pointer",
+                }}>
+                Log it
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Upcoming games */}
+      {upcoming.length > 0 && (
+        <div style={{
+          background: `${color}06`, border: `1px solid ${color}15`,
+          borderRadius: 12, padding: "12px 14px",
+        }}>
+          <div style={{
+            display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 14 }}>📅</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                Coming up
+              </span>
+            </div>
+            {onOpenSchedule && (
+              <button onClick={onOpenSchedule} style={{
+                background: "none", border: "none", fontSize: 12, color, cursor: "pointer", fontWeight: 600,
+              }}>
+                Full schedule →
+              </button>
+            )}
+          </div>
+          {upcoming.map((g, i) => {
+            const gameDate = new Date(g.date + "T12:00:00");
+            const daysUntil = Math.ceil((gameDate - new Date()) / 86400000);
+            const isToday = g.date === today;
+            const isTomorrow = daysUntil === 1;
+            return (
+              <div key={g.id} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "8px 0",
+                borderTop: i > 0 ? `1px solid ${color}10` : "none",
+              }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: theme.text }}>{g.summary}</div>
+                  <div style={{ fontSize: 11, color: theme.textMuted }}>
+                    {gameDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                    {g.time ? ` at ${g.time}` : ""}
+                    {g.location ? ` — ${g.location}` : ""}
+                  </div>
+                </div>
+                {isToday ? (
+                  <span style={{
+                    background: color, color: "white", padding: "4px 10px",
+                    borderRadius: 6, fontSize: 11, fontWeight: 700,
+                  }}>TODAY</span>
+                ) : isTomorrow ? (
+                  <span style={{
+                    background: `${color}15`, color, padding: "4px 10px",
+                    borderRadius: 6, fontSize: 11, fontWeight: 600,
+                  }}>Tomorrow</span>
+                ) : (
+                  <span style={{ fontSize: 11, color: theme.textMuted }}>
+                    {daysUntil} day{daysUntil !== 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --- QUICK ENTRY MODE (Daylio-style tap-based) ---
+function QuickMoodTag({ label, icon, selected, onClick, color }) {
+  return (
+    <button onClick={onClick} style={{
+      padding: "10px 14px", border: `2px solid ${selected ? color : theme.border}`,
+      background: selected ? `${color}10` : "white",
+      borderRadius: 10, cursor: "pointer", display: "flex", flexDirection: "column",
+      alignItems: "center", gap: 4, transition: "all 0.15s", minWidth: 60,
+    }}>
+      <span style={{ fontSize: 22 }}>{icon}</span>
+      <span style={{
+        fontSize: 10, fontWeight: selected ? 700 : 500,
+        color: selected ? color : theme.textMuted,
+      }}>{label}</span>
+    </button>
+  );
+}
+
+const GAME_MOODS = [
+  { id: "amazing", icon: "🔥", label: "Amazing" },
+  { id: "good", icon: "😊", label: "Good" },
+  { id: "okay", icon: "😐", label: "Okay" },
+  { id: "tough", icon: "😤", label: "Tough" },
+  { id: "rough", icon: "😔", label: "Rough" },
+];
+
+const HIGHLIGHT_TAGS = {
+  parent: [
+    { id: "first-goal", label: "First goal", icon: "⚽" },
+    { id: "great-effort", label: "Great effort", icon: "💪" },
+    { id: "big-save", label: "Big save", icon: "🧤" },
+    { id: "team-player", label: "Team player", icon: "🤝" },
+    { id: "tough-loss-good-attitude", label: "Tough loss, good attitude", icon: "💚" },
+    { id: "breakthrough", label: "Breakthrough", icon: "⭐" },
+    { id: "car-ride-stories", label: "Car ride stories", icon: "🚗" },
+    { id: "fun-day", label: "Fun day", icon: "😂" },
+  ],
+  coach: [
+    { id: "tactical-shift", label: "Tactical shift", icon: "📋" },
+    { id: "player-stepped-up", label: "Player stepped up", icon: "⭐" },
+    { id: "defense-solid", label: "Defense solid", icon: "🛡️" },
+    { id: "set-piece-worked", label: "Set piece worked", icon: "🎯" },
+    { id: "team-chemistry", label: "Team chemistry", icon: "🤝" },
+    { id: "gutsy-win", label: "Gutsy win", icon: "🔥" },
+    { id: "learning-moment", label: "Learning moment", icon: "📖" },
+    { id: "substitution-impact", label: "Sub impact", icon: "🔄" },
+  ],
+};
 
 // --- TIMELINE ENTRY CARD ---
 function EntryCard({ entry, players, onShare, onDelete, brandColor }) {
@@ -2100,9 +3212,12 @@ function EntryCard({ entry, players, onShare, onDelete, brandColor }) {
     sightseeing: "#6B7280",
     food: "#C2410C",
     moment: theme.moment,
+    film: "#7C3AED",
+    player: "#0369A1",
+    week: "#92400E",
   };
 
-  const typeEmojis = { game: "🏟️", practice: "🔄", tournament: "🏆", event: "✈️", sightseeing: "📍", food: "🍕", moment: "⭐" };
+  const typeEmojis = { game: "🏟️", practice: "🔄", tournament: "🏆", event: "✈️", sightseeing: "📍", food: "🍕", moment: "⭐", film: "🎬", player: "👤", week: "📓" };
   const resultLabels = { win: "W", loss: "L", draw: "D" };
 
   const color = typeColors[entry.entry_type] || theme.textMuted;
@@ -2185,6 +3300,36 @@ function EntryCard({ entry, players, onShare, onDelete, brandColor }) {
           {entry.result && (
             <span className="badge" style={{ background: color, color: "white", fontSize: 10 }}>
               {resultLabels[entry.result]}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Player Stats */}
+      {(entry.goals > 0 || entry.assists > 0 || entry.clean_sheet) && (
+        <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
+          {entry.goals > 0 && (
+            <span style={{
+              fontSize: 12, padding: "3px 10px", borderRadius: 10,
+              background: `${theme.win}12`, color: theme.win, fontWeight: 600,
+            }}>
+              ⚽ {entry.goals} {entry.goals === 1 ? "goal" : "goals"}
+            </span>
+          )}
+          {entry.assists > 0 && (
+            <span style={{
+              fontSize: 12, padding: "3px 10px", borderRadius: 10,
+              background: `${theme.accent}12`, color: theme.accent, fontWeight: 600,
+            }}>
+              🎯 {entry.assists} {entry.assists === 1 ? "assist" : "assists"}
+            </span>
+          )}
+          {entry.clean_sheet && (
+            <span style={{
+              fontSize: 12, padding: "3px 10px", borderRadius: 10,
+              background: `${theme.primary}12`, color: theme.primary, fontWeight: 600,
+            }}>
+              🧤 Clean sheet
             </span>
           )}
         </div>
@@ -2702,7 +3847,7 @@ function BookPreview({ entries, team, season, players, onClose, onOrder }) {
 }
 
 // --- ORDER FLOW ---
-function OrderFlow({ entries, team, season, players, onClose }) {
+function OrderFlow({ entries, team, season, players, onClose, onStartNewSeason }) {
   const orderPrimary = team?.color || theme.primary;
   const entryPages = paginateEntries(entries);
   const totalBookPages = 2 + entryPages.length + 1;
@@ -2735,12 +3880,49 @@ function OrderFlow({ entries, team, season, players, onClose }) {
     return "idle";
   });
 
+  const [trackingInfo, setTrackingInfo] = useState(null);
+  const [statusChecking, setStatusChecking] = useState(false);
   const [errors, setErrors] = useState({});
 
   // Persist order state
   useEffect(() => {
-    localStorage.setItem("teamSeasonOrder", JSON.stringify({ shipping, status: orderStatus }));
+    const saved = localStorage.getItem("teamSeasonOrder");
+    let existing = {};
+    try { existing = JSON.parse(saved) || {}; } catch {}
+    localStorage.setItem("teamSeasonOrder", JSON.stringify({ ...existing, shipping, status: orderStatus }));
   }, [shipping, orderStatus]);
+
+  // Check order status from Lulu via our API
+  const checkOrderStatus = async () => {
+    const saved = localStorage.getItem("teamSeasonOrder");
+    let sessionId = null;
+    try { sessionId = JSON.parse(saved)?.sessionId; } catch {}
+    if (!sessionId) return;
+
+    setStatusChecking(true);
+    try {
+      const res = await fetch(`/api/order-status?sessionId=${sessionId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.status && data.status !== "processing") {
+          setOrderStatus(data.status);
+        }
+        if (data.trackingUrl || data.trackingNumber) {
+          setTrackingInfo({ url: data.trackingUrl, number: data.trackingNumber });
+        }
+      }
+    } catch (e) {
+      console.warn("Status check failed:", e);
+    }
+    setStatusChecking(false);
+  };
+
+  // Auto-check status when showing ordered state
+  useEffect(() => {
+    if (step === "status" && (orderStatus === "ordered" || orderStatus === "printing")) {
+      checkOrderStatus();
+    }
+  }, [step]);
 
   const validateShipping = () => {
     const errs = {};
@@ -2982,7 +4164,9 @@ function OrderFlow({ entries, team, season, players, onClose }) {
               <>
                 <div style={{ padding: "16px 0" }}>
                   {statusSteps.map((s, i) => {
-                    const active = statusSteps.findIndex((ss) => ss.key === orderStatus) >= i;
+                    const activeIdx = statusSteps.findIndex((ss) => ss.key === orderStatus);
+                    const active = activeIdx >= i;
+                    const isCurrent = activeIdx === i;
                     return (
                       <div key={s.key} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: i < statusSteps.length - 1 ? 20 : 0 }}>
                         <div style={{
@@ -2994,17 +4178,86 @@ function OrderFlow({ entries, team, season, players, onClose }) {
                         }}>
                           {active ? "✓" : i + 1}
                         </div>
-                        <span style={{
-                          fontSize: 14, fontWeight: active ? 600 : 400,
-                          color: active ? theme.text : theme.textMuted,
-                        }}>{s.label}</span>
+                        <div style={{ flex: 1 }}>
+                          <span style={{
+                            fontSize: 14, fontWeight: active ? 600 : 400,
+                            color: active ? theme.text : theme.textMuted,
+                          }}>{s.label}</span>
+                          {isCurrent && s.key === "ordered" && (
+                            <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 2 }}>
+                              Expect 5–10 business days
+                            </div>
+                          )}
+                          {isCurrent && s.key === "shipped" && trackingInfo?.url && (
+                            <a href={trackingInfo.url} target="_blank" rel="noopener noreferrer" style={{
+                              fontSize: 12, color: orderPrimary, display: "block", marginTop: 2,
+                            }}>
+                              Track your package →
+                            </a>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
                 </div>
-                <button className="btn btn-ghost" onClick={onClose} style={{ width: "100%", marginTop: 16 }}>
-                  Close
-                </button>
+
+                {/* Check Status + Extra Copy */}
+                <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+                  <button
+                    className="btn btn-ghost"
+                    onClick={checkOrderStatus}
+                    disabled={statusChecking}
+                    style={{ flex: 1 }}
+                  >
+                    {statusChecking ? "Checking..." : "Check Status"}
+                  </button>
+                  <button className="btn btn-ghost" onClick={onClose} style={{ flex: 1 }}>
+                    Close
+                  </button>
+                </div>
+
+                {/* Extra copy upsell */}
+                {orderStatus === "ordered" && (
+                  <div style={{
+                    marginTop: 16, padding: "14px 16px", background: `${orderPrimary}08`,
+                    border: `1px solid ${orderPrimary}15`, borderRadius: 10, textAlign: "center",
+                  }}>
+                    <div style={{ fontSize: 13, color: theme.textMuted, marginBottom: 4 }}>
+                      Want a copy for the grandparents?
+                    </div>
+                    <div style={{ fontSize: 12, color: theme.textLight }}>
+                      Same book, same memories — coming soon.
+                    </div>
+                  </div>
+                )}
+
+                {/* Start Next Season */}
+                {onStartNewSeason && (
+                  <div style={{ marginTop: 20 }}>
+                    <div style={{
+                      height: 1, background: theme.border, marginBottom: 20,
+                    }} />
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{
+                        fontSize: 13, color: theme.textMuted, marginBottom: 12,
+                        fontWeight: 500,
+                      }}>
+                        Season wrapped. Ready for the next one?
+                      </div>
+                      <button
+                        onClick={() => { onClose(); onStartNewSeason(); }}
+                        style={{
+                          padding: "12px 24px", border: "none",
+                          background: orderPrimary, color: "white",
+                          fontSize: 14, fontWeight: 700, cursor: "pointer",
+                          fontFamily: "'DM Sans', sans-serif",
+                        }}
+                      >
+                        Start Next Season →
+                      </button>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </>
@@ -3351,6 +4604,411 @@ const ShareCardRender = React.forwardRef(function ShareCardRender({
     );
   }
 
+  // --- TEMPLATE: VICTORY ---
+  if (template === "victory") {
+    const scoreLine = hasScore ? `${entry.score_home} – ${entry.score_away}` : null;
+    const massiveSize = isStory ? 260 : 200;
+    const photoSrc = entry.photoPreview || entry.photoData;
+
+    return (
+      <div ref={ref} style={{
+        width, height,
+        position: preview ? "relative" : "absolute",
+        ...(preview ? {} : { left: -9999, top: -9999 }),
+        overflow: "hidden", fontFamily: fonts.body,
+        background: `linear-gradient(175deg, #0a0a0a 0%, ${activeColor}22 40%, #000 100%)`,
+        display: "flex", flexDirection: "column",
+      }}>
+        {/* Full-bleed photo layer */}
+        {photoSrc && (
+          <div style={{
+            position: "absolute", inset: 0,
+            backgroundImage: `url(${photoSrc})`,
+            backgroundSize: "cover", backgroundPosition: bgPosition,
+            backgroundRepeat: "no-repeat",
+            opacity: 0.45,
+          }} />
+        )}
+
+        {/* Deep gradient overlays */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 35%, transparent 50%, rgba(0,0,0,0.85) 75%, rgba(0,0,0,0.97) 100%)",
+        }} />
+        <div style={{
+          position: "absolute", inset: 0,
+          background: `linear-gradient(to right, ${activeColor}55 0%, transparent 60%)`,
+        }} />
+
+        {/* VICTORY text — massive, behind/layered with photo */}
+        <div style={{
+          position: "absolute",
+          top: isStory ? "18%" : "15%",
+          left: 0, right: 0,
+          display: "flex", justifyContent: "center", alignItems: "center",
+          zIndex: 1,
+          pointerEvents: "none",
+        }}>
+          <span style={{
+            fontFamily: fonts.body, fontWeight: 900,
+            fontSize: massiveSize, lineHeight: 0.85,
+            color: "rgba(255,255,255,0.12)",
+            letterSpacing: -8, textTransform: "uppercase",
+            textAlign: "center",
+            userSelect: "none",
+          }}>
+            VICTORY
+          </span>
+        </div>
+
+        {/* Content — sits above photo and massive text */}
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0,
+          padding: isStory ? "0 72px 72px" : "0 64px 56px",
+          zIndex: 3,
+        }}>
+          {/* Team vs Opponent row */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 20,
+            marginBottom: isStory ? 32 : 24,
+          }}>
+            <span style={{ fontSize: isStory ? 44 : 36 }}>{team?.emoji || "⚽"}</span>
+            {entry.opponent && (
+              <>
+                <span style={{
+                  fontFamily: fonts.body, fontSize: isStory ? 26 : 22, fontWeight: 700,
+                  color: "rgba(255,255,255,0.5)", letterSpacing: 3, textTransform: "uppercase",
+                }}>
+                  VS
+                </span>
+                <span style={{
+                  fontFamily: fonts.body, fontSize: isStory ? 26 : 22, fontWeight: 700,
+                  color: "rgba(255,255,255,0.7)", letterSpacing: 2, textTransform: "uppercase",
+                }}>
+                  {entry.opponent}
+                </span>
+              </>
+            )}
+          </div>
+
+          {/* Score — huge */}
+          {scoreLine && (
+            <div style={{
+              fontFamily: fonts.mono, fontSize: isStory ? 144 : 112, fontWeight: 700,
+              color: "#FFFFFF", letterSpacing: 4, lineHeight: 0.9,
+              marginBottom: isStory ? 28 : 20,
+            }}>
+              {scoreLine}
+            </div>
+          )}
+
+          {/* VICTORY label */}
+          <div style={{
+            fontFamily: fonts.body, fontWeight: 900, fontSize: isStory ? 52 : 42,
+            color: activeColor, letterSpacing: 6, textTransform: "uppercase",
+            marginBottom: isStory ? 28 : 20,
+          }}>
+            VICTORY
+          </div>
+
+          {/* Date and watermark */}
+          <div style={{
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+            paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.15)",
+          }}>
+            <span style={{
+              fontFamily: fonts.body, fontSize: 22, fontWeight: 500,
+              color: "rgba(255,255,255,0.45)", letterSpacing: 1,
+            }}>
+              {dateStr}
+            </span>
+            <span style={{
+              fontFamily: fonts.body, fontSize: 22, fontWeight: 700,
+              color: "rgba(255,255,255,0.4)", letterSpacing: 4, textTransform: "uppercase",
+            }}>
+              {hasSeasonPass && team?.name ? team.name : "TEAM SEASON"}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- TEMPLATE: MATCHDAY ---
+  if (template === "matchday") {
+    const photoSrc = entry.photoPreview || entry.photoData;
+    const isPastGame = hasScore;
+    const massiveLabel = isPastGame ? "FINAL" : "MATCHDAY";
+    const massiveSize = isStory ? 200 : 160;
+    const subScoreSize = isStory ? 130 : 100;
+
+    return (
+      <div ref={ref} style={{
+        width, height,
+        position: preview ? "relative" : "absolute",
+        ...(preview ? {} : { left: -9999, top: -9999 }),
+        overflow: "hidden", fontFamily: fonts.body,
+        background: `linear-gradient(150deg, ${activeColor} 0%, #000 70%)`,
+        display: "flex", flexDirection: "column",
+      }}>
+        {/* Photo layer */}
+        {photoSrc && (
+          <div style={{
+            position: "absolute", inset: 0,
+            backgroundImage: `url(${photoSrc})`,
+            backgroundSize: "cover", backgroundPosition: bgPosition,
+            backgroundRepeat: "no-repeat",
+            opacity: 0.35,
+          }} />
+        )}
+
+        {/* Gradient overlays */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 30%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.95) 100%)",
+        }} />
+        <div style={{
+          position: "absolute", inset: 0,
+          background: `linear-gradient(to right, rgba(0,0,0,0.5) 0%, transparent 70%)`,
+        }} />
+
+        {/* MATCHDAY / FINAL — massive background word */}
+        <div style={{
+          position: "absolute",
+          top: isStory ? "12%" : "10%",
+          left: 0, right: 0,
+          display: "flex", justifyContent: "center",
+          zIndex: 1, pointerEvents: "none",
+        }}>
+          <span style={{
+            fontFamily: fonts.body, fontWeight: 900,
+            fontSize: massiveSize, lineHeight: 0.85,
+            color: "rgba(255,255,255,0.10)",
+            letterSpacing: -6, textTransform: "uppercase",
+            textAlign: "center", userSelect: "none",
+          }}>
+            {massiveLabel}
+          </span>
+        </div>
+
+        {/* Top bar: team info */}
+        <div style={{
+          position: "absolute", top: isStory ? 72 : 56, left: 0, right: 0,
+          padding: "0 64px",
+          display: "flex", alignItems: "center", gap: 20,
+          zIndex: 3,
+        }}>
+          {team?.logo ? (
+            <img src={team.logo} alt="" style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(255,255,255,0.25)" }} />
+          ) : (
+            <span style={{ fontSize: 44 }}>{team?.emoji || "⚽"}</span>
+          )}
+          <div>
+            <div style={{
+              fontFamily: fonts.body, fontSize: 28, fontWeight: 700,
+              color: "rgba(255,255,255,0.9)", letterSpacing: 2, textTransform: "uppercase",
+            }}>
+              {team?.name || "Team"}
+            </div>
+            {season?.name && (
+              <div style={{
+                fontFamily: fonts.body, fontSize: 20, fontWeight: 500,
+                color: "rgba(255,255,255,0.5)", letterSpacing: 1,
+              }}>
+                {season.name}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom content */}
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0,
+          padding: isStory ? "0 64px 64px" : "0 64px 52px",
+          zIndex: 3,
+        }}>
+          {/* Foreground MATCHDAY / FINAL label */}
+          <div style={{
+            fontFamily: fonts.body, fontWeight: 900,
+            fontSize: isStory ? 80 : 64,
+            color: isPastGame ? activeColor : "#FFFFFF",
+            letterSpacing: isPastGame ? 8 : 4,
+            textTransform: "uppercase",
+            marginBottom: isPastGame ? 8 : 24,
+          }}>
+            {massiveLabel}
+          </div>
+
+          {/* Score for past games */}
+          {isPastGame && (
+            <div style={{
+              fontFamily: fonts.mono, fontSize: subScoreSize, fontWeight: 700,
+              color: "#FFFFFF", letterSpacing: 4, lineHeight: 0.9,
+              marginBottom: 24,
+            }}>
+              {entry.score_home} – {entry.score_away}
+            </div>
+          )}
+
+          {/* vs Opponent */}
+          {entry.opponent && (
+            <div style={{
+              fontFamily: fonts.body, fontSize: isStory ? 32 : 26, fontWeight: 600,
+              color: "rgba(255,255,255,0.65)", letterSpacing: 2, textTransform: "uppercase",
+              marginBottom: isStory ? 28 : 20,
+            }}>
+              {isPastGame ? "vs" : "vs"} {entry.opponent}
+            </div>
+          )}
+
+          {/* Date + watermark row */}
+          <div style={{
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+            paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.15)",
+          }}>
+            <span style={{
+              fontFamily: fonts.body, fontSize: 22, fontWeight: 500,
+              color: "rgba(255,255,255,0.45)",
+            }}>
+              {dateStr}
+            </span>
+            <span style={{
+              fontFamily: fonts.body, fontSize: 22, fontWeight: 700,
+              color: "rgba(255,255,255,0.4)", letterSpacing: 4, textTransform: "uppercase",
+            }}>
+              {hasSeasonPass && team?.name ? team.name : "TEAM SEASON"}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- TEMPLATE: SEASON STATS ---
+  if (template === "seasonStats") {
+    const gameEntries = entries.filter((e) => e.entry_type === "game" || e.entry_type === "tournament");
+    const totalGames = gameEntries.length;
+    const totalGoalsFor = gameEntries.reduce((s, e) => s + (e.score_home || 0), 0);
+    const totalGoalsAgainst = gameEntries.reduce((s, e) => s + (e.score_away || 0), 0);
+    const winPct = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0;
+    const record = `${wins}-${losses}-${draws}`;
+
+    const statItems = [
+      { num: totalGames, label: "GAMES" },
+      { num: record, label: "RECORD" },
+      { num: totalGoalsFor, label: "GOALS" },
+      { num: `${winPct}%`, label: "WIN RATE" },
+    ];
+
+    return (
+      <div ref={ref} style={{
+        width, height,
+        position: preview ? "relative" : "absolute",
+        ...(preview ? {} : { left: -9999, top: -9999 }),
+        overflow: "hidden", fontFamily: fonts.body,
+        background: `linear-gradient(155deg, ${activeColor} 0%, #000 65%)`,
+        display: "flex", flexDirection: "column",
+        padding: isStory ? "80px 72px 72px" : "64px 72px 56px",
+      }}>
+        {/* Subtle texture layer */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(to bottom right, rgba(255,255,255,0.04) 0%, transparent 60%)",
+          pointerEvents: "none",
+        }} />
+
+        {/* Top: team */}
+        <div style={{ display: "flex", alignItems: "center", gap: 24, marginBottom: isStory ? 56 : 40, zIndex: 1 }}>
+          {team?.logo ? (
+            <img src={team.logo} alt="" style={{ width: 80, height: 80, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(255,255,255,0.25)" }} />
+          ) : (
+            <span style={{ fontSize: 56 }}>{team?.emoji || "⚽"}</span>
+          )}
+          <div>
+            <div style={{
+              fontFamily: fonts.body, fontSize: isStory ? 36 : 30, fontWeight: 800,
+              color: "#FFFFFF", letterSpacing: 2, textTransform: "uppercase",
+            }}>
+              {team?.name || "My Team"}
+            </div>
+            {season?.name && (
+              <div style={{
+                fontFamily: fonts.body, fontSize: isStory ? 26 : 22, fontWeight: 500,
+                color: "rgba(255,255,255,0.55)", letterSpacing: 1,
+              }}>
+                {season.name}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Section label */}
+        <div style={{
+          fontFamily: fonts.body, fontWeight: 900, fontSize: isStory ? 28 : 24,
+          color: activeColor, letterSpacing: 6, textTransform: "uppercase",
+          marginBottom: isStory ? 40 : 28, zIndex: 1,
+          borderLeft: `4px solid ${activeColor}`, paddingLeft: 20,
+        }}>
+          SEASON STATS
+        </div>
+
+        {/* Stat grid */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: isStory ? 32 : 24,
+          flex: 1,
+          zIndex: 1,
+        }}>
+          {statItems.map(({ num, label }, i) => (
+            <div key={i} style={{
+              background: "rgba(255,255,255,0.07)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              padding: isStory ? "40px 32px" : "28px 24px",
+              display: "flex", flexDirection: "column",
+              justifyContent: "flex-end",
+            }}>
+              <div style={{
+                fontFamily: fonts.mono, fontSize: isStory ? 88 : 68, fontWeight: 700,
+                color: "#FFFFFF", lineHeight: 0.9, letterSpacing: -2,
+                marginBottom: 12,
+              }}>
+                {num}
+              </div>
+              <div style={{
+                fontFamily: fonts.body, fontSize: isStory ? 24 : 20, fontWeight: 700,
+                color: "rgba(255,255,255,0.45)", letterSpacing: 4, textTransform: "uppercase",
+              }}>
+                {label}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Watermark row */}
+        <div style={{
+          marginTop: isStory ? 40 : 28,
+          paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.12)",
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          zIndex: 1,
+        }}>
+          <span style={{
+            fontFamily: fonts.body, fontSize: 22, fontWeight: 500,
+            color: "rgba(255,255,255,0.35)", letterSpacing: 1,
+          }}>
+            {season?.name || "Season Recap"}
+          </span>
+          <span style={{
+            fontFamily: fonts.body, fontSize: 22, fontWeight: 700,
+            color: "rgba(255,255,255,0.35)", letterSpacing: 4, textTransform: "uppercase",
+          }}>
+            {hasSeasonPass && team?.name ? team.name : "TEAM SEASON"}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   // --- TEMPLATE: MINIMAL ---
   if (template === "minimal") {
     return (
@@ -3618,6 +5276,1001 @@ function SharePrompt({ entry, onShare, onDismiss, brandColor, bookPageCount }) {
   );
 }
 
+// --- PLAYER MILESTONE CARDS (FIFA-style) ---
+const MILESTONE_DEFS = [
+  // Games
+  { id: "first_game", label: "First Game", stat: "games", threshold: 1, tier: "bronze", icon: "🏟️" },
+  { id: "games_10", label: "10 Games", stat: "games", threshold: 10, tier: "silver", icon: "🏟️" },
+  { id: "games_25", label: "25 Games", stat: "games", threshold: 25, tier: "gold", icon: "🏟️" },
+  { id: "games_50", label: "50 Games", stat: "games", threshold: 50, tier: "diamond", icon: "🏟️" },
+  // Wins
+  { id: "first_win", label: "First Win", stat: "wins", threshold: 1, tier: "bronze", icon: "🏆" },
+  { id: "wins_10", label: "10 Wins", stat: "wins", threshold: 10, tier: "silver", icon: "🏆" },
+  { id: "wins_25", label: "25 Wins", stat: "wins", threshold: 25, tier: "gold", icon: "🏆" },
+  // Goals
+  { id: "first_goal", label: "First Goal", stat: "goals", threshold: 1, tier: "bronze", icon: "⚽" },
+  { id: "goals_5", label: "5 Goals", stat: "goals", threshold: 5, tier: "silver", icon: "⚽" },
+  { id: "goals_10", label: "10 Goals", stat: "goals", threshold: 10, tier: "gold", icon: "⚽" },
+  { id: "goals_25", label: "25 Goals", stat: "goals", threshold: 25, tier: "diamond", icon: "⚽" },
+  // Assists
+  { id: "first_assist", label: "First Assist", stat: "assists", threshold: 1, tier: "bronze", icon: "🎯" },
+  { id: "assists_5", label: "5 Assists", stat: "assists", threshold: 5, tier: "silver", icon: "🎯" },
+  { id: "assists_10", label: "10 Assists", stat: "assists", threshold: 10, tier: "gold", icon: "🎯" },
+  // Clean Sheets
+  { id: "first_cleansheet", label: "Clean Sheet", stat: "cleanSheets", threshold: 1, tier: "bronze", icon: "🧤" },
+  { id: "cleansheets_5", label: "5 Clean Sheets", stat: "cleanSheets", threshold: 5, tier: "silver", icon: "🧤" },
+  // Hat Trick (single-game)
+  { id: "hat_trick", label: "Hat Trick", stat: "hatTricks", threshold: 1, tier: "gold", icon: "🎩" },
+  // Brace (single-game)
+  { id: "brace", label: "Brace", stat: "braces", threshold: 1, tier: "silver", icon: "✌️" },
+  // Streaks
+  { id: "win_streak_3", label: "3-Game Win Streak", stat: "winStreak", threshold: 3, tier: "silver", icon: "🔥" },
+  { id: "win_streak_5", label: "5-Game Win Streak", stat: "winStreak", threshold: 5, tier: "gold", icon: "🔥" },
+  { id: "win_streak_10", label: "10-Game Win Streak", stat: "winStreak", threshold: 10, tier: "diamond", icon: "🔥" },
+  // Unbeaten
+  { id: "unbeaten_5", label: "5-Game Unbeaten", stat: "unbeatenStreak", threshold: 5, tier: "silver", icon: "🛡️" },
+  { id: "unbeaten_10", label: "10-Game Unbeaten", stat: "unbeatenStreak", threshold: 10, tier: "gold", icon: "🛡️" },
+];
+
+const TIER_STYLES = {
+  bronze: {
+    bg: "linear-gradient(160deg, #4a2800 0%, #7a4010 25%, #CD7F32 55%, #e8a85a 75%, #A0522D 100%)",
+    borderGradient: "linear-gradient(160deg, #e8a85a, #CD7F32, #7a4010, #e8a85a)",
+    accent: "#CD7F32", glow: "rgba(205,127,50,0.5)", text: "#FFF8F0",
+    nameBar: "rgba(0,0,0,0.35)", statSeparator: "rgba(255,255,255,0.15)",
+  },
+  silver: {
+    bg: "linear-gradient(160deg, #1a1a1a 0%, #555 25%, #C0C0C0 55%, #e8e8e8 75%, #888 100%)",
+    borderGradient: "linear-gradient(160deg, #e8e8e8, #C0C0C0, #555, #e8e8e8)",
+    accent: "#C0C0C0", glow: "rgba(192,192,192,0.45)", text: "#FFFFFF",
+    nameBar: "rgba(0,0,0,0.4)", statSeparator: "rgba(255,255,255,0.15)",
+  },
+  gold: {
+    bg: "linear-gradient(160deg, #2a1800 0%, #6b4000 25%, #c8963e 55%, #FFD700 75%, #B8860B 100%)",
+    borderGradient: "linear-gradient(160deg, #FFD700, #c8963e, #6b4000, #FFD700)",
+    accent: "#FFD700", glow: "rgba(200,150,62,0.6)", text: "#FFF5DC",
+    nameBar: "rgba(0,0,0,0.35)", statSeparator: "rgba(255,255,255,0.18)",
+  },
+  diamond: {
+    bg: "linear-gradient(160deg, #020b18 0%, #0a1628 30%, #0e2040 55%, #1a3a6b 80%, #0d1f45 100%)",
+    borderGradient: "linear-gradient(160deg, #4a90d9, #2060b0, #0a1628, #6ab0f0, #4a90d9)",
+    accent: "#4a90d9", glow: "rgba(74,144,217,0.6)", text: "#d4eaff",
+    nameBar: "rgba(0,20,60,0.5)", statSeparator: "rgba(74,144,217,0.25)",
+  },
+};
+
+function computePlayerStats(entries) {
+  const gameEntries = entries
+    .filter((e) => e.entry_type === "game" || e.entry_type === "tournament")
+    .sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+
+  const stats = {
+    games: gameEntries.length,
+    wins: gameEntries.filter((e) => e.result === "win").length,
+    losses: gameEntries.filter((e) => e.result === "loss").length,
+    goals: 0,
+    assists: 0,
+    cleanSheets: 0,
+    hatTricks: 0,
+    braces: 0,
+    winStreak: 0,
+    unbeatenStreak: 0,
+  };
+
+  // Count goals, assists, clean sheets, hat tricks, braces
+  for (const e of gameEntries) {
+    const g = e.goals || 0;
+    const a = e.assists || 0;
+    stats.goals += g;
+    stats.assists += a;
+    if (e.clean_sheet) stats.cleanSheets++;
+    if (g >= 3) stats.hatTricks++;
+    if (g === 2) stats.braces++;
+  }
+
+  // Calculate current win streak (consecutive wins from most recent)
+  let ws = 0;
+  for (let i = gameEntries.length - 1; i >= 0; i--) {
+    if (gameEntries[i].result === "win") ws++;
+    else break;
+  }
+  stats.winStreak = ws;
+
+  // Calculate current unbeaten streak (no losses from most recent)
+  let us = 0;
+  for (let i = gameEntries.length - 1; i >= 0; i--) {
+    if (gameEntries[i].result !== "loss") us++;
+    else break;
+  }
+  stats.unbeatenStreak = us;
+
+  return stats;
+}
+
+function getEarnedMilestones(entries) {
+  const stats = computePlayerStats(entries);
+  return MILESTONE_DEFS.filter((m) => stats[m.stat] >= m.threshold);
+}
+
+function computeOverallRating(stats) {
+  const raw = stats.games * 1 + stats.wins * 2 + stats.goals * 3 + stats.assists * 2 + stats.cleanSheets * 2;
+  // Map raw score to 55–99 range
+  return Math.min(99, Math.max(55, 55 + Math.floor(raw * 0.8)));
+}
+
+function getNewMilestones(entriesBefore, entriesAfter) {
+  const before = new Set(getEarnedMilestones(entriesBefore).map((m) => m.id));
+  const after = getEarnedMilestones(entriesAfter);
+  return after.filter((m) => !before.has(m.id));
+}
+
+// --- FIFA UT CARD INNER (reusable for both popup and gallery) ---
+function FIFACardInner({ milestone, playerName, playerPhoto, playerFlags = [], playerPosition, teamEmoji, teamName, seasonName, stats, size = "full" }) {
+  const tier = TIER_STYLES[milestone.tier] || TIER_STYLES.bronze;
+  const isFull = size === "full";
+  const W = isFull ? 280 : 100;
+  const H = isFull ? 420 : 150;
+  const scale = isFull ? 1 : (W / 280);
+
+  const overallRating = stats ? computeOverallRating(stats) : 60;
+  const pos = playerPosition || "ST";
+
+  const statItems = stats ? [
+    { label: "GAM", value: stats.games || 0 },
+    { label: "WIN", value: stats.wins || 0 },
+    { label: "GOL", value: stats.goals || 0 },
+    { label: "AST", value: stats.assists || 0 },
+    { label: "CS", value: stats.cleanSheets || 0 },
+    { label: "STK", value: stats.winStreak || 0 },
+  ] : [];
+
+  const cardEl = (
+    <div style={{
+      width: 280, height: 420,
+      background: tier.bg,
+      position: "relative", overflow: "hidden",
+      boxShadow: isFull ? `0 0 50px ${tier.glow}, 0 20px 60px rgba(0,0,0,0.5)` : `0 2px 12px rgba(0,0,0,0.3)`,
+      fontFamily: "'DM Sans', sans-serif",
+    }}>
+      {/* Ornate border frame */}
+      <div style={{
+        position: "absolute", inset: 4,
+        border: `1px solid rgba(255,255,255,0.25)`,
+        pointerEvents: "none", zIndex: 10,
+      }} />
+      <div style={{
+        position: "absolute", inset: 7,
+        border: `1px solid rgba(255,255,255,0.10)`,
+        pointerEvents: "none", zIndex: 10,
+      }} />
+
+      {/* Corner accents */}
+      {[{ top: 4, left: 4 }, { top: 4, right: 4 }, { bottom: 4, left: 4 }, { bottom: 4, right: 4 }].map((pos2, i) => (
+        <div key={i} style={{
+          position: "absolute", width: 12, height: 12,
+          border: `2px solid rgba(255,255,255,0.35)`,
+          ...pos2,
+          borderTopWidth: pos2.bottom !== undefined ? 0 : "2px",
+          borderBottomWidth: pos2.top !== undefined ? 0 : "2px",
+          borderLeftWidth: pos2.right !== undefined ? 0 : "2px",
+          borderRightWidth: pos2.left !== undefined ? 0 : "2px",
+          zIndex: 11,
+        }} />
+      ))}
+
+      {/* Shine overlay */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 45%, rgba(255,255,255,0.04) 100%)",
+        pointerEvents: "none", zIndex: 9,
+      }} />
+
+      {/* TOP: Rating + Position (left) | Tier + Team emoji (right) */}
+      <div style={{
+        position: "absolute", top: 14, left: 16, zIndex: 20,
+        display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1,
+      }}>
+        <div style={{
+          fontSize: 48, fontWeight: 900, color: tier.text,
+          fontFamily: "'DM Sans', sans-serif", lineHeight: 1,
+          textShadow: "0 2px 8px rgba(0,0,0,0.4)",
+        }}>{overallRating}</div>
+        <div style={{
+          fontSize: 13, fontWeight: 800, color: tier.text,
+          letterSpacing: 1.5, textTransform: "uppercase", opacity: 0.85,
+          marginTop: 2,
+        }}>{pos}</div>
+        <div style={{
+          fontSize: 11, fontWeight: 700, color: tier.text,
+          letterSpacing: 1, textTransform: "uppercase", opacity: 0.55,
+          marginTop: 4,
+        }}>{(milestone.tier).toUpperCase()}</div>
+      </div>
+
+      <div style={{
+        position: "absolute", top: 14, right: 16, zIndex: 20,
+        display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+      }}>
+        <span style={{ fontSize: 26 }}>{teamEmoji || "⚽"}</span>
+        <div style={{
+          fontSize: 9, fontWeight: 700, color: tier.text,
+          letterSpacing: 0.8, textTransform: "uppercase", opacity: 0.5,
+          textAlign: "center",
+        }}>TEAM<br/>SEASON</div>
+      </div>
+
+      {/* MILESTONE RIBBON */}
+      <div style={{
+        position: "absolute", top: 0, left: 0, right: 0, zIndex: 15,
+        display: "flex", justifyContent: "center", paddingTop: 88,
+      }}>
+        <div style={{
+          background: "rgba(0,0,0,0.5)",
+          backdropFilter: "blur(2px)",
+          padding: "3px 14px",
+          fontSize: 10, fontWeight: 800, color: tier.text,
+          letterSpacing: 1.5, textTransform: "uppercase",
+          borderTop: `1px solid rgba(255,255,255,0.2)`,
+          borderBottom: `1px solid rgba(255,255,255,0.2)`,
+        }}>
+          {milestone.label}
+        </div>
+      </div>
+
+      {/* PLAYER PHOTO — rectangular FIFA-style cutout */}
+      <div style={{
+        position: "absolute", top: 100, left: 0, right: 0,
+        height: 190,
+        display: "flex", justifyContent: "center", alignItems: "flex-end",
+        overflow: "hidden",
+        zIndex: 5,
+      }}>
+        {playerPhoto ? (
+          <img src={playerPhoto} alt="" style={{
+            height: "100%", width: "auto",
+            objectFit: "cover", objectPosition: "center top",
+            // no border-radius — FIFA card style
+            filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.5))",
+          }} />
+        ) : (
+          <div style={{
+            width: 130, height: 170,
+            background: "rgba(255,255,255,0.06)",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            gap: 8,
+          }}>
+            <svg width="70" height="70" viewBox="0 0 100 100" style={{ opacity: 0.3 }}>
+              <circle cx="50" cy="32" r="20" fill={tier.text} />
+              <ellipse cx="50" cy="80" rx="32" ry="24" fill={tier.text} />
+            </svg>
+            <div style={{ fontSize: 28, opacity: 0.4 }}>{milestone.icon}</div>
+          </div>
+        )}
+      </div>
+
+      {/* PLAYER NAME BAR */}
+      <div style={{
+        position: "absolute", top: 290, left: 0, right: 0, zIndex: 20,
+        background: tier.nameBar,
+        backdropFilter: "blur(4px)",
+        padding: "7px 8px 5px",
+        textAlign: "center",
+      }}>
+        <div style={{
+          fontSize: playerName && playerName.length > 12 ? 13 : 16,
+          fontWeight: 800, color: tier.text,
+          letterSpacing: 1.5, textTransform: "uppercase",
+          textShadow: "0 1px 4px rgba(0,0,0,0.4)",
+        }}>
+          {playerName || "PLAYER"}
+        </div>
+      </div>
+
+      {/* STAT BAR */}
+      {stats && (
+        <div style={{
+          position: "absolute", top: 318, left: 0, right: 0, zIndex: 20,
+          display: "flex", alignItems: "stretch",
+          background: "rgba(0,0,0,0.45)",
+          backdropFilter: "blur(4px)",
+          padding: "6px 8px",
+        }}>
+          {statItems.map((s, i) => (
+            <div key={s.label} style={{
+              flex: 1, textAlign: "center",
+              borderRight: i < statItems.length - 1 ? `1px solid ${tier.statSeparator}` : "none",
+            }}>
+              <div style={{
+                fontSize: 14, fontWeight: 800, color: tier.text, lineHeight: 1,
+              }}>{s.value}</div>
+              <div style={{
+                fontSize: 8, fontWeight: 700, color: tier.text, opacity: 0.55,
+                letterSpacing: 0.5, textTransform: "uppercase", marginTop: 2,
+              }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* BOTTOM ROW: Flags | Team | TEAM SEASON */}
+      <div style={{
+        position: "absolute", bottom: 8, left: 0, right: 0, zIndex: 20,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 14px",
+      }}>
+        <div style={{ display: "flex", gap: 3 }}>
+          {(playerFlags || []).slice(0, 2).map((iso) => (
+            <span key={iso} style={{ fontSize: 16 }}>{countryFlag(iso)}</span>
+          ))}
+          {(!playerFlags || playerFlags.length === 0) && (
+            <span style={{ fontSize: 10, opacity: 0.3, color: tier.text }}>—</span>
+          )}
+        </div>
+        <div style={{
+          fontSize: 10, fontWeight: 700, color: tier.text,
+          opacity: 0.35, letterSpacing: 0.5, textTransform: "uppercase",
+        }}>
+          TEAM SEASON
+        </div>
+      </div>
+    </div>
+  );
+
+  if (size === "full") return cardEl;
+
+  return (
+    <div style={{ width: W, height: H, overflow: "hidden", flexShrink: 0 }}>
+      <div style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: 280, height: 420 }}>
+        {cardEl}
+      </div>
+    </div>
+  );
+}
+
+// --- CANVAS SHARE HELPER ---
+async function shareMilestoneCard(milestone, playerName, playerPhoto, playerFlags, playerPosition, teamEmoji, teamName, seasonName, stats) {
+  const tier = TIER_STYLES[milestone.tier] || TIER_STYLES.bronze;
+  const canvasW = 600;
+  const canvasH = 900;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvasW;
+  canvas.height = canvasH;
+  const ctx = canvas.getContext("2d");
+
+  // Draw gradient background
+  const grd = ctx.createLinearGradient(0, 0, canvasW, canvasH);
+  // Parse tier colors from gradient string — use solid fallbacks
+  const tierColors = {
+    bronze: ["#4a2800", "#CD7F32", "#e8a85a"],
+    silver: ["#1a1a1a", "#C0C0C0", "#e8e8e8"],
+    gold: ["#2a1800", "#c8963e", "#FFD700"],
+    diamond: ["#020b18", "#0a1628", "#1a3a6b"],
+  };
+  const [c0, c1, c2] = tierColors[milestone.tier] || tierColors.bronze;
+  grd.addColorStop(0, c0);
+  grd.addColorStop(0.5, c1);
+  grd.addColorStop(1, c2);
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  // Shine overlay
+  const shine = ctx.createLinearGradient(0, 0, canvasW, canvasH * 0.5);
+  shine.addColorStop(0, "rgba(255,255,255,0.18)");
+  shine.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = shine;
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  // Border frame
+  ctx.strokeStyle = "rgba(255,255,255,0.25)";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(12, 12, canvasW - 24, canvasH - 24);
+  ctx.strokeStyle = "rgba(255,255,255,0.10)";
+  ctx.strokeRect(20, 20, canvasW - 40, canvasH - 40);
+
+  const textColor = tier.text === "#1a1a1a" ? "#1a1a1a" : "#FFFFFF";
+
+  // Rating
+  const overallRating = stats ? computeOverallRating(stats) : 60;
+  ctx.fillStyle = textColor;
+  ctx.font = "bold 110px 'DM Sans', sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText(String(overallRating), 36, 140);
+
+  ctx.font = "bold 28px 'DM Sans', sans-serif";
+  ctx.globalAlpha = 0.85;
+  ctx.fillText((playerPosition || "ST").toUpperCase(), 40, 175);
+  ctx.globalAlpha = 0.5;
+  ctx.font = "bold 20px 'DM Sans', sans-serif";
+  ctx.fillText((milestone.tier).toUpperCase(), 40, 205);
+  ctx.globalAlpha = 1;
+
+  // Team emoji (right)
+  ctx.font = "56px sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText(teamEmoji || "⚽", canvasW - 36, 120);
+  ctx.font = "bold 18px 'DM Sans', sans-serif";
+  ctx.globalAlpha = 0.4;
+  ctx.fillText("TEAM SEASON", canvasW - 36, 150);
+  ctx.globalAlpha = 1;
+  ctx.textAlign = "left";
+
+  // Milestone ribbon
+  ctx.fillStyle = "rgba(0,0,0,0.5)";
+  ctx.fillRect(0, 220, canvasW, 42);
+  ctx.fillStyle = textColor;
+  ctx.font = "bold 20px 'DM Sans', sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(milestone.label.toUpperCase(), canvasW / 2, 248);
+  ctx.textAlign = "left";
+
+  // Player photo
+  if (playerPhoto) {
+    try {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = resolve; // don't fail if image can't load
+        img.src = playerPhoto;
+        setTimeout(resolve, 3000);
+      });
+      if (img.complete && img.naturalHeight > 0) {
+        const photoH = 400;
+        const photoW = (img.naturalWidth / img.naturalHeight) * photoH;
+        ctx.drawImage(img, (canvasW - photoW) / 2, 270, photoW, photoH);
+      }
+    } catch (_) {}
+  } else {
+    // Silhouette
+    ctx.fillStyle = "rgba(255,255,255,0.08)";
+    ctx.fillRect(200, 270, 200, 380);
+    ctx.fillStyle = "rgba(255,255,255,0.25)";
+    ctx.beginPath();
+    ctx.arc(300, 360, 60, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(210, 430, 180, 100);
+  }
+
+  // Name bar
+  ctx.fillStyle = "rgba(0,0,0,0.5)";
+  ctx.fillRect(0, 680, canvasW, 68);
+  ctx.fillStyle = textColor;
+  ctx.font = "bold 34px 'DM Sans', sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText((playerName || "PLAYER").toUpperCase(), canvasW / 2, 724);
+  ctx.textAlign = "left";
+
+  // Stat bar
+  if (stats) {
+    const statItems = [
+      { label: "GAM", value: stats.games || 0 },
+      { label: "WIN", value: stats.wins || 0 },
+      { label: "GOL", value: stats.goals || 0 },
+      { label: "AST", value: stats.assists || 0 },
+      { label: "CS", value: stats.cleanSheets || 0 },
+      { label: "STK", value: stats.winStreak || 0 },
+    ];
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.fillRect(0, 750, canvasW, 78);
+    const colW = canvasW / 6;
+    statItems.forEach((s, i) => {
+      const cx = colW * i + colW / 2;
+      ctx.fillStyle = textColor;
+      ctx.font = "bold 30px 'DM Sans', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(String(s.value), cx, 787);
+      ctx.globalAlpha = 0.55;
+      ctx.font = "bold 16px 'DM Sans', sans-serif";
+      ctx.fillText(s.label, cx, 810);
+      ctx.globalAlpha = 1;
+      if (i > 0) {
+        ctx.strokeStyle = "rgba(255,255,255,0.15)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(colW * i, 758);
+        ctx.lineTo(colW * i, 820);
+        ctx.stroke();
+      }
+    });
+  }
+
+  // Flags
+  if (playerFlags && playerFlags.length > 0) {
+    ctx.font = "36px sans-serif";
+    ctx.textAlign = "left";
+    let fx = 36;
+    playerFlags.slice(0, 2).forEach((iso) => {
+      ctx.fillText(countryFlag(iso), fx, 870);
+      fx += 50;
+    });
+  }
+
+  // TEAM SEASON watermark
+  ctx.globalAlpha = 0.35;
+  ctx.fillStyle = textColor;
+  ctx.font = "bold 18px 'DM Sans', sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText("TEAM SEASON", canvasW - 36, 870);
+  ctx.globalAlpha = 1;
+  ctx.textAlign = "left";
+
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), "image/png");
+  });
+}
+
+function PlayerMilestoneCard({ milestone, playerName, playerPhoto, playerFlags, playerPosition, teamName, teamColor, teamEmoji, seasonName, stats, onClose }) {
+  const [sharing, setSharing] = useState(false);
+
+  const handleShare = async () => {
+    setSharing(true);
+    try {
+      const blob = await shareMilestoneCard(milestone, playerName, playerPhoto, playerFlags, playerPosition, teamEmoji, teamName, seasonName, stats);
+      const file = new File([blob], "milestone.png", { type: "image/png" });
+      const shareText = `${playerName || "Player"} just unlocked ${milestone.label}! \uD83C\uDFC6 #TeamSeason`;
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], text: shareText });
+      } else if (navigator.share) {
+        // fallback: share without file
+        await navigator.share({ text: shareText, url: "https://teamseason.app" });
+      } else {
+        // Download fallback
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${(playerName || "player").toLowerCase()}-${milestone.id}.png`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 3000);
+      }
+    } catch (e) {
+      if (e.name !== "AbortError") console.warn("Share failed:", e);
+    }
+    setSharing(false);
+  };
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.9)", zIndex: 250,
+      display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+    }} onClick={onClose}>
+      <div className="slide-up" onClick={(e) => e.stopPropagation()} style={{
+        display: "flex", flexDirection: "column", alignItems: "center", gap: 16,
+      }}>
+        {/* "Milestone Unlocked" label */}
+        <div style={{
+          fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.5)",
+          letterSpacing: 2, textTransform: "uppercase",
+        }}>
+          Milestone Unlocked
+        </div>
+
+        {/* The Card */}
+        <div id="milestone-card-render">
+          <FIFACardInner
+            milestone={milestone}
+            playerName={playerName}
+            playerPhoto={playerPhoto}
+            playerFlags={playerFlags}
+            playerPosition={playerPosition}
+            teamEmoji={teamEmoji}
+            teamName={teamName}
+            seasonName={seasonName}
+            stats={stats}
+            size="full"
+          />
+        </div>
+
+        {/* Action buttons below card */}
+        <div style={{ display: "flex", gap: 8, width: 280 }}>
+          <button onClick={handleShare} disabled={sharing} style={{
+            flex: 1, padding: "13px 16px", border: "none",
+            background: "white", color: "#1a1a1a",
+            fontSize: 14, fontWeight: 700, cursor: sharing ? "default" : "pointer",
+            fontFamily: "'DM Sans', sans-serif",
+            opacity: sharing ? 0.7 : 1,
+          }}>
+            {sharing ? "..." : "Share"}
+          </button>
+          <button onClick={onClose} style={{
+            flex: 1, padding: "13px 16px", border: "1px solid rgba(255,255,255,0.25)",
+            background: "transparent", color: "white",
+            fontSize: 14, fontWeight: 600, cursor: "pointer",
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
+            Nice
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MilestoneGallery({ milestones, playerName, playerPhoto, playerFlags, playerPosition, teamName, teamColor, teamEmoji, seasonName, stats, onClose }) {
+  const earned = milestones;
+  const locked = MILESTONE_DEFS.filter((m) => !earned.find((e) => e.id === m.id));
+  const [selected, setSelected] = useState(null);
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+      display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 100,
+    }}>
+      <div className="slide-up" style={{
+        background: "#0a0a0a", borderRadius: "18px 18px 0 0",
+        padding: "24px 16px calc(24px + env(safe-area-inset-bottom, 0px))",
+        width: "100%", maxWidth: 480, maxHeight: "88vh", overflow: "auto",
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <h2 style={{ fontFamily: fonts.display, fontSize: 22, fontWeight: 700, color: "white" }}>
+            {playerName ? `${playerName}'s Milestones` : "Milestones"}
+          </h2>
+          <button onClick={onClose} style={{
+            background: "rgba(255,255,255,0.1)", border: "none", fontSize: 20, cursor: "pointer",
+            color: "rgba(255,255,255,0.6)", width: 32, height: 32, display: "flex",
+            alignItems: "center", justifyContent: "center",
+          }}>×</button>
+        </div>
+
+        {earned.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "40px 20px", color: "rgba(255,255,255,0.5)" }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>🏅</div>
+            <p style={{ fontSize: 15 }}>No milestones yet. Keep logging games!</p>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.3)", marginTop: 8 }}>
+              Add goals and assists in Game Details to unlock milestone cards.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div style={{
+              fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.4)",
+              textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 12,
+            }}>
+              Earned — {earned.length}
+            </div>
+            <div style={{
+              display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 28,
+            }}>
+              {earned.map((m) => {
+                return (
+                  <div key={m.id} onClick={() => setSelected(m)} style={{ cursor: "pointer" }}>
+                    <FIFACardInner
+                      milestone={m}
+                      playerName={playerName}
+                      playerPhoto={playerPhoto}
+                      playerFlags={playerFlags}
+                      playerPosition={playerPosition}
+                      teamEmoji={teamEmoji}
+                      teamName={teamName}
+                      seasonName={seasonName}
+                      stats={stats}
+                      size="small"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {locked.length > 0 && (
+          <>
+            <div style={{
+              fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.25)",
+              textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 10,
+            }}>
+              Locked — {locked.length}
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {locked.map((m) => (
+                <div key={m.id} style={{
+                  width: 80, background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  padding: "10px 6px", textAlign: "center",
+                  opacity: 0.5,
+                }}>
+                  <div style={{ fontSize: 20, marginBottom: 4, filter: "grayscale(1)" }}>{m.icon}</div>
+                  <div style={{
+                    fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.5)",
+                    lineHeight: 1.2, textTransform: "uppercase", letterSpacing: 0.5,
+                  }}>
+                    {m.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Full card view when tapped from gallery */}
+      {selected && (
+        <PlayerMilestoneCard
+          milestone={selected}
+          playerName={playerName}
+          playerPhoto={playerPhoto}
+          playerFlags={playerFlags}
+          playerPosition={playerPosition}
+          teamName={teamName}
+          teamColor={teamColor}
+          teamEmoji={teamEmoji}
+          seasonName={seasonName}
+          stats={stats}
+          onClose={() => setSelected(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// --- BOOK ORDERED CELEBRATION ---
+function BookOrderedCelebration({ seasonName, teamColor, onStartNewSeason, onClose }) {
+  const color = teamColor || theme.primary;
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 500,
+      background: color,
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      padding: "calc(40px + env(safe-area-inset-top, 0px)) 24px calc(40px + env(safe-area-inset-bottom, 0px))",
+    }}>
+      <style>{`
+        @keyframes confettiFall {
+          0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        @keyframes sparkle {
+          0%, 100% { opacity: 0.2; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+        @keyframes bookBounce {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-12px) scale(1.05); }
+        }
+      `}</style>
+
+      {/* Confetti dots */}
+      {Array.from({ length: 24 }).map((_, i) => (
+        <div key={i} style={{
+          position: "absolute",
+          left: `${Math.random() * 100}%`,
+          top: `-${Math.random() * 20 + 5}%`,
+          width: Math.random() * 10 + 6,
+          height: Math.random() * 10 + 6,
+          borderRadius: Math.random() > 0.5 ? "50%" : "0",
+          background: ["rgba(255,255,255,0.8)", "rgba(255,215,0,0.8)", "rgba(255,255,255,0.5)", "rgba(200,150,62,0.9)"][Math.floor(Math.random() * 4)],
+          animation: `confettiFall ${Math.random() * 3 + 2}s ease-in ${Math.random() * 2}s both infinite`,
+          pointerEvents: "none",
+        }} />
+      ))}
+
+      {/* Sparkle dots around the book */}
+      {Array.from({ length: 8 }).map((_, i) => {
+        const angle = (i / 8) * Math.PI * 2;
+        const r = 80;
+        return (
+          <div key={i} style={{
+            position: "absolute",
+            left: `calc(50% + ${Math.cos(angle) * r}px)`,
+            top: `calc(50% + ${Math.sin(angle) * r - 60}px)`,
+            width: 8, height: 8, borderRadius: "50%",
+            background: "rgba(255,255,255,0.7)",
+            animation: `sparkle 1.5s ease-in-out ${i * 0.18}s infinite`,
+            pointerEvents: "none",
+          }} />
+        );
+      })}
+
+      <div className="slide-up" style={{ textAlign: "center", maxWidth: 340, width: "100%", position: "relative", zIndex: 2 }}>
+        <div style={{
+          fontSize: 80, marginBottom: 24,
+          animation: "bookBounce 2s ease-in-out infinite",
+          display: "inline-block",
+        }}>
+          📖
+        </div>
+
+        <h1 style={{
+          fontFamily: "'Crimson Pro', Georgia, serif",
+          fontSize: 30, fontWeight: 700, color: "white",
+          lineHeight: 1.2, marginBottom: 16,
+          textShadow: "0 2px 12px rgba(0,0,0,0.2)",
+        }}>
+          Your Book Is On Its Way!
+        </h1>
+
+        <p style={{
+          fontSize: 16, color: "rgba(255,255,255,0.8)",
+          lineHeight: 1.6, marginBottom: 40,
+        }}>
+          Your <strong style={{ color: "white" }}>{seasonName || "season"}</strong> book is being printed and will ship to you soon.
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <button onClick={onStartNewSeason} style={{
+            padding: "16px 24px", border: "none",
+            background: "white", color: color,
+            fontSize: 16, fontWeight: 700, cursor: "pointer",
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
+            Start Next Season →
+          </button>
+          <button onClick={onClose} style={{
+            padding: "14px 24px",
+            background: "transparent",
+            border: "1px solid rgba(255,255,255,0.35)",
+            color: "rgba(255,255,255,0.8)",
+            fontSize: 15, fontWeight: 600, cursor: "pointer",
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
+            Back to Season
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- SEASON LIFECYCLE: Celebration + Milestone Modal ---
+function CelebrationModal({ celebration, onClose, onViewBook, brandColor, playerName }) {
+  const color = brandColor || theme.primary;
+
+  useEffect(() => {
+    if (celebration?.type !== "first") {
+      const timer = setTimeout(onClose, 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [celebration, onClose]);
+
+  if (!celebration) return null;
+
+  const milestoneMessages = {
+    5: "Five entries deep. Your book is taking shape.",
+    10: "Double digits. This is becoming a real season story.",
+    15: "Fifteen entries — that's a book worth reading.",
+    20: "Twenty entries. This season has some weight to it.",
+    25: "Twenty-five. You're building something special.",
+  };
+
+  if (celebration.type === "first") {
+    return (
+      <div style={{
+        position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 200,
+        display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+      }} onClick={onClose}>
+        <div className="slide-up" style={{
+          background: "white", borderRadius: 16, padding: 32, maxWidth: 340,
+          width: "100%", textAlign: "center",
+        }} onClick={(e) => e.stopPropagation()}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>&#9998;</div>
+          <h2 style={{ fontFamily: fonts.display, fontSize: 22, fontWeight: 700, marginBottom: 8 }}>
+            That's one.
+          </h2>
+          <p style={{ fontSize: 15, color: theme.textMuted, lineHeight: 1.6, marginBottom: 24 }}>
+            {playerName
+              ? `By the end of the season, ${playerName}'s whole story will be here. Every game, every moment.`
+              : "By the end of the season, this will be a whole book. Every game, every moment."
+            }
+          </p>
+          <div style={{
+            background: `${color}08`, border: `1px solid ${color}20`,
+            borderRadius: 10, padding: "14px 16px", marginBottom: 24,
+          }}>
+            <div style={{ fontFamily: fonts.mono, fontSize: 12, color: color, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>
+              Your book
+            </div>
+            <div style={{ fontSize: 14, color: theme.textMuted }}>
+              1 entry — just getting started
+            </div>
+          </div>
+          <button onClick={onClose} className="btn btn-primary" style={{ width: "100%", background: color, padding: "14px 24px", fontSize: 15 }}>
+            Keep going
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Milestone toast
+  return (
+    <div style={{
+      position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 150,
+      display: "flex", justifyContent: "center", padding: "0 16px 24px",
+      animation: "slideUp 0.35s ease-out both",
+    }}>
+      <div style={{
+        background: color, color: "white", borderRadius: 14,
+        padding: "16px 20px", width: "100%", maxWidth: 440,
+        boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>
+              {milestoneMessages[celebration.count] || `${celebration.count} entries. Nice.`}
+            </div>
+            <div style={{ fontSize: 13, color: "rgba(255,255,255,0.7)" }}>
+              Your book is {celebration.count} pages and counting
+            </div>
+          </div>
+          {celebration.count >= 8 && (
+            <button onClick={(e) => { e.stopPropagation(); onClose(); onViewBook(); }} style={{
+              background: "rgba(255,255,255,0.2)", color: "white", border: "none",
+              borderRadius: 8, padding: "8px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer",
+            }}>
+              Preview
+            </button>
+          )}
+          <button onClick={onClose} style={{
+            background: "none", color: "rgba(255,255,255,0.5)", border: "none",
+            fontSize: 18, cursor: "pointer", padding: "4px 8px",
+          }}>&#215;</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- SEASON LIFECYCLE: Timeline Banners ---
+function SeasonBanner({ type, entryCount, brandColor, onAction, onDismiss, playerName }) {
+  const color = brandColor || theme.primary;
+
+  const banners = {
+    bookTease: {
+      title: `Your book is ${entryCount} pages and counting`,
+      subtitle: playerName ? `${playerName}'s season is starting to look like something real.` : "Your season is starting to look like something real.",
+      action: "Preview Book",
+    },
+    wrapUp: {
+      title: "Season winding down?",
+      subtitle: `${entryCount} entries — your book is ready when you are.`,
+      action: "See Your Book",
+    },
+    bookNudge: {
+      title: `${entryCount} entries. That's a whole season.`,
+      subtitle: "Turn it into a hardcover book they'll keep forever.",
+      action: "Order Book",
+    },
+  };
+
+  const banner = banners[type];
+  if (!banner) return null;
+
+  return (
+    <div style={{
+      background: `${color}08`, border: `1px solid ${color}20`,
+      borderRadius: 12, padding: "14px 16px", marginBottom: 12,
+    }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: theme.text, marginBottom: 2 }}>
+            {banner.title}
+          </div>
+          <div style={{ fontSize: 12, color: theme.textMuted, lineHeight: 1.5 }}>
+            {banner.subtitle}
+          </div>
+        </div>
+        <button onClick={onDismiss} style={{
+          background: "none", border: "none", cursor: "pointer",
+          fontSize: 18, color: theme.textMuted, padding: 0, lineHeight: 1, flexShrink: 0,
+        }}>×</button>
+      </div>
+      <button onClick={onAction} style={{
+        marginTop: 10, width: "100%", padding: "10px 16px",
+        background: color, color: "white", border: "none",
+        fontSize: 14, fontWeight: 600, borderRadius: 8, cursor: "pointer",
+      }}>
+        {banner.action}
+      </button>
+    </div>
+  );
+}
+
 // --- SHARE CARD MODAL ---
 function ShareCardModal({ entry, team, season, onClose, entryNumber, entries = [] }) {
   const sharePrimary = team?.color || theme.primary;
@@ -3628,14 +6281,32 @@ function ShareCardModal({ entry, team, season, onClose, entryNumber, entries = [
 
   const hasPhoto = !!(entry.photoPreview || entry.photoData);
   const hasScore = entry.score_home !== null && entry.score_away !== null;
+  const isGameEntry = entry.entry_type === "game" || entry.entry_type === "tournament";
+  const gameEntryCount = entries.filter((e) => e.entry_type === "game" || e.entry_type === "tournament").length;
 
   // Auto-pick the best template
-  const template = (() => {
+  const autoTemplate = (() => {
+    if (hasScore && entry.result === "win") return "victory";
     if (hasPhoto && (entry.text || "").length < 80) return "photoHero";
     if (hasScore && entry.result === "win" && (entry.score_home - entry.score_away) >= 2) return "bigScore";
+    if (isGameEntry) return "matchday";
     if (hasScore) return "classic";
     return "minimal";
   })();
+
+  const [template, setTemplate] = useState(autoTemplate);
+
+  // Available templates — filtered by what makes sense for this entry
+  const availableTemplates = [
+    { id: "classic", label: "Classic", always: true },
+    { id: "bigScore", label: "Big Score", when: hasScore },
+    { id: "photoHero", label: "Photo", when: hasPhoto },
+    { id: "victory", label: "Victory", when: hasScore && entry.result === "win" },
+    { id: "matchday", label: "Matchday", when: isGameEntry },
+    { id: "seasonStats", label: "Season", when: gameEntryCount >= 5 },
+    { id: "statLine", label: "Stats", when: hasScore },
+    { id: "minimal", label: "Minimal", always: true },
+  ].filter((t) => t.always || t.when);
 
   const cardColor = team?.color || theme.primary;
 
@@ -3754,6 +6425,39 @@ function ShareCardModal({ entry, team, season, onClose, entryNumber, entries = [
         ].map((opt) => (
           <button key={opt.id} onClick={() => setAspect(opt.id)} style={toggleBtn(aspect === opt.id)}>
             {opt.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Template picker */}
+      <div style={{
+        display: "flex", gap: 8, marginBottom: 16,
+        overflowX: "auto", paddingBottom: 4,
+        maxWidth: Math.max(previewWidth + 40, 320),
+        WebkitOverflowScrolling: "touch",
+        scrollbarWidth: "none",
+      }}>
+        {availableTemplates.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTemplate(t.id)}
+            style={{
+              flexShrink: 0,
+              padding: "6px 14px",
+              borderRadius: 20,
+              border: template === t.id ? "1.5px solid rgba(255,255,255,0.8)" : "1.5px solid rgba(255,255,255,0.2)",
+              background: template === t.id ? "rgba(255,255,255,0.18)" : "transparent",
+              color: template === t.id ? "white" : "rgba(255,255,255,0.45)",
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: 1,
+              textTransform: "uppercase",
+              cursor: "pointer",
+              transition: "all 0.15s",
+              fontFamily: fonts.body,
+            }}
+          >
+            {t.label}
           </button>
         ))}
       </div>
@@ -5651,6 +8355,7 @@ function SportsJournalAppInner() {
   const [showComposer, setShowComposer] = useState(false);
   const [showBook, setShowBook] = useState(false);
   const [showOrder, setShowOrder] = useState(false);
+  const [showOrderCelebration, setShowOrderCelebration] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [filter, setFilter] = useState("all");
   const menuRef = useRef(null);
@@ -5660,6 +8365,19 @@ function SportsJournalAppInner() {
   const [confirmModal, setConfirmModal] = useState(null);
   const [toast, setToast] = useState(null);
   const showToast = useCallback((message, type = "error") => setToast({ message, type }), []);
+
+  // Schedule state
+  const [schedule, setSchedule] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("ts_schedule") || "[]"); } catch { return []; }
+  });
+  const [showScheduleImport, setShowScheduleImport] = useState(false);
+  const [composerPrefill, setComposerPrefill] = useState(null); // { date, opponent }
+
+  const handleScheduleImport = (events) => {
+    setSchedule(events);
+    localStorage.setItem("ts_schedule", JSON.stringify(events));
+    setShowScheduleImport(false);
+  };
 
   // Share card state
   const [shareEntry, setShareEntry] = useState(null);
@@ -5674,6 +8392,19 @@ function SportsJournalAppInner() {
   const [showInstallBanner, setShowInstallBanner] = useState(() => !localStorage.getItem("ts_install_dismissed"));
   const [showHelp, setShowHelp] = useState(false);
   const [showEditSeason, setShowEditSeason] = useState(false);
+
+  // Lifecycle: milestones, celebrations, banners
+  const [showCelebration, setShowCelebration] = useState(null); // null or { type, count }
+  const [showMilestoneCard, setShowMilestoneCard] = useState(null); // null or milestone object
+  const [showMilestoneGallery, setShowMilestoneGallery] = useState(false);
+  const [dismissedBanners, setDismissedBanners] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("ts_dismissed_banners") || "{}"); } catch { return {}; }
+  });
+  const dismissBanner = (key) => {
+    const updated = { ...dismissedBanners, [key]: new Date().toISOString() };
+    setDismissedBanners(updated);
+    localStorage.setItem("ts_dismissed_banners", JSON.stringify(updated));
+  };
 
   // Capture beforeinstallprompt (Android/Chrome)
   useEffect(() => {
@@ -5918,15 +8649,19 @@ function SportsJournalAppInner() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('order') === 'success') {
+      const sessionId = params.get('session_id');
       const saved = localStorage.getItem("teamSeasonOrder");
       if (saved) {
         try {
           const order = JSON.parse(saved);
           order.status = "ordered";
+          order.orderedAt = new Date().toISOString();
+          if (sessionId) order.sessionId = sessionId;
           localStorage.setItem("teamSeasonOrder", JSON.stringify(order));
         } catch (e) {}
       }
       setShowOrder(true);
+      setShowOrderCelebration(true);
       window.history.replaceState({}, '', window.location.pathname);
     } else if (params.get('order') === 'cancelled') {
       const saved = localStorage.getItem("teamSeasonOrder");
@@ -6121,8 +8856,8 @@ function SportsJournalAppInner() {
     setScreen("setup");
   };
 
-  const handleDemo = () => {
-    const data = demoData();
+  const handleDemo = (demoRole) => {
+    const data = demoRole === "coach" ? coachDemoData() : demoData();
     setRole(data.role);
     setTeam(data.team);
     setSeason(data.season);
@@ -6144,8 +8879,9 @@ function SportsJournalAppInner() {
   // Value-first onboarding: user signed up after writing their first memory
   const handleOnboardComplete = async (authUser, onboardData) => {
     setUser(authUser);
-    setAuthed(true);
-    setRole("parent");
+    setAuthed(!!authUser);
+    const onboardRole = onboardData.userRole || "parent";
+    setRole(onboardRole);
 
     const teamId = generateId();
     const seasonId = generateId();
@@ -6160,17 +8896,21 @@ function SportsJournalAppInner() {
       emoji: sportObj?.emoji || onboardData.sportIcon || "🏅",
       color: onboardData.teamColor || "#1B4332",
       logo: null,
-      orgType: "club",
+      orgType: onboardRole === "coach" ? "school" : "club",
     };
+    const seasonName = onboardRole === "coach" && onboardData.teamLevel
+      ? `${onboardData.teamLevel} ${onboardData.sport || "Sports"} ${new Date().getFullYear()}`
+      : `${onboardData.sport || "Sports"} ${new Date().getFullYear()}`;
     const seasonData = {
       id: seasonId,
-      name: `${onboardData.sport || "Sports"} ${new Date().getFullYear()}`,
+      name: seasonName,
     };
-    const playerData = {
+    const playerData = onboardRole !== "coach" ? {
       id: playerId,
       name: onboardData.childName || "Player",
       is_my_child: true,
-    };
+      flags: onboardData.childFlags || [],
+    } : null;
     const entryData = {
       id: entryId,
       entry_type: "game",
@@ -6184,14 +8924,15 @@ function SportsJournalAppInner() {
 
     setTeam(teamData);
     setSeason(seasonData);
-    setPlayers([playerData]);
+    setPlayers(playerData ? [playerData] : []);
     setEntries(onboardData.memory ? [entryData] : []);
     setScreen("home");
 
     // Add to allSeasons
     const newSeasonData = {
-      role: "parent", team: teamData, season: seasonData,
-      players: [playerData], entries: onboardData.memory ? [entryData] : [],
+      role: onboardRole, team: teamData, season: seasonData,
+      players: onboardRole === "coach" ? [] : [playerData],
+      entries: onboardData.memory ? [entryData] : [],
     };
     setAllSeasons([newSeasonData]);
     setActiveSeasonIdx(0);
@@ -6212,11 +8953,13 @@ function SportsJournalAppInner() {
             team_id: teamId, name: seasonData.name,
           });
           if (seasonErr) console.warn("Season insert failed:", seasonErr);
-          const { error: playerErr } = await supabase.from("players").insert({
-            id: playerId, team_id: teamId,
-            name: playerData.name, is_my_child: true,
-          });
-          if (playerErr) console.warn("Player insert failed:", playerErr);
+          if (playerData) {
+            const { error: playerErr } = await supabase.from("players").insert({
+              id: playerId, team_id: teamId,
+              name: playerData.name, is_my_child: true,
+            });
+            if (playerErr) console.warn("Player insert failed:", playerErr);
+          }
           if (onboardData.memory) {
             const { error: entryErr } = await supabase.from("entries").insert({
               id: entryId, user_id: authUser.id, season_id: seasonId,
@@ -6590,10 +9333,34 @@ function SportsJournalAppInner() {
         photoPreview: photoData,
         created_at: new Date().toISOString(),
       };
-      setEntries((prev) => [newEntry, ...prev]);
+      const prevCount = entries.length;
+      const newCount = prevCount + 1;
+      const updatedEntries = [newEntry, ...entries];
+      setEntries(updatedEntries);
       setShowComposer(false);
-      setShareEntry(newEntry);
-      setShowSharePrompt(true);
+
+      // Check for player milestone cards (parent mode only, game/tournament entries)
+      if (role === "parent" && (newEntry.entry_type === "game" || newEntry.entry_type === "tournament")) {
+        const newMilestones = getNewMilestones(entries, updatedEntries);
+        if (newMilestones.length > 0) {
+          // Show the highest-tier new milestone
+          const tierOrder = { diamond: 4, gold: 3, silver: 2, bronze: 1 };
+          newMilestones.sort((a, b) => (tierOrder[b.tier] || 0) - (tierOrder[a.tier] || 0));
+          setShowMilestoneCard(newMilestones[0]);
+          return; // Skip other celebrations — milestone card is the celebration
+        }
+      }
+
+      // First entry celebration
+      if (prevCount === 0) {
+        setShowCelebration({ type: "first", count: 1 });
+      } else if ([5, 10, 15, 20, 25].includes(newCount)) {
+        // Milestone celebration
+        setShowCelebration({ type: "milestone", count: newCount });
+      } else {
+        setShareEntry(newEntry);
+        setShowSharePrompt(true);
+      }
     } catch (e) {
       console.error("Entry save failed:", e);
       setShowComposer(false);
@@ -6636,6 +9403,9 @@ function SportsJournalAppInner() {
             score_away: newEntry.score_away != null ? newEntry.score_away : null,
             result: newEntry.result || null,
             consent_shared: newEntry.consent_shared || false,
+            goals: newEntry.goals || 0,
+            assists: newEntry.assists || 0,
+            clean_sheet: newEntry.clean_sheet || false,
             ...(photoUrl ? { photo_url: photoUrl } : {}),
           });
           if (entryErr) console.warn("Entry sync failed:", entryErr);
@@ -6696,6 +9466,7 @@ function SportsJournalAppInner() {
   };
 
   const handleSignOut = async () => {
+    const wasDemo = isDemo;
     await supabase.auth.signOut();
     localStorage.removeItem("teamSeason");
     localStorage.removeItem("teamSeasonAdmin");
@@ -6704,7 +9475,7 @@ function SportsJournalAppInner() {
     setAuthed(false);
     setUser(null);
     setIsDemo(false);
-    setScreen("auth");
+    setScreen(wasDemo ? "onboard" : "auth");
     setTeam(null);
     setSeason(null);
     setPlayers([]);
@@ -6785,6 +9556,7 @@ function SportsJournalAppInner() {
         <ValueOnboarding
           onComplete={handleOnboardComplete}
           onSignIn={() => setScreen("auth")}
+          onDemo={handleDemo}
           initialStep={new URLSearchParams(window.location.search).get("skip") === "welcome" ? 1 : 0}
         />
       )}
@@ -6821,21 +9593,42 @@ function SportsJournalAppInner() {
               width: 28, height: 28, borderRadius: "50%", objectFit: "cover",
             }} />
           ) : null}
-          subtitle={
-            <button
-              onClick={() => setShowSeasonSwitcher(!showSeasonSwitcher)}
-              style={{
-                background: `${brandPrimary}08`, border: `1px solid ${brandPrimary}20`,
-                borderRadius: 20, padding: "3px 10px 3px 6px", cursor: "pointer",
-                display: "inline-flex", alignItems: "center", gap: 4,
-                fontSize: 13, color: theme.textMuted, transition: "all 0.15s",
-              }}
-            >
-              <span>{team.emoji}</span>
-              <span>{season.name}</span>
-              <span style={{ fontSize: 10, marginLeft: 2 }}>{showSeasonSwitcher ? "▲" : "▼"}</span>
-            </button>
-          }
+          subtitle={(() => {
+            const orderData = (() => {
+              try { return JSON.parse(localStorage.getItem("teamSeasonOrder") || "{}"); } catch { return {}; }
+            })();
+            const hasBookOrder = ["ordered", "printing", "shipped", "delivered"].includes(orderData.status);
+            return (
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <button
+                  onClick={() => setShowSeasonSwitcher(!showSeasonSwitcher)}
+                  style={{
+                    background: `${brandPrimary}08`, border: `1px solid ${brandPrimary}20`,
+                    borderRadius: 20, padding: "3px 10px 3px 6px", cursor: "pointer",
+                    display: "inline-flex", alignItems: "center", gap: 4,
+                    fontSize: 13, color: theme.textMuted, transition: "all 0.15s",
+                  }}
+                >
+                  <span>{team.emoji}</span>
+                  <span>{season.name}</span>
+                  <span style={{ fontSize: 10, marginLeft: 2 }}>{showSeasonSwitcher ? "▲" : "▼"}</span>
+                </button>
+                {hasBookOrder && (
+                  <div onClick={() => setShowOrder(true)} style={{
+                    display: "inline-flex", alignItems: "center", gap: 4,
+                    background: "#D1FAE5", color: "#065F46",
+                    border: "1px solid #6EE7B7",
+                    borderRadius: 20, padding: "2px 8px",
+                    fontSize: 11, fontWeight: 600, cursor: "pointer",
+                    width: "fit-content",
+                  }}>
+                    <span>📖</span>
+                    <span>Book {orderData.status === "shipped" ? "Shipped" : orderData.status === "delivered" ? "Delivered" : "Ordered"}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
           subtitleIcon={role === "parent" && players[0]?.headshot ? (
             <img src={players[0].headshot} alt="" style={{
               width: 20, height: 20, borderRadius: "50%", objectFit: "cover",
@@ -6858,6 +9651,22 @@ function SportsJournalAppInner() {
                       fontSize: 14, color: theme.text, textAlign: "left",
                     }}>
                       Help & FAQ
+                  </button>
+                  {role === "parent" && (
+                    <button onClick={() => { setShowMenu(false); setShowMilestoneGallery(true); }} style={{
+                        display: "block", width: "100%", padding: "10px 16px",
+                        background: "none", border: "none", cursor: "pointer",
+                        fontSize: 14, color: theme.text, textAlign: "left",
+                      }}>
+                        🏅 Milestones
+                    </button>
+                  )}
+                  <button onClick={() => { setShowMenu(false); setShowScheduleImport(true); }} style={{
+                      display: "block", width: "100%", padding: "10px 16px",
+                      background: "none", border: "none", cursor: "pointer",
+                      fontSize: 14, color: theme.text, textAlign: "left",
+                    }}>
+                      📅 Import Schedule
                   </button>
                   <button onClick={() => { setShowMenu(false); setShowEditSeason(true); }} style={{
                       display: "block", width: "100%", padding: "10px 16px",
@@ -6987,6 +9796,54 @@ function SportsJournalAppInner() {
           {/* Stats */}
           <SeasonStats entries={entries} brandColor={brandPrimary} />
 
+          {/* On This Day — memory resurfacing (Day One-style) */}
+          <OnThisDay
+            entries={entries}
+            playerName={players?.find((p) => p.is_my_child)?.name}
+            brandColor={brandPrimary}
+          />
+
+          {/* Upcoming Games + Missed Game Nudges */}
+          {schedule.length > 0 && (
+            <UpcomingGames
+              schedule={schedule}
+              entries={entries}
+              brandColor={brandPrimary}
+              onLogGame={(game) => {
+                setComposerPrefill({ date: game.date, opponent: game.summary });
+                setShowComposer(true);
+              }}
+              onOpenSchedule={() => setShowScheduleImport(true)}
+            />
+          )}
+
+          {/* Import schedule prompt (only show if no schedule yet and has entries) */}
+          {schedule.length === 0 && entries.length >= 2 && !localStorage.getItem("ts_schedule_dismissed") && (
+            <div style={{
+              background: `${brandPrimary}06`, border: `1px solid ${brandPrimary}15`,
+              borderRadius: 12, padding: "12px 14px", marginBottom: 12,
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+            }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: theme.text }}>
+                  📅 Import your schedule
+                </div>
+                <div style={{ fontSize: 11, color: theme.textMuted }}>
+                  We'll remind you to log games and track what's coming up
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                <button onClick={() => setShowScheduleImport(true)} style={{
+                  background: brandPrimary, color: "white", border: "none",
+                  borderRadius: 6, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer",
+                }}>Import</button>
+                <button onClick={() => localStorage.setItem("ts_schedule_dismissed", "1")} style={{
+                  background: "none", border: "none", color: theme.textLight, fontSize: 16, cursor: "pointer",
+                }}>×</button>
+              </div>
+            </div>
+          )}
+
           {/* Post-game nudge */}
           {(() => {
             if (entries.length === 0 || nudgeDismissed) return null;
@@ -7049,6 +9906,31 @@ function SportsJournalAppInner() {
             );
           })()}
 
+          {/* Season Lifecycle Banners */}
+          {(() => {
+            const hasOrder = (() => {
+              try { const o = JSON.parse(localStorage.getItem("teamSeasonOrder") || "{}"); return o.status && o.status !== "idle"; } catch { return false; }
+            })();
+            const lastEntry = entries.length > 0 ? [...entries].sort((a, b) => new Date(b.entry_date) - new Date(a.entry_date))[0] : null;
+            const daysSinceLast = lastEntry ? Math.floor((new Date() - new Date(lastEntry.entry_date)) / (1000 * 60 * 60 * 24)) : 0;
+            const childName = players?.find(p => p.is_my_child)?.name || null;
+
+            // Priority: wrap-up > book order nudge > book tease
+            if (daysSinceLast >= 14 && entries.length >= 5 && !hasOrder && !dismissedBanners.wrapUp) {
+              return <SeasonBanner type="wrapUp" entryCount={entries.length} brandColor={brandPrimary} playerName={childName}
+                onAction={() => setShowBook(true)} onDismiss={() => dismissBanner("wrapUp")} />;
+            }
+            if (entries.length >= 15 && !hasOrder && !dismissedBanners.bookNudge) {
+              return <SeasonBanner type="bookNudge" entryCount={entries.length} brandColor={brandPrimary} playerName={childName}
+                onAction={() => { setShowBook(true); }} onDismiss={() => dismissBanner("bookNudge")} />;
+            }
+            if (entries.length >= 8 && entries.length < 15 && !hasOrder && !dismissedBanners.bookTease) {
+              return <SeasonBanner type="bookTease" entryCount={entries.length} brandColor={brandPrimary} playerName={childName}
+                onAction={() => setShowBook(true)} onDismiss={() => dismissBanner("bookTease")} />;
+            }
+            return null;
+          })()}
+
           {/* Quick Actions */}
           <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
             <button className="btn btn-primary" onClick={() => setShowComposer(true)}
@@ -7094,12 +9976,16 @@ function SportsJournalAppInner() {
             }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>✏️</div>
               <p style={{ fontFamily: fonts.display, fontSize: 18, fontStyle: "italic", marginBottom: 8 }}>
-                {role === "parent" && players[0]?.name
+                {role === "coach"
+                  ? "Your season record starts here"
+                  : role === "parent" && players[0]?.name
                   ? `${players[0].name}'s season story starts here`
                   : "Your season story starts here"}
               </p>
               <p style={{ fontSize: 14 }}>
-                Tap "New Entry" after your next game or practice
+                {role === "coach"
+                  ? "Tap \"New Entry\" after your next game"
+                  : "Tap \"New Entry\" after your next game or practice"}
               </p>
             </div>
           ) : (
@@ -7113,10 +9999,21 @@ function SportsJournalAppInner() {
             <EntryComposer
               season={season}
               players={players}
-              onSave={handleSaveEntry}
-              onClose={() => setShowComposer(false)}
+              onSave={(data) => { handleSaveEntry(data); setComposerPrefill(null); }}
+              onClose={() => { setShowComposer(false); setComposerPrefill(null); }}
               brandColor={brandPrimary}
               orgName={team?.orgName || null}
+              role={role}
+              prefillDate={composerPrefill?.date}
+              prefillOpponent={composerPrefill?.opponent}
+            />
+          )}
+
+          {showScheduleImport && (
+            <ScheduleImportModal
+              onImport={handleScheduleImport}
+              onClose={() => setShowScheduleImport(false)}
+              brandColor={brandPrimary}
             />
           )}
 
@@ -7138,6 +10035,7 @@ function SportsJournalAppInner() {
               season={season}
               players={players}
               onClose={() => setShowOrder(false)}
+              onStartNewSeason={startNewSeason}
             />
           )}
 
@@ -7148,6 +10046,7 @@ function SportsJournalAppInner() {
               season={season}
               players={players}
               brandColor={brandPrimary}
+              role={role}
               onSave={handleEditSeason}
               onClose={() => setShowEditSeason(false)}
             />
@@ -7218,6 +10117,69 @@ function SportsJournalAppInner() {
           )}
         </AppShell>
       </>)}
+
+      {/* Book Ordered Celebration */}
+      {showOrderCelebration && (
+        <BookOrderedCelebration
+          seasonName={season?.name || ""}
+          teamColor={brandPrimary}
+          onStartNewSeason={() => { setShowOrderCelebration(false); setShowOrder(false); startNewSeason(); }}
+          onClose={() => setShowOrderCelebration(false)}
+        />
+      )}
+
+      {/* Celebration / Milestone modal */}
+      {showCelebration && (
+        <CelebrationModal
+          celebration={showCelebration}
+          brandColor={brandPrimary}
+          playerName={players?.find(p => p.is_my_child)?.name || null}
+          onClose={() => setShowCelebration(null)}
+          onViewBook={() => setShowBook(true)}
+        />
+      )}
+
+      {/* Player Milestone Card (FIFA-style) */}
+      {showMilestoneCard && (() => {
+        const myChild = players?.find(p => p.is_my_child);
+        const milestoneStats = computePlayerStats(entries);
+        return (
+          <PlayerMilestoneCard
+            milestone={showMilestoneCard}
+            playerName={myChild?.name || null}
+            playerPhoto={myChild?.headshot || null}
+            playerFlags={myChild?.flags || []}
+            playerPosition={myChild?.position || null}
+            teamName={team?.name || ""}
+            teamColor={brandPrimary}
+            teamEmoji={team?.emoji || "🏅"}
+            seasonName={season?.name || ""}
+            stats={milestoneStats}
+            onClose={() => setShowMilestoneCard(null)}
+          />
+        );
+      })()}
+
+      {/* Milestone Gallery */}
+      {showMilestoneGallery && (() => {
+        const myChild = players?.find(p => p.is_my_child);
+        const milestoneStats = computePlayerStats(entries);
+        return (
+          <MilestoneGallery
+            milestones={getEarnedMilestones(entries)}
+            playerName={myChild?.name || null}
+            playerPhoto={myChild?.headshot || null}
+            playerFlags={myChild?.flags || []}
+            playerPosition={myChild?.position || null}
+            teamName={team?.name || ""}
+            teamColor={brandPrimary}
+            teamEmoji={team?.emoji || "🏅"}
+            seasonName={season?.name || ""}
+            stats={milestoneStats}
+            onClose={() => setShowMilestoneGallery(false)}
+          />
+        );
+      })()}
 
       {/* Share prompt toast */}
       {showSharePrompt && shareEntry && (
