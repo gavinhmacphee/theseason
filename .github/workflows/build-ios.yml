@@ -87,11 +87,20 @@ jobs:
             -exportPath $RUNNER_TEMP/export \
             -exportOptionsPlist $RUNNER_TEMP/ExportOptions.plist
 
+      - name: Find IPA
+        run: |
+          echo "Looking for IPA files..."
+          find $RUNNER_TEMP/export -name "*.ipa" -type f
+          ls -la $RUNNER_TEMP/export/
+
       - name: Upload to App Store Connect
-        uses: apple-actions/upload-testflight-build@v1
-        with:
-          app-id: ${{ secrets.IOS_APP_ID }}
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
-          ipa-path: ${{ runner.temp }}/export/App.ipa
+        run: |
+          mkdir -p ~/private_keys
+          echo "${{ secrets.APPSTORE_PRIVATE_KEY }}" > ~/private_keys/AuthKey_${{ secrets.APPSTORE_KEY_ID }}.p8
+          IPA_PATH=$(find $RUNNER_TEMP/export -name "*.ipa" -type f | head -1)
+          echo "Uploading: $IPA_PATH"
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$IPA_PATH" \
+            --apiKey ${{ secrets.APPSTORE_KEY_ID }} \
+            --apiIssuer ${{ secrets.APPSTORE_ISSUER_ID }}
