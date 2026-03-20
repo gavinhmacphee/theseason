@@ -771,7 +771,7 @@ function Toast({ message, type = "error", onDone }) {
 function AppShell({ children, title, titleIcon, subtitle, subtitleIcon, onBack, actions, accentColor }) {
   const shellPrimary = accentColor || theme.primary;
   return (
-    <div style={{ maxWidth: 480, margin: "0 auto", minHeight: "100dvh", padding: "env(safe-area-inset-top, 0px) 16px calc(24px + env(safe-area-inset-bottom, 0px))", position: "relative" }}>
+    <div style={{ maxWidth: 480, margin: "0 auto", minHeight: "100dvh", padding: "calc(16px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px))", position: "relative" }}>
       <header style={{
         padding: "16px 0",
         display: "flex",
@@ -1879,7 +1879,7 @@ function TeamSetupScreen({ role, onComplete }) {
   };
 
   return (
-    <div style={{ minHeight: "100dvh", padding: "calc(24px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px))", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div style={{ minHeight: "100dvh", padding: "calc(24px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px))", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: "calc(48px + env(safe-area-inset-top, 0px))" }}>
       <form onSubmit={handleSubmit} className="slide-up" style={{ maxWidth: 400, width: "100%" }}>
         <h1 style={{ fontFamily: fonts.display, fontSize: 28, fontWeight: 700, color: theme.primary, marginBottom: 6 }}>
           {role === "parent" ? "Set up your child's season" : "Set up your season"}
@@ -1902,7 +1902,7 @@ function TeamSetupScreen({ role, onComplete }) {
                   padding: "10px 4px", cursor: "pointer",
                   border: `1.5px solid ${selectedSport?.name === s.name ? brandColor : theme.border}`,
                   background: selectedSport?.name === s.name ? `${brandColor}10` : "white",
-                  borderRadius: 8, display: "flex", flexDirection: "column",
+                  borderRadius: 0, display: "flex", flexDirection: "column",
                   alignItems: "center", gap: 4, transition: "all 0.15s",
                 }}>
                 <span style={{ fontSize: 22 }}>{s.emoji}</span>
