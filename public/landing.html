@@ -7,21 +7,21 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-902RJPS89Z"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-902RJPS89Z');</script>
   <meta name="theme-color" content="#1B4332" />
-  <meta name="description" content="Free season journal for youth sports families. Capture every game, practice, and moment worth remembering." />
-  <title>Youth Sports Season Journal &amp; Photo Book | Team Season</title>
+  <meta name="description" content="The season journal for youth sports families. Log games, capture moments, and turn your child's season into a printed memory book." />
+  <title>Team Season | The Season Journal for Youth Sports Families</title>
   <link rel="canonical" href="https://teamseason.app/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Team Season — The Season Journal for Youth Sports Families" />
-  <meta property="og:description" content="Free season journal for youth sports families. Capture every game, practice, and moment worth remembering." />
+  <meta property="og:title" content="Team Season | The Season Journal for Youth Sports Families" />
+  <meta property="og:description" content="Log games, capture moments, and turn your child's season into a printed memory book." />
   <meta property="og:url" content="https://teamseason.app/" />
   <meta property="og:site_name" content="Team Season" />
 
   <!-- Twitter -->
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Team Season — Youth Sports Season Journal" />
-  <meta name="twitter:description" content="Free season journal for youth sports families. Capture every game, practice, and moment worth remembering." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Team Season | Youth Sports Season Journal" />
+  <meta name="twitter:description" content="Log games, capture moments, and turn your child's season into a printed memory book." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -33,6 +33,7 @@
       --green: #1B4332;
       --green-deep: #122d22;
       --green-light: #2D6A4F;
+      --green-soft: #40916C;
       --accent: #E07A5F;
       --accent-light: #e8937c;
       --bg: #FAFAF7;
@@ -67,22 +68,15 @@
       font-weight: 700;
       color: var(--green);
       text-decoration: none;
-      letter-spacing: 0.5px;
     }
 
-    .site-nav {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
+    .site-nav { display: flex; align-items: center; gap: 24px; }
 
     .site-nav a {
-      font-family: 'DM Sans', sans-serif;
       font-size: 14px;
       font-weight: 600;
       color: var(--text);
       text-decoration: none;
-      letter-spacing: 0.3px;
     }
 
     .site-nav a:hover { color: var(--green); }
@@ -90,19 +84,12 @@
     .site-nav .nav-cta {
       background: var(--green);
       color: white;
-      padding: 8px 20px;
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-      text-decoration: none;
-      display: inline-block;
+      padding: 10px 24px;
+      font-weight: 700;
     }
 
     .site-nav .nav-cta:hover { background: var(--green-light); color: white; }
 
-    .site-nav .nav-sign-in { color: var(--green); font-weight: 500; }
-
-    /* Gradient Stripe */
     .gradient-stripe {
       height: 3px;
       background: linear-gradient(90deg, var(--green-deep), var(--green), var(--green-light));
@@ -110,308 +97,334 @@
 
     /* Hero */
     .hero {
-      background: linear-gradient(160deg, var(--green) 0%, var(--green-light) 50%, #40916C 100%);
+      background: var(--green);
       color: var(--white);
-      padding: 90px 32px 100px;
-      text-align: center;
+      overflow: hidden;
     }
 
     .hero-inner {
-      max-width: 700px;
+      max-width: 1200px;
       margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      min-height: 560px;
+    }
+
+    .hero-copy {
+      padding: 80px 60px 80px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .hero-badge {
       display: inline-block;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.9);
-      border: 1px solid rgba(255,255,255,0.3);
-      padding: 6px 16px;
-      margin-bottom: 28px;
+      color: var(--accent);
+      margin-bottom: 24px;
+      width: fit-content;
     }
 
     .hero h1 {
       font-family: 'Crimson Pro', Georgia, serif;
-      font-size: clamp(40px, 7vw, 64px);
-      line-height: 1.1;
+      font-size: clamp(36px, 5vw, 56px);
+      line-height: 1.08;
       font-weight: 700;
-      margin-bottom: 20px;
-    }
-
-    .hero .tagline {
-      font-family: 'Crimson Pro', Georgia, serif;
-      font-size: 20px;
-      color: rgba(255,255,255,0.7);
-      font-style: italic;
-      margin-bottom: 36px;
+      margin-bottom: 24px;
     }
 
     .hero .lead {
-      font-size: 17px;
+      font-size: 18px;
       line-height: 1.7;
-      color: rgba(255,255,255,0.8);
-      max-width: 540px;
-      margin: 0 auto 40px;
+      color: rgba(255,255,255,0.75);
+      max-width: 460px;
+      margin-bottom: 36px;
     }
+
+    .hero-ctas { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
 
     .btn-primary {
       display: inline-block;
       background: var(--accent);
       color: white;
-      padding: 16px 40px;
+      padding: 16px 36px;
       font-size: 16px;
       font-weight: 700;
-      letter-spacing: 0.3px;
       text-decoration: none;
       transition: background 0.2s, transform 0.2s;
     }
 
-    .btn-primary:hover {
-      background: var(--accent-light);
-      transform: translateY(-1px);
-    }
+    .btn-primary:hover { background: var(--accent-light); transform: translateY(-1px); }
 
-    .hero-ctas {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .hero-sign-in {
+    .btn-secondary {
+      display: inline-block;
       color: rgba(255,255,255,0.6);
       font-size: 14px;
+      font-weight: 500;
       text-decoration: none;
     }
 
-    .hero-sign-in:hover { color: white; }
+    .btn-secondary:hover { color: white; }
 
-    /* Showcase sections */
-    .showcase {
-      max-width: 760px;
+    .hero-photos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 4px;
+    }
+
+    .hero-photos img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hero-photos img:first-child { grid-row: 1 / 3; }
+
+    /* Social proof */
+    .social-proof {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 28px 32px;
+      text-align: center;
+    }
+
+    .social-proof-inner {
+      max-width: 800px;
       margin: 0 auto;
-      padding: 48px 32px;
-    }
-
-    .showcase-inner {
       display: flex;
-      align-items: flex-start;
-      gap: 48px;
-      flex-wrap: wrap;
+      align-items: center;
       justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
     }
 
-    .showcase-inner.reverse {
-      flex-direction: row-reverse;
-    }
-
-    .showcase-copy {
-      flex: 1 1 260px;
-      min-width: 240px;
-      padding-top: 24px;
-    }
-
-    .showcase-label {
-      font-size: 11px;
-      font-weight: 500;
+    .social-proof-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
       color: var(--text-muted);
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      margin-bottom: 16px;
+      font-weight: 500;
     }
 
-    .showcase-copy h2 {
+    .social-proof-item strong { color: var(--text); }
+
+    /* How it works */
+    .how-it-works {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 80px 32px;
+      text-align: center;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
       font-family: 'Crimson Pro', Georgia, serif;
-      font-size: 28px;
+      font-size: clamp(28px, 4vw, 40px);
       font-weight: 700;
       color: var(--text);
       line-height: 1.15;
       margin-bottom: 16px;
     }
 
-    .showcase-copy p {
-      font-size: 16px;
+    .section-subtitle {
+      font-size: 17px;
       color: var(--text-muted);
-      line-height: 1.6;
-      max-width: 420px;
-      margin-bottom: 0;
+      max-width: 520px;
+      margin: 0 auto 56px;
     }
 
-    /* Phone Mockup */
-    .phone-frame {
-      width: 260px;
-      background: #111;
-      border-radius: 28px;
-      padding: 8px;
-      box-shadow: 0 24px 48px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.08);
-      flex-shrink: 0;
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
     }
 
-    .phone-notch {
-      height: 28px;
-      background: #111;
-      border-radius: 20px 20px 0 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+    .step { text-align: center; }
 
-    .phone-notch-pill {
-      width: 80px;
-      height: 6px;
-      background: #333;
-      border-radius: 3px;
-    }
-
-    .phone-screen {
-      background: var(--bg);
-      border-radius: 0 0 20px 20px;
-      padding: 16px 14px 20px;
-    }
-
-    .mock-card {
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 10px;
-    }
-
-    .mock-card-game { border-left: 3px solid #2D6A4F; }
-    .mock-card-practice { border-left: 3px solid #6B7280; padding: 12px 14px; }
-
-    .mock-card img {
+    .step-img {
       width: 100%;
-      height: 80px;
+      height: 220px;
       object-fit: cover;
-      object-position: center 30%;
-      display: block;
+      margin-bottom: 24px;
     }
 
-    .mock-card-body { padding: 10px 14px 12px; }
-
-    .mock-badge {
+    .step-num {
       display: inline-block;
-      font-size: 8px;
-      font-weight: 600;
-      padding: 2px 6px;
-      border-radius: 3px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-right: 6px;
-    }
-
-    .mock-badge-game { color: #2D6A4F; background: rgba(45,106,79,0.07); }
-    .mock-badge-practice { color: #6B7280; background: rgba(107,114,128,0.07); }
-
-    .mock-date { font-size: 8px; color: #9CA3AF; }
-    .mock-opponent { font-size: 11px; font-weight: 600; color: var(--text); margin: 6px 0 4px; }
-    .mock-score { font-family: monospace; font-size: 13px; font-weight: 700; color: #2D6A4F; margin-bottom: 6px; }
-    .mock-quote { font-family: 'Crimson Pro', Georgia, serif; font-style: italic; font-size: 10px; color: var(--text-muted); line-height: 1.4; }
-
-    /* Share Card Mockup */
-    .share-card {
-      width: 280px;
-      height: 280px;
-      background: linear-gradient(160deg, rgba(27,67,50,0.7) 0%, rgba(45,106,79,0.6) 60%, rgba(64,145,108,0.55) 100%), url('/images/share-bg.jpg') center/cover;
-      border-radius: 12px;
-      padding: 24px 22px 20px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      box-shadow: 0 24px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-
-    .share-card-team {
-      font-size: 9px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.5);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .share-card-headline {
-      font-family: 'Crimson Pro', Georgia, serif;
-      font-style: italic;
-      font-size: 28px;
-      color: white;
-      line-height: 1.0;
-      margin-bottom: 10px;
-    }
-
-    .share-card-bar {
       width: 32px;
-      height: 3px;
-      background: var(--accent);
-      border-radius: 2px;
-      margin-bottom: 10px;
-    }
-
-    .share-card-quote {
-      font-family: 'Crimson Pro', Georgia, serif;
-      font-style: italic;
-      font-size: 10px;
-      color: rgba(255,255,255,0.7);
-      line-height: 1.4;
+      height: 32px;
+      line-height: 32px;
+      background: var(--green);
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
       margin-bottom: 12px;
     }
 
-    .share-card-score {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 8px;
-      padding: 8px 12px;
-      margin-bottom: 14px;
-      border: 1px solid rgba(255,255,255,0.08);
+    .step h3 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
     }
 
-    .share-card-score-num {
-      font-family: monospace;
-      font-size: 18px;
+    .step p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Feature sections */
+    .feature {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 60px 32px;
+    }
+
+    .feature-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .feature-inner.reverse { direction: rtl; }
+    .feature-inner.reverse > * { direction: ltr; }
+
+    .feature-copy .section-label { text-align: left; }
+    .feature-copy .section-title { text-align: left; margin-bottom: 16px; }
+
+    .feature-copy p {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+
+    .feature-copy .detail {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .feature-img {
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    /* Sports grid */
+    .sports-section {
+      background: var(--green);
+      padding: 80px 32px;
+      text-align: center;
+    }
+
+    .sports-section .section-title { color: var(--white); }
+    .sports-section .section-subtitle { color: rgba(255,255,255,0.6); }
+
+    .sports-grid {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .sport-card {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 4/5;
+    }
+
+    .sport-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+
+    .sport-card:hover img { transform: scale(1.03); }
+
+    .sport-card-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 20px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    }
+
+    .sport-card-name {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 24px;
       font-weight: 700;
       color: white;
-      letter-spacing: 1px;
     }
 
-    .share-card-score-vs {
-      font-size: 9px;
-      color: rgba(255,255,255,0.5);
+    .sport-card-caption {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      margin-top: 4px;
     }
 
-    .share-card-footer {
+    .sports-more {
+      margin-top: 32px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 8px;
-      border-top: 1px solid rgba(255,255,255,0.08);
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
-    .share-card-brand {
-      font-size: 7px;
-      font-weight: 700;
-      color: rgba(255,255,255,0.2);
-      letter-spacing: 3px;
-      text-transform: uppercase;
+    .sport-tag {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 6px 16px;
+      letter-spacing: 0.5px;
     }
 
-    .share-card-url {
-      font-size: 7px;
-      color: rgba(255,255,255,0.15);
+    /* Testimonial */
+    .testimonial-section {
+      padding: 80px 32px;
+      text-align: center;
+      background: var(--white);
     }
 
-    /* Book Image */
-    .book-img {
-      width: 260px;
-      box-shadow: 0 16px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
-      flex-shrink: 0;
+    .testimonial {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .testimonial blockquote {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 24px;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .testimonial cite {
+      font-style: normal;
+      font-size: 15px;
+      color: var(--text-muted);
     }
 
     /* Bottom CTA */
@@ -422,18 +435,15 @@
       padding: 80px 32px;
     }
 
-    .bottom-cta h2 {
-      font-family: 'Crimson Pro', Georgia, serif;
-      font-size: 36px;
-      font-weight: 700;
-      margin-bottom: 16px;
+    .bottom-cta .section-title {
       color: var(--white);
+      margin-bottom: 16px;
     }
 
     .bottom-cta p {
-      font-size: 17px;
+      font-size: 18px;
       color: rgba(255,255,255,0.75);
-      margin-bottom: 32px;
+      margin-bottom: 36px;
       max-width: 500px;
       margin-left: auto;
       margin-right: auto;
@@ -441,7 +451,7 @@
 
     .bottom-cta .cta-note {
       font-size: 13px;
-      color: rgba(255,255,255,0.45);
+      color: rgba(255,255,255,0.4);
       margin-top: 16px;
     }
 
@@ -449,50 +459,70 @@
     .site-footer {
       background: var(--green-deep);
       color: rgba(255,255,255,0.5);
-      text-align: center;
-      padding: 32px;
-      font-size: 13px;
+      padding: 40px 32px;
     }
+
+    .footer-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-links { display: flex; gap: 24px; }
 
     .site-footer a {
       color: rgba(255,255,255,0.5);
       text-decoration: none;
+      font-size: 13px;
     }
 
     .site-footer a:hover { color: rgba(255,255,255,0.8); }
 
     /* Responsive */
-    @media (max-width: 768px) {
-      .site-header { padding: 14px 20px; }
-      .site-nav { gap: 16px; }
-      .hero { padding: 60px 20px 70px; }
-      .bottom-cta { padding: 60px 20px; }
-      .showcase { padding: 40px 20px; }
-      .showcase-inner { gap: 32px; }
-      .showcase-inner.reverse { flex-direction: row; }
-      .phone-frame { width: 220px; }
-      .share-card { width: 240px; height: 240px; }
-      .book-img { width: 220px; }
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-copy { padding: 60px 32px; text-align: center; }
+      .hero-copy .hero-badge { margin-left: auto; margin-right: auto; }
+      .hero .lead { margin-left: auto; margin-right: auto; }
+      .hero-ctas { justify-content: center; }
+      .hero-photos { max-height: 300px; }
+      .steps { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+      .feature-inner, .feature-inner.reverse { grid-template-columns: 1fr; direction: ltr; }
+      .feature-copy .section-label, .feature-copy .section-title { text-align: center; }
+      .feature-copy p { text-align: center; }
+      .sports-grid { grid-template-columns: 1fr 1fr; }
     }
 
-    @media (max-width: 480px) {
-      .site-logo { font-size: 20px; }
+    @media (max-width: 600px) {
+      .site-header { padding: 14px 20px; }
+      .site-nav { gap: 16px; }
+      .hero-copy { padding: 48px 20px; }
+      .social-proof-inner { gap: 20px; }
+      .how-it-works, .feature, .bottom-cta { padding: 56px 20px; }
+      .sports-section { padding: 56px 20px; }
+      .sports-grid { grid-template-columns: 1fr; max-width: 340px; margin: 0 auto; }
+      .footer-inner { flex-direction: column; text-align: center; }
     }
   </style>
+
   <!-- Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": "Team Season",
-    "applicationCategory": "LifestyleApplication",
-    "operatingSystem": "Web",
+    "applicationCategory": "SportsApplication",
+    "operatingSystem": "iOS, Web",
     "offers": {
       "@type": "Offer",
       "price": "0",
       "priceCurrency": "USD"
     },
-    "description": "Free season journal for youth sports families. Capture every game, practice, and moment worth remembering.",
+    "description": "The season journal for youth sports families. Log games, capture moments, and turn your child's season into a printed memory book.",
     "url": "https://teamseason.app"
   }
   </script>
@@ -503,105 +533,158 @@
   <header class="site-header">
     <a href="/" class="site-logo">Team Season</a>
     <nav class="site-nav">
-      <a href="/app" class="nav-sign-in">Sign In</a>
+      <a href="/app" style="color: var(--green); font-weight: 500;">Sign In</a>
       <a href="/app?skip=welcome" class="nav-cta">Start Free</a>
     </nav>
   </header>
 
-  <!-- Gradient Stripe -->
   <div class="gradient-stripe"></div>
 
   <!-- Hero -->
   <section class="hero">
     <div class="hero-inner">
-      <div class="hero-badge">Free for families</div>
-      <h1>Every Season Is Worth Remembering</h1>
-      <p class="tagline">Long after the scores are forgotten, the moments remain.</p>
-      <p class="lead">A simple journal for youth sports families. Capture the games, the wins, the funny car rides home. Then turn your season into a hardcover photo book.</p>
-      <div class="hero-ctas">
-        <a href="/app?skip=welcome" class="btn-primary">Start Your Free Journal</a>
-        <a href="/app" class="hero-sign-in">Already have an account? Sign in</a>
+      <div class="hero-copy">
+        <div class="hero-badge">Free for every family</div>
+        <h1>The easiest way to capture your child's season</h1>
+        <p class="lead">Log games in seconds. Add photos and highlights. At the end of the season, turn it all into a printed hardcover book they'll keep forever.</p>
+        <div class="hero-ctas">
+          <a href="/app?skip=welcome" class="btn-primary">Start Your Free Journal</a>
+          <a href="/app" class="btn-secondary">Sign in</a>
+        </div>
+      </div>
+      <div class="hero-photos">
+        <img src="/images/homepage/soccer-action.png" alt="Youth soccer player dribbling during a game" />
+        <img src="/images/homepage/soccer-celebration.png" alt="Youth player celebrating a goal with teammates" />
+        <img src="/images/homepage/soccer-postgame.png" alt="Parent and child walking off the field after a game" />
       </div>
     </div>
   </section>
 
-  <!-- LOG: Journal Showcase -->
-  <section class="showcase">
-    <div class="showcase-inner">
-      <div class="showcase-copy">
-        <p class="showcase-label">Log</p>
-        <h2>Write It Down While It's Fresh</h2>
-        <p>After every game, practice, or moment worth remembering. Add the score, a photo, what you noticed. It takes two minutes and you'll be glad you did.</p>
-      </div>
+  <!-- Social proof -->
+  <div class="social-proof">
+    <div class="social-proof-inner">
+      <div class="social-proof-item"><strong>13</strong> sports supported</div>
+      <div class="social-proof-item"><strong>Free</strong> to use, no limits</div>
+      <div class="social-proof-item"><strong>Available</strong> on iOS and web</div>
+    </div>
+  </div>
 
-      <!-- Phone mockup -->
-      <div class="phone-frame">
-        <div class="phone-notch"><div class="phone-notch-pill"></div></div>
-        <div class="phone-screen">
-          <!-- Game entry card -->
-          <div class="mock-card mock-card-game">
-            <img src="/images/phone-photo.jpg" alt="Youth soccer player walking off field at golden hour" />
-            <div class="mock-card-body">
-              <div><span class="mock-badge mock-badge-game">Game</span><span class="mock-date">Feb 8</span></div>
-              <div class="mock-opponent">vs Lightning</div>
-              <div class="mock-score">3 - 1 W</div>
-              <div class="mock-quote">&ldquo;Found the open lane and made the right play every time.&rdquo;</div>
-            </div>
-          </div>
-          <!-- Practice entry card -->
-          <div class="mock-card mock-card-practice">
-            <div><span class="mock-badge mock-badge-practice">Practice</span><span class="mock-date">Feb 6</span></div>
-            <div class="mock-quote" style="margin-top:6px">&ldquo;Finally nailed the crossover. Coach noticed.&rdquo;</div>
-          </div>
-        </div>
+  <!-- How it works -->
+  <section class="how-it-works">
+    <p class="section-label">How it works</p>
+    <h2 class="section-title">Three steps. One season. A lifetime.</h2>
+    <p class="section-subtitle">Two minutes after each game is all it takes. By the end of the season, you'll have a story worth keeping.</p>
+    <div class="steps">
+      <div class="step">
+        <img class="step-img" src="/images/homepage/soccer-headshot.png" alt="Youth athlete portrait" />
+        <div class="step-num">1</div>
+        <h3>Set up your season</h3>
+        <p>Pick your sport, add your child's name and team. Takes 30 seconds.</p>
+      </div>
+      <div class="step">
+        <img class="step-img" src="/images/homepage/soccer-huddle.png" alt="Team huddle with coach" />
+        <div class="step-num">2</div>
+        <h3>Log every moment</h3>
+        <p>After each game, tap a mood, pick highlights, add a photo. Write as much or as little as you want.</p>
+      </div>
+      <div class="step">
+        <img class="step-img" src="/images/homepage/soccer-postgame.png" alt="Walking off the field with dad" />
+        <div class="step-num">3</div>
+        <h3>Keep it forever</h3>
+        <p>Order a printed hardcover book with every entry, photo, and score. Designed automatically from your journal.</p>
       </div>
     </div>
   </section>
 
-  <!-- SHARE: Share Cards Showcase -->
-  <section class="showcase">
-    <div class="showcase-inner reverse">
-      <div class="showcase-copy">
-        <p class="showcase-label">Share</p>
-        <h2>Turn a Moment into a Post</h2>
-        <p>Any entry becomes a share card &mdash; sized for Instagram Stories or your feed. Your words, their photo, your team's colors. One tap.</p>
+  <!-- Feature 1: Log -->
+  <section class="feature">
+    <div class="feature-inner">
+      <div class="feature-copy">
+        <p class="section-label">Log</p>
+        <h2 class="section-title">Capture it while it's fresh</h2>
+        <p>Quick-tap mood and highlight tags make it easy to log a game in seconds. Scored a goal? Great effort? Tough loss but good attitude? Tap, write, done.</p>
+        <p>Games, practices, tournaments, road trips, team dinners. Every type of moment that makes a season special.</p>
       </div>
-
-      <!-- Share card mockup -->
-      <div class="share-card">
-        <div class="share-card-team">Thunder</div>
-        <div class="share-card-headline">Two assists and the go-ahead goal</div>
-        <div class="share-card-bar"></div>
-        <div class="share-card-quote">&ldquo;Found the open lane and didn't even hesitate.&rdquo;</div>
-        <div class="share-card-score">
-          <span class="share-card-score-num">3 - 1</span>
-          <span class="share-card-score-vs">vs Lightning FC</span>
-        </div>
-        <div class="share-card-footer">
-          <span class="share-card-brand">Team Season</span>
-          <span class="share-card-url">teamseason.app</span>
-        </div>
-      </div>
+      <img class="feature-img" src="/images/homepage/soccer-action.png" alt="Youth soccer action shot" />
     </div>
   </section>
 
-  <!-- REMEMBER: Book Showcase -->
-  <section class="showcase">
-    <div class="showcase-inner">
-      <div class="showcase-copy">
-        <p class="showcase-label">Remember</p>
-        <h2>A Real Book for the Shelf</h2>
-        <p>At the end of the season, turn the whole journal into a printed hardcover photo book. Every entry, every score, every photo &mdash; bound and in their hands. The kind of thing they keep.</p>
-        <p style="font-size:13px;margin-top:16px">Designed automatically from your journal. You just order it.</p>
+  <!-- Feature 2: Share -->
+  <section class="feature">
+    <div class="feature-inner reverse">
+      <div class="feature-copy">
+        <p class="section-label">Share</p>
+        <h2 class="section-title">Turn a moment into a post</h2>
+        <p>Any entry becomes a share card. Pick a template, add the score and your words. Sized for Instagram Stories or your feed. Download or share in one tap.</p>
       </div>
+      <img class="feature-img" src="/images/homepage/soccer-celebration.png" alt="Player celebrating with teammates" />
+    </div>
+  </section>
 
-      <img class="book-img" src="/images/book-mockup.jpg" alt="Team Season printed hardcover photo book" />
+  <!-- Feature 3: Print -->
+  <section class="feature">
+    <div class="feature-inner">
+      <div class="feature-copy">
+        <p class="section-label">Print</p>
+        <h2 class="section-title">A real book for the shelf</h2>
+        <p>At the end of the season, your journal becomes a 7.5-inch hardcover photo book. Every entry, every score, every photo. The kind of thing they keep.</p>
+        <p class="detail">$39 shipped. Designed automatically from your journal.</p>
+      </div>
+      <img class="feature-img" src="/images/book-mockup.jpg" alt="Team Season printed hardcover photo book" />
+    </div>
+  </section>
+
+  <!-- Multi-sport -->
+  <section class="sports-section">
+    <p class="section-label" style="color: var(--accent);">Every sport. Every season.</p>
+    <h2 class="section-title">Built for every youth sports family</h2>
+    <p class="section-subtitle">Soccer, baseball, lacrosse, basketball, hockey, football, and more. If your kid plays it, Team Season tracks it.</p>
+    <div class="sports-grid">
+      <div class="sport-card">
+        <img src="/images/homepage/soccer-action.png" alt="Youth soccer player" />
+        <div class="sport-card-overlay">
+          <div class="sport-card-name">Soccer</div>
+          <div class="sport-card-caption">Spring 2026</div>
+        </div>
+      </div>
+      <div class="sport-card">
+        <img src="/images/homepage/baseball-action.png" alt="Youth baseball player batting" />
+        <div class="sport-card-overlay">
+          <div class="sport-card-name">Baseball</div>
+          <div class="sport-card-caption">Summer 2026</div>
+        </div>
+      </div>
+      <div class="sport-card">
+        <img src="/images/homepage/lacrosse-action.png" alt="Youth lacrosse player" />
+        <div class="sport-card-overlay">
+          <div class="sport-card-name">Lacrosse</div>
+          <div class="sport-card-caption">Spring 2026</div>
+        </div>
+      </div>
+    </div>
+    <div class="sports-more">
+      <span class="sport-tag">Basketball</span>
+      <span class="sport-tag">Hockey</span>
+      <span class="sport-tag">Football</span>
+      <span class="sport-tag">Softball</span>
+      <span class="sport-tag">Volleyball</span>
+      <span class="sport-tag">Swimming</span>
+      <span class="sport-tag">Tennis</span>
+      <span class="sport-tag">Track &amp; Field</span>
+    </div>
+  </section>
+
+  <!-- Testimonial -->
+  <section class="testimonial-section">
+    <div class="testimonial">
+      <blockquote>"I thought I'd remember everything. I didn't. Now I have a book on the shelf with the whole season in it. My son reads it before every new season starts."</blockquote>
+      <cite>Youth soccer parent</cite>
     </div>
   </section>
 
   <!-- Bottom CTA -->
   <section class="bottom-cta">
-    <h2>This Season Only Happens Once</h2>
+    <h2 class="section-title">This season only happens once</h2>
     <p>Two minutes after each game. By the end of the season, you'll have a story your family keeps forever.</p>
     <a href="/app?skip=welcome" class="btn-primary">Start Your Free Journal</a>
     <p class="cta-note">Free to use. No credit card required.</p>
@@ -609,7 +692,14 @@
 
   <!-- Footer -->
   <footer class="site-footer">
-    <p>&copy; 2026 Team Season &nbsp;&middot;&nbsp; <a href="/app">Open App</a></p>
+    <div class="footer-inner">
+      <span>&copy; 2026 Team Season</span>
+      <div class="footer-links">
+        <a href="/app">Open App</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+      </div>
+    </div>
   </footer>
 
 </body>
