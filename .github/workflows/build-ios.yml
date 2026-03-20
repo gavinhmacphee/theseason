@@ -94,4 +94,4 @@ jobs:
           issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
           api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
           api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
-          ipa-path: $RUNNER_TEMP/export/App.ipa
+          ipa-path: ${{ runner.temp }}/export/App.ipa
