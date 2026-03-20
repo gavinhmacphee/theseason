@@ -70,6 +70,13 @@ jobs:
             <string>app-store-connect</string>
             <key>teamID</key>
             <string>${{ secrets.IOS_TEAM_ID }}</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>app.teamseason</key>
+              <string>${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}</string>
+            </dict>
             <key>uploadSymbols</key>
             <true/>
           </dict>
