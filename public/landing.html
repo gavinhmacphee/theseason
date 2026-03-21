@@ -147,6 +147,11 @@
 
     .hero-ctas { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
 
+    .store-badges { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 20px; }
+    .store-badges img { height: 44px; }
+    .store-badges a { display: inline-block; transition: opacity 0.2s; }
+    .store-badges a:hover { opacity: 0.85; }
+
     .btn-primary {
       display: inline-block;
       background: var(--accent);
@@ -554,6 +559,7 @@
       .hero-copy .hero-badge { margin-left: auto; margin-right: auto; }
       .hero .lead { margin-left: auto; margin-right: auto; }
       .hero-ctas { justify-content: center; }
+      .store-badges { justify-content: center; }
       .hero-visual { padding: 20px; }
       .phone-mockup { width: 240px; }
       .hero-bg-photo { display: none; }
@@ -618,6 +624,10 @@
         <div class="hero-ctas">
           <a href="/app?skip=welcome" class="btn-primary">Start Your Free Journal</a>
           <a href="/app" class="btn-secondary">Sign in</a>
+        </div>
+        <div class="store-badges">
+          <a href="https://apps.apple.com/app/team-season/id6760875715" target="_blank" rel="noopener"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83" alt="Download on the App Store" /></a>
+          <a href="#" target="_blank" rel="noopener"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" style="height: 64px; margin: -10px 0;" /></a>
         </div>
       </div>
       <div class="hero-visual">
@@ -764,6 +774,10 @@
     <h2 class="section-title">This season only happens once</h2>
     <p>Two minutes after each game. By the end of the season, you'll have a story your family keeps forever.</p>
     <a href="/app?skip=welcome" class="btn-primary">Start Your Free Journal</a>
+    <div class="store-badges" style="justify-content: center; margin-top: 24px;">
+      <a href="https://apps.apple.com/app/team-season/id6760875715" target="_blank" rel="noopener"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/white/en-us?size=250x83" alt="Download on the App Store" /></a>
+      <a href="#" target="_blank" rel="noopener"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" style="height: 64px; margin: -10px 0;" /></a>
+    </div>
     <p class="cta-note">Free to use. No credit card required.</p>
   </section>
 
