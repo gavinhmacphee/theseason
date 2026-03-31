@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import html2canvas from "html2canvas";
+import {
+  isNative, isIOS,
+  hapticImpact, hapticNotification, hapticSelection,
+  takePhoto, pickPhoto, photoToFile,
+  configureStatusBar, setStatusBarDark, setStatusBarLight,
+  setupKeyboard,
+  scheduleGameDayReminders, requestNotificationPermission,
+  onAppStateChange,
+} from "./native";
 
 // ============================================
 // TEAM SEASON — Youth Sports Journal
@@ -2375,6 +2384,22 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName, 
     setPhotoPreview(url);
   };
 
+  const [showPhotoMenu, setShowPhotoMenu] = useState(false);
+
+  const handleNativePhoto = async (source) => {
+    setShowPhotoMenu(false);
+    hapticImpact("light");
+    const capPhoto = source === "camera" ? await takePhoto() : await pickPhoto();
+    if (!capPhoto) return;
+    const file = await photoToFile(capPhoto);
+    if (!file) return;
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    const url = URL.createObjectURL(file);
+    previewUrlRef.current = url;
+    setPhoto(file);
+    setPhotoPreview(url);
+  };
+
   const computeResult = () => {
     if (scoreHome === "" || scoreAway === "") return null;
     const h = parseInt(scoreHome);
@@ -2483,7 +2508,7 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName, 
             <div style={{ display: "flex", gap: 6, overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
               {GAME_MOODS.map((m) => (
                 <QuickMoodTag key={m.id} label={m.label} icon={m.icon}
-                  selected={mood === m.id} onClick={() => setMood(mood === m.id ? null : m.id)}
+                  selected={mood === m.id} onClick={() => { hapticSelection(); setMood(mood === m.id ? null : m.id); }}
                   color={composerPrimary} />
               ))}
             </div>
@@ -2498,9 +2523,9 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName, 
               {(HIGHLIGHT_TAGS[isCoach ? "coach" : "parent"] || []).map((tag) => {
                 const sel = highlights.includes(tag.id);
                 return (
-                  <button key={tag.id} onClick={() => setHighlights((prev) =>
+                  <button key={tag.id} onClick={() => { hapticSelection(); setHighlights((prev) =>
                     sel ? prev.filter((h) => h !== tag.id) : [...prev, tag.id]
-                  )}
+                  ); }}
                     style={{
                       padding: "7px 12px", border: `1.5px solid ${sel ? composerPrimary : theme.border}`,
                       background: sel ? `${composerPrimary}10` : "white",
@@ -2564,14 +2589,14 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName, 
         </div>
 
         {/* Photo */}
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 16, position: "relative" }}>
           <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display: "none" }} />
           {photoPreview ? (
             <div style={{ position: "relative" }}>
               <img src={photoPreview} alt="" style={{
                 width: "100%", height: 180, objectFit: "cover", objectPosition: "top", borderRadius: 12,
               }} />
-              <button onClick={() => { if (previewUrlRef.current) { URL.revokeObjectURL(previewUrlRef.current); previewUrlRef.current = null; } setPhoto(null); setPhotoPreview(null); }}
+              <button onClick={() => { hapticImpact("light"); if (previewUrlRef.current) { URL.revokeObjectURL(previewUrlRef.current); previewUrlRef.current = null; } setPhoto(null); setPhotoPreview(null); }}
                 style={{
                   position: "absolute", top: 8, right: 8,
                   background: "rgba(0,0,0,0.6)", color: "white",
@@ -2579,6 +2604,45 @@ function EntryComposer({ season, players, onSave, onClose, brandColor, orgName, 
                   cursor: "pointer", fontSize: 14,
                 }}>×</button>
             </div>
+          ) : isNative ? (
+            <>
+              <button onClick={() => { hapticImpact("light"); setShowPhotoMenu(true); }}
+                style={{
+                  width: "100%", padding: 16, borderRadius: 12,
+                  border: `2px dashed ${theme.border}`, background: theme.borderLight,
+                  cursor: "pointer", color: theme.textMuted, fontSize: 14,
+                }}>
+                📷 {isCoach ? "Add Photo (optional)" : "Add Photo"}
+              </button>
+              {showPhotoMenu && (
+                <div style={{
+                  position: "absolute", bottom: "100%", left: 0, right: 0,
+                  background: "white", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                  overflow: "hidden", zIndex: 10, marginBottom: 4,
+                }}>
+                  <button onClick={() => handleNativePhoto("camera")} style={{
+                    width: "100%", padding: "14px 16px", border: "none", background: "white",
+                    cursor: "pointer", fontSize: 14, fontWeight: 500, textAlign: "left",
+                    borderBottom: `1px solid ${theme.borderLight}`,
+                  }}>
+                    📸 Take Photo
+                  </button>
+                  <button onClick={() => handleNativePhoto("gallery")} style={{
+                    width: "100%", padding: "14px 16px", border: "none", background: "white",
+                    cursor: "pointer", fontSize: 14, fontWeight: 500, textAlign: "left",
+                  }}>
+                    🖼️ Choose from Library
+                  </button>
+                  <button onClick={() => setShowPhotoMenu(false)} style={{
+                    width: "100%", padding: "12px 16px", border: "none",
+                    background: theme.borderLight, cursor: "pointer",
+                    fontSize: 13, color: theme.textMuted, textAlign: "center",
+                  }}>
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <button onClick={() => fileRef.current?.click()}
               style={{
@@ -3227,8 +3291,81 @@ function EntryCard({ entry, players, onShare, onDelete, brandColor }) {
     return { ...tag, playerName: player?.name || "Unknown" };
   });
 
+  // Swipe-to-delete gesture
+  const [swipeX, setSwipeX] = useState(0);
+  const swipeStartX = useRef(0);
+  const swipeStartY = useRef(0);
+  const isSwiping = useRef(false);
+  const isScrolling = useRef(false);
+
+  const onSwipeTouchStart = (e) => {
+    swipeStartX.current = e.touches[0].clientX;
+    swipeStartY.current = e.touches[0].clientY;
+    isSwiping.current = false;
+    isScrolling.current = false;
+  };
+
+  const onSwipeTouchMove = (e) => {
+    const dx = e.touches[0].clientX - swipeStartX.current;
+    const dy = e.touches[0].clientY - swipeStartY.current;
+    // Determine if this is a horizontal swipe or vertical scroll
+    if (!isSwiping.current && !isScrolling.current) {
+      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
+        isScrolling.current = true;
+        return;
+      }
+      if (Math.abs(dx) > 10) {
+        isSwiping.current = true;
+      }
+    }
+    if (isScrolling.current) return;
+    if (dx < 0 && isSwiping.current) {
+      setSwipeX(Math.max(dx, -100));
+    } else if (dx > 0 && swipeX < 0) {
+      setSwipeX(Math.min(0, swipeX + dx));
+    }
+  };
+
+  const onSwipeTouchEnd = () => {
+    if (swipeX < -60) {
+      setSwipeX(-80);
+      hapticImpact("medium");
+    } else {
+      setSwipeX(0);
+    }
+    isSwiping.current = false;
+    isScrolling.current = false;
+  };
+
   return (
-    <div className="card fade-in" style={{ marginBottom: 12, borderLeft: `4px solid ${color}` }}>
+    <div style={{ marginBottom: 12, position: "relative", overflow: "hidden", borderRadius: 12 }}>
+      {/* Delete action behind card */}
+      {swipeX < 0 && (
+        <div
+          onClick={() => { hapticNotification("warning"); onDelete?.(entry.id); setSwipeX(0); }}
+          style={{
+            position: "absolute", right: 0, top: 0, bottom: 0,
+            width: 80, display: "flex", alignItems: "center", justifyContent: "center",
+            background: "#dc2626", color: "white", cursor: "pointer",
+            fontSize: 13, fontWeight: 600, flexDirection: "column", gap: 4,
+          }}
+        >
+          <span style={{ fontSize: 20 }}>🗑</span>
+          Delete
+        </div>
+      )}
+    <div
+      className="card fade-in"
+      onTouchStart={onSwipeTouchStart}
+      onTouchMove={onSwipeTouchMove}
+      onTouchEnd={onSwipeTouchEnd}
+      style={{
+        borderLeft: `4px solid ${color}`,
+        transform: `translateX(${swipeX}px)`,
+        transition: isSwiping.current ? "none" : "transform 0.25s ease-out",
+        position: "relative", zIndex: 1,
+      }}
+    >
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -3368,6 +3505,7 @@ function EntryCard({ entry, players, onShare, onDelete, brandColor }) {
           ))}
         </div>
       )}
+    </div>
     </div>
   );
 }
@@ -6327,6 +6465,7 @@ function ShareCardModal({ entry, team, season, onClose, entryNumber, entries = [
 
   const handleExport = async () => {
     if (!cardRef.current || exporting) return;
+    hapticImpact("medium");
     setExporting(true);
 
     try {
@@ -8333,6 +8472,24 @@ function SportsJournalAppInner() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Configure native platform features on mount
+  useEffect(() => {
+    configureStatusBar();
+    const cleanupKeyboard = setupKeyboard(
+      (height) => {
+        // Push content up when keyboard shows
+        document.documentElement.style.setProperty("--keyboard-height", `${height}px`);
+      },
+      () => {
+        document.documentElement.style.setProperty("--keyboard-height", "0px");
+      }
+    );
+    const cleanupAppState = onAppStateChange(({ isActive }) => {
+      if (isActive) configureStatusBar();
+    });
+    return () => { cleanupKeyboard(); cleanupAppState(); };
+  }, []);
+
   // Data (parent)
   const [team, setTeam] = useState(null);
   const [season, setSeason] = useState(null);
@@ -8377,7 +8534,20 @@ function SportsJournalAppInner() {
     setSchedule(events);
     localStorage.setItem("ts_schedule", JSON.stringify(events));
     setShowScheduleImport(false);
+    // Schedule native game day notifications
+    if (events.length > 0 && team) {
+      const sport = SPORTS.find((s) => s.name === team.sport);
+      scheduleGameDayReminders(events, team.name, sport?.emoji || team.emoji || "🏅");
+    }
   };
+
+  // Schedule notifications on load if we have schedule data
+  useEffect(() => {
+    if (schedule.length > 0 && team && screen === "home") {
+      const sport = SPORTS.find((s) => s.name === team.sport);
+      scheduleGameDayReminders(schedule, team.name, sport?.emoji || team.emoji || "🏅");
+    }
+  }, [screen, team?.id]);
 
   // Share card state
   const [shareEntry, setShareEntry] = useState(null);
@@ -8413,7 +8583,7 @@ function SportsJournalAppInner() {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
 
   const handleInstall = async () => {
@@ -9317,6 +9487,7 @@ function SportsJournalAppInner() {
   };
 
   const handleSaveEntry = async (entryData) => {
+    hapticNotification("success");
     let newEntry;
     try {
       let photoData = null;
@@ -9457,12 +9628,59 @@ function SportsJournalAppInner() {
   };
 
   const handleDeleteEntry = (entryId) => {
+    hapticNotification("warning");
     setConfirmModal({
       title: "Delete Entry",
       message: "Delete this entry? This can't be undone.",
       confirmLabel: "Delete",
-      onConfirm: () => { setConfirmModal(null); executeDeleteEntry(entryId); },
+      onConfirm: () => { setConfirmModal(null); hapticImpact("heavy"); executeDeleteEntry(entryId); },
     });
+  };
+
+  // --- PULL TO REFRESH ---
+  const [refreshing, setRefreshing] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const pullStartY = useRef(0);
+  const isPulling = useRef(false);
+  const feedRef = useRef(null);
+
+  const refreshEntries = async () => {
+    if (!season?.id || isDemo) return;
+    setRefreshing(true);
+    hapticImpact("medium");
+    try {
+      const { data } = await supabase.from("entries").select("*").eq("season_id", season.id).order("entry_date", { ascending: false });
+      if (data) {
+        setEntries(data.map((e) => ({ ...e, photoPreview: e.photo_url || e.photo_path || null })));
+      }
+    } catch {}
+    setRefreshing(false);
+    setPullDistance(0);
+  };
+
+  const handleTouchStart = (e) => {
+    const scrollTop = feedRef.current?.scrollTop || 0;
+    if (scrollTop <= 0) {
+      pullStartY.current = e.touches[0].clientY;
+      isPulling.current = true;
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isPulling.current) return;
+    const dy = e.touches[0].clientY - pullStartY.current;
+    if (dy > 0 && (feedRef.current?.scrollTop || 0) <= 0) {
+      setPullDistance(Math.min(dy * 0.4, 80));
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (pullDistance > 50 && !refreshing) {
+      refreshEntries();
+    } else {
+      setPullDistance(0);
+    }
+    isPulling.current = false;
   };
 
   const handleSignOut = async () => {
@@ -9755,7 +9973,7 @@ function SportsJournalAppInner() {
           )}
 
           {/* PWA Install Banner */}
-          {showInstallBanner && !isStandalone && (installPrompt || isIOS) && (
+          {showInstallBanner && !isStandalone && (installPrompt || isIOSDevice) && (
             <div style={{
               background: `linear-gradient(135deg, ${brandPrimary}12, ${brandPrimary}06)`,
               border: `1px solid ${brandPrimary}25`,
@@ -9766,7 +9984,7 @@ function SportsJournalAppInner() {
                   <div style={{ fontSize: 14, fontWeight: 600, color: theme.text, marginBottom: 4 }}>
                     Add to Home Screen
                   </div>
-                  {isIOS ? (
+                  {isIOSDevice ? (
                     <div style={{ fontSize: 13, color: theme.textMuted, lineHeight: 1.5 }}>
                       Tap the share button <span style={{ fontSize: 15 }}>&#x2191;</span> in Safari, then "Add to Home Screen" for the full app experience.
                     </div>
@@ -9792,6 +10010,15 @@ function SportsJournalAppInner() {
               )}
             </div>
           )}
+
+          {/* Feed with pull-to-refresh */}
+          <div
+            ref={feedRef}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            style={{ touchAction: pullDistance > 0 ? "none" : "auto" }}
+          >
 
           {/* Stats */}
           <SeasonStats entries={entries} brandColor={brandPrimary} />
@@ -9906,6 +10133,39 @@ function SportsJournalAppInner() {
             );
           })()}
 
+          {/* Pull-to-refresh indicator */}
+          {pullDistance > 0 && (
+            <div style={{
+              display: "flex", justifyContent: "center", alignItems: "center",
+              height: pullDistance, overflow: "hidden", transition: refreshing ? "none" : "height 0.2s",
+              marginBottom: 8,
+            }}>
+              <div style={{
+                width: 28, height: 28,
+                border: `3px solid ${brandPrimary}30`,
+                borderTopColor: brandPrimary,
+                borderRadius: "50%",
+                animation: refreshing ? "spin 0.6s linear infinite" : "none",
+                transform: `rotate(${pullDistance * 3}deg)`,
+                opacity: Math.min(pullDistance / 50, 1),
+              }} />
+            </div>
+          )}
+          {refreshing && pullDistance === 0 && (
+            <div style={{
+              display: "flex", justifyContent: "center", padding: "12px 0",
+              marginBottom: 8,
+            }}>
+              <div style={{
+                width: 24, height: 24,
+                border: `3px solid ${brandPrimary}30`,
+                borderTopColor: brandPrimary,
+                borderRadius: "50%",
+                animation: "spin 0.6s linear infinite",
+              }} />
+            </div>
+          )}
+
           {/* Season Lifecycle Banners */}
           {(() => {
             const hasOrder = (() => {
@@ -9933,7 +10193,7 @@ function SportsJournalAppInner() {
 
           {/* Quick Actions */}
           <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-            <button className="btn btn-primary" onClick={() => setShowComposer(true)}
+            <button className="btn btn-primary" onClick={() => { hapticImpact("medium"); setShowComposer(true); }}
               style={{ flex: 1, fontSize: 15, background: brandPrimary }}>
               ✏️ New Entry
             </button>
@@ -9954,7 +10214,7 @@ function SportsJournalAppInner() {
               { id: "off-field", label: "Off Field" },
               { id: "moment", label: "Moments" },
             ].map((tab) => (
-              <button key={tab.id} onClick={() => setFilter(tab.id)}
+              <button key={tab.id} onClick={() => { hapticSelection(); setFilter(tab.id); }}
                 style={{
                   padding: "6px 14px", borderRadius: 8, border: "none",
                   background: filter === tab.id ? `${brandPrimary}10` : "transparent",
@@ -9993,6 +10253,8 @@ function SportsJournalAppInner() {
               <EntryCard key={entry.id} entry={entry} players={players} onShare={(e) => setShareEntry(e)} onDelete={handleDeleteEntry} brandColor={brandPrimary} />
             ))
           )}
+
+          </div>{/* end pull-to-refresh wrapper */}
 
           {/* Modals */}
           {showComposer && (
@@ -10081,7 +10343,7 @@ function SportsJournalAppInner() {
                   { q: "Can I journal for more than one kid?", a: "Yes. Tap the season name at the top of your journal to switch between seasons, or tap \"+\" to start a new one." },
                   { q: "How does the book work?", a: "At the end of the season, tap the book icon to preview your hardcover photo book. Every entry becomes a page. You can order it right from the app." },
                   { q: "Is my data private?", a: "Your journal is yours. Nothing is shared unless you choose to share it." },
-                  { q: "How do I install the app?", a: isIOS
+                  { q: "How do I install the app?", a: isIOSDevice
                     ? "In Safari, tap the share button and select \"Add to Home Screen.\" Team Season will appear as an app on your phone."
                     : "If you see the \"Add to Home Screen\" banner, tap \"Install App.\" You can also install from your browser's menu."
                   },

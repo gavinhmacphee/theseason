@@ -22,6 +22,18 @@ const config: CapacitorConfig = {
       backgroundColor: '#1B4332',
       showSpinner: false,
     },
+    Keyboard: {
+      resize: 'body',
+      resizeOnFullScreen: true,
+    },
+    LocalNotifications: {
+      smallIcon: 'ic_stat_team_season',
+      iconColor: '#1B4332',
+      sound: 'default',
+    },
+    Camera: {
+      presentationStyle: 'fullScreen',
+    },
   },
 };
 
